@@ -14,6 +14,7 @@ namespace AvaloniaVS.IntelliSense
         class MetadataHelper
         {
             private Metadata _metadata;
+            public Metadata Metadata { get; }
             public Dictionary<string, string> Aliases { get; private set; }
 
             Dictionary<string, MetadataType> _types;
@@ -206,7 +207,7 @@ namespace AvaloniaVS.IntelliSense
                         if (state.AttributeValue.StartsWith("clr-namespace:"))
                             completions.AddRange(
                                 metadata.Namespaces.Keys.Where(v => v.StartsWith(state.AttributeValue))
-                                    .Select(v => new Completion(v)));
+                                    .Select(v => new Completion(v.Substring("clr-namespace:".Length), v, v)));
                         else
                         {
                             completions.Add(new Completion("clr-namespace:"));
@@ -225,8 +226,8 @@ namespace AvaloniaVS.IntelliSense
                 return new CompletionSet() {Completions = completions, StartPosition = curStart};
             return null;
         }
-
-
+        
+            
         List<Completion> GetEnumCompletions(string entered, string[] enumValues)
         {
             var enumCompletions = new List<Completion>();

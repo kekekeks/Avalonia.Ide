@@ -71,6 +71,12 @@ namespace AvaloniaVS.IntelliSense
 
         public static Metadata LoadMetadata(IMetadataProvider provider)
         {
+            using (var s = provider.GetMetadata())
+                return LoadMetadata(s);
+        }
+
+        public static Metadata LoadMetadata(IMetadataReaderSession provider)
+        {
             var types = new Dictionary<string, MetadataType>();
             var typeDefs = new Dictionary<MetadataType, ITypeInformation>();
             var metadata = new Metadata();

@@ -11,12 +11,25 @@ namespace Avalonia.Ide.CompletionEngine.DnlibMetadataProvider
 {
     public class DnlibMetadataProvider : IMetadataProvider
     {
-        private Lazy<IEnumerable<IAssemblyInformation>> _assemblies;
-        public IEnumerable<IAssemblyInformation> Assemblies => _assemblies.Value;
+        private readonly string _directoryPath;
+
         public DnlibMetadataProvider(string directoryPath)
         {
-            _assemblies = new Lazy<IEnumerable<IAssemblyInformation>>(
-                () => LoadAssemblies(directoryPath).Select(a => new AssemblyWrapper(a)).ToList());
+            _directoryPath = directoryPath;
+        }
+
+        public IMetadataReaderSession GetMetadata()
+        {
+            return new DnlibMetadataProviderSession(_directoryPath);
+        }
+    }
+
+    class DnlibMetadataProviderSession :IMetadataReaderSession
+    { 
+        public IEnumerable<IAssemblyInformation> Assemblies { get; }
+        public DnlibMetadataProviderSession(string directoryPath)
+        {
+            Assemblies = LoadAssemblies(directoryPath).Select(a => new AssemblyWrapper(a)).ToList();
         }
 
         static List<AssemblyDef> LoadAssemblies(string directory)
@@ -49,5 +62,9 @@ namespace Avalonia.Ide.CompletionEngine.DnlibMetadataProvider
             return assemblies;
         }
 
+        public void Dispose()
+        {
+            //no-op
+        }
     }
 }

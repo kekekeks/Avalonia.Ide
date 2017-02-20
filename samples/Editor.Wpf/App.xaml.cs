@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using Avalonia.Ide.CompletionEngine.DnlibMetadataProvider;
+using Avalonia.Ide.CompletionEngine.SrmMetadataProvider;
 
 namespace Editor.Wpf
 {
@@ -19,7 +20,7 @@ namespace Editor.Wpf
             var metadatapath = Environment.GetCommandLineArgs()[1];
 
             base.OnStartup(e);
-            new MainWindow() {DataContext = new MainWindowModel(new DnlibMetadataProvider(metadatapath), null)}
+            new MainWindow() {DataContext = new MainWindowModel(new SrmMetadataProvider(metadatapath), null)}
                 .ShowDialog();
         }
     }
