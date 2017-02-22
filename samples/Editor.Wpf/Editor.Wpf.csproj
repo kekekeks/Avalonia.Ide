@@ -114,5 +114,6 @@
       <Version>1.6.1</Version>
     </PackageReference>
   </ItemGroup>
+  <Import Project="..\Editor.Shared\Editor.Shared.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

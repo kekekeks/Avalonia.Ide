@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp1.1</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="**\*.xaml;Assets\*" Exclude="bin\**;obj\**;**\*.xproj;packages\**;@(EmbeddedResource)" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="0.4.1-*" />
+    <PackageReference Include="Avalonia.Skia.Desktop" Version="0.4.1-*" />
+    <PackageReference Include="Avalonia.Win32" Version="0.4.1-*" />
+    <PackageReference Include="Avalonia.Gtk3" Version="0.4.1-*" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Avalonia.Ide.CompletionEngine.SrmMetadataProvider\Avalonia.Ide.CompletionEngine.SrmMetadataProvider.csproj" />
+    <ProjectReference Include="..\..\src\Avalonia.Ide.CompletionEngine\Avalonia.Ide.CompletionEngine.csproj" />
+  </ItemGroup>
+  <Import Project="..\Editor.Shared\Editor.Shared.projitems" Label="Shared" />
+</Project>

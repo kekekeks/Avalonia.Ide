@@ -15,7 +15,15 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Editor.Wpf", "samples\Edito
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Avalonia.Ide.CompletionEngine.SrmMetadataProvider", "src\Avalonia.Ide.CompletionEngine.SrmMetadataProvider\Avalonia.Ide.CompletionEngine.SrmMetadataProvider.csproj", "{FD142639-0F1C-4712-BA69-07415A491D56}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Editor.Avalonia", "samples\Editor.Avalonia\Editor.Avalonia.csproj", "{45FBDBE8-1827-43F9-92A4-39052F7BADA0}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Editor.Shared", "samples\Editor.Shared\Editor.Shared.shproj", "{411FBE58-FA4A-4918-BFB2-707D7558D297}"
+EndProject
 Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		samples\Editor.Shared\Editor.Shared.projitems*{1aef8360-f2ea-4275-be31-e09db5aa9c58}*SharedItemsImports = 4
+		samples\Editor.Shared\Editor.Shared.projitems*{411fbe58-fa4a-4918-bfb2-707d7558d297}*SharedItemsImports = 13
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Debug|x64 = Debug|x64
@@ -73,6 +81,18 @@ Global
 		{FD142639-0F1C-4712-BA69-07415A491D56}.Release|x64.Build.0 = Release|x64
 		{FD142639-0F1C-4712-BA69-07415A491D56}.Release|x86.ActiveCfg = Release|x86
 		{FD142639-0F1C-4712-BA69-07415A491D56}.Release|x86.Build.0 = Release|x86
+		{45FBDBE8-1827-43F9-92A4-39052F7BADA0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{45FBDBE8-1827-43F9-92A4-39052F7BADA0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{45FBDBE8-1827-43F9-92A4-39052F7BADA0}.Debug|x64.ActiveCfg = Debug|x64
+		{45FBDBE8-1827-43F9-92A4-39052F7BADA0}.Debug|x64.Build.0 = Debug|x64
+		{45FBDBE8-1827-43F9-92A4-39052F7BADA0}.Debug|x86.ActiveCfg = Debug|x86
+		{45FBDBE8-1827-43F9-92A4-39052F7BADA0}.Debug|x86.Build.0 = Debug|x86
+		{45FBDBE8-1827-43F9-92A4-39052F7BADA0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{45FBDBE8-1827-43F9-92A4-39052F7BADA0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{45FBDBE8-1827-43F9-92A4-39052F7BADA0}.Release|x64.ActiveCfg = Release|x64
+		{45FBDBE8-1827-43F9-92A4-39052F7BADA0}.Release|x64.Build.0 = Release|x64
+		{45FBDBE8-1827-43F9-92A4-39052F7BADA0}.Release|x86.ActiveCfg = Release|x86
+		{45FBDBE8-1827-43F9-92A4-39052F7BADA0}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -82,5 +102,7 @@ Global
 		{C54E5FB7-D2F3-4FD1-A20A-3CA465CED8D0} = {042CECB7-80C5-4A1C-AF22-A5AF4115ED88}
 		{1AEF8360-F2EA-4275-BE31-E09DB5AA9C58} = {1335F2A2-FE76-4219-A780-07998705F6B3}
 		{FD142639-0F1C-4712-BA69-07415A491D56} = {042CECB7-80C5-4A1C-AF22-A5AF4115ED88}
+		{45FBDBE8-1827-43F9-92A4-39052F7BADA0} = {1335F2A2-FE76-4219-A780-07998705F6B3}
+		{411FBE58-FA4A-4918-BFB2-707D7558D297} = {1335F2A2-FE76-4219-A780-07998705F6B3}
 	EndGlobalSection
 EndGlobal
