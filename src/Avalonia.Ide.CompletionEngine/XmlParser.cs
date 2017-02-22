@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Sandbox
+﻿namespace Avalonia.Ide.CompletionEngine
 {
     public class XmlParser
     {
         private readonly string _data;
-
+        
         public enum ParserState
         {
             None,

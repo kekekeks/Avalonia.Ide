@@ -8,7 +8,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Avalonia.Ide.CompletionEngine;
 using Avalonia.Ide.CompletionEngine.AssemblyMetadata;
-using AvaloniaVS.IntelliSense;
 
 namespace Editor.Wpf
 {
@@ -44,9 +43,9 @@ namespace Editor.Wpf
             CompletionSet = _engine.GetCompletions(Metadata, Text, position);
         }
 
-        public MainWindowModel(IMetadataProvider provider, string text)
+        public MainWindowModel(Metadata metadata, string text)
         {
-            Metadata = MetadataLoader.LoadMetadata(provider);
+            Metadata = metadata;
             Text = text ??
                    "<UserControl xmlns='https://github.com/avaloniaui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'>\r\n    <Button></Button>\r\n</UserControl>"
                        .Replace("'", "\"");

@@ -8,14 +8,7 @@ namespace Avalonia.Ide.CompletionEngine.SrmMetadataProvider
 {
     public class SrmMetadataProvider : IMetadataProvider
     {
-        private readonly string _directory;
-
-        public SrmMetadataProvider(string directory)
-        {
-            _directory = directory;
-        }
-
-        public IMetadataReaderSession GetMetadata() => new SrmMetadataProviderSession(_directory);
+        public IMetadataReaderSession GetMetadata(IEnumerable<string> paths) => new SrmMetadataProviderSession(paths.ToArray());
     }
 
     class SrmMetadataProviderSession : IMetadataReaderSession
@@ -23,11 +16,10 @@ namespace Avalonia.Ide.CompletionEngine.SrmMetadataProvider
 
         private readonly Resolver _resolver;
 
-        public SrmMetadataProviderSession(string directory)
+        public SrmMetadataProviderSession(string[] files)
         {
             _resolver = new Resolver();
             {
-                var files = Directory.GetFiles(directory).Where(f => f.EndsWith(".dll") || f.EndsWith(".exe"));
                 foreach (var file in files)
                 {
                     var asm = LoadedAssembly.FromFile(file);

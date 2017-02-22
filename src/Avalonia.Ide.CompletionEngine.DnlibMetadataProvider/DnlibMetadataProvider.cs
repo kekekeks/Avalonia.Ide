@@ -11,40 +11,34 @@ namespace Avalonia.Ide.CompletionEngine.DnlibMetadataProvider
 {
     public class DnlibMetadataProvider : IMetadataProvider
     {
-        private readonly string _directoryPath;
-
-        public DnlibMetadataProvider(string directoryPath)
+        
+        public IMetadataReaderSession GetMetadata(IEnumerable<string> paths)
         {
-            _directoryPath = directoryPath;
-        }
-
-        public IMetadataReaderSession GetMetadata()
-        {
-            return new DnlibMetadataProviderSession(_directoryPath);
+            return new DnlibMetadataProviderSession(paths.ToArray());
         }
     }
 
     class DnlibMetadataProviderSession :IMetadataReaderSession
     { 
         public IEnumerable<IAssemblyInformation> Assemblies { get; }
-        public DnlibMetadataProviderSession(string directoryPath)
+        public DnlibMetadataProviderSession(string[] directoryPath)
         {
             Assemblies = LoadAssemblies(directoryPath).Select(a => new AssemblyWrapper(a)).ToList();
         }
 
-        static List<AssemblyDef> LoadAssemblies(string directory)
+        static List<AssemblyDef> LoadAssemblies(string[] lst)
         {
             AssemblyResolver asmResolver = new AssemblyResolver();
             ModuleContext modCtx = new ModuleContext(asmResolver);
             asmResolver.DefaultModuleContext = modCtx;
             asmResolver.EnableTypeDefCache = true;
-            
-            asmResolver.PreSearchPaths.Add(directory);
+
+            foreach (var path in lst)
+                asmResolver.PreSearchPaths.Add(path);
 
             List<AssemblyDef> assemblies = new List<AssemblyDef>();
 
-            foreach (var asm in Directory.GetFiles(directory, "*.*")
-                .Where(f => Path.GetExtension(f.ToLower()) == ".exe" || Path.GetExtension(f.ToLower()) == ".dll"))
+            foreach (var asm in lst)
             {
                 try
                 {

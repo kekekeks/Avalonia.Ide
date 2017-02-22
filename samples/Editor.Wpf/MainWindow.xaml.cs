@@ -14,7 +14,6 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using Avalonia.Ide.CompletionEngine;
-using AvaloniaVS.IntelliSense;
 
 namespace Editor.Wpf
 {

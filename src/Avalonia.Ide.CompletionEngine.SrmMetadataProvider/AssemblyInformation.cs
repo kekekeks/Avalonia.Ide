@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection.Metadata;
 using System.Text;
 using Avalonia.Ide.CompletionEngine.AssemblyMetadata;
+using MetadataReader = System.Reflection.Metadata.MetadataReader;
 
 namespace Avalonia.Ide.CompletionEngine.SrmMetadataProvider
 {

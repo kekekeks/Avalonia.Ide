@@ -3,18 +3,15 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml;
-using Avalonia.Ide.CompletionEngine;
-using AvaloniaVS.Infrastructure;
-using Sandbox;
 
-namespace AvaloniaVS.IntelliSense
+namespace Avalonia.Ide.CompletionEngine
 {
     public class CompletionEngine 
     {
         class MetadataHelper
         {
             private Metadata _metadata;
-            public Metadata Metadata { get; }
+            public Metadata Metadata => _metadata;
             public Dictionary<string, string> Aliases { get; private set; }
 
             Dictionary<string, MetadataType> _types;
@@ -131,15 +128,19 @@ namespace AvaloniaVS.IntelliSense
 
         public CompletionSet GetCompletions(Metadata metadata, string text, int pos)
         {
+            _helper.SetMetadata(metadata, text);
+
+            if (_helper.Metadata == null)
+                return null;
+
             if (text.Length == 0 || pos == 0)
                 return null;
             text = text.Substring(0, pos);
             var state = XmlParser.Parse(text);
-            
 
             var completions = new List<Completion>();
-            _helper.SetMetadata(metadata, text);
-            
+
+
             var curStart = state.CurrentValueStart ?? 0;
 
             if (state.State == XmlParser.ParserState.StartElement)
