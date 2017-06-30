@@ -42,8 +42,12 @@ namespace Avalonia.Ide.CompletionEngine.AssemblyMetadata
 
         static string[] GetNugetPackagesDirs()
         {
-            var home =
-                Environment.GetEnvironmentVariable(RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+            var home = Environment.GetEnvironmentVariable(
+#if DESKTOP
+                Environment.OSVersion.Platform == PlatformID.Win32NT
+#else
+                RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+#endif
                     ? "USERPROFILE"
                     : "HOME");
             return new[] {Path.Combine(home, ".nuget/packages")};
