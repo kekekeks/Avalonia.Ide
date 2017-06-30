@@ -1,16 +1,22 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp1.1</TargetFramework>
+    <TargetFrameworks>net461;netcoreapp1.1</TargetFrameworks>
   </PropertyGroup>
   <ItemGroup>
     <EmbeddedResource Include="**\*.xaml;Assets\*" Exclude="bin\**;obj\**;**\*.xproj;packages\**;@(EmbeddedResource)" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Avalonia" Version="0.4.1-*" />
-    <PackageReference Include="Avalonia.Skia.Desktop" Version="0.4.1-*" />
-    <PackageReference Include="Avalonia.Win32" Version="0.4.1-*" />
-    <PackageReference Include="Avalonia.Gtk3" Version="0.4.1-*" />
+    <EmbeddedResource Include="MainWindow.paml" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="0.5.1" />
+    <PackageReference Include="Avalonia.AvaloniaEdit" Version="0.2.1-alpha" />
+    <PackageReference Include="Avalonia.Skia.Desktop" Version="0.5.1" />
+    <PackageReference Include="Avalonia.Direct2D1" Condition="'$(TargetFramework)' == 'net461'" Version="0.5.1" />
+    <PackageReference Include="Avalonia.Win32" Version="0.5.1" />
+    <PackageReference Include="Avalonia.Gtk3" Version="0.5.1" />
+    <PackageReference Include="System.ValueTuple" Version="4.3.1" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\Avalonia.Ide.CompletionEngine.SrmMetadataProvider\Avalonia.Ide.CompletionEngine.SrmMetadataProvider.csproj" />

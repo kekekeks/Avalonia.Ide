@@ -170,11 +170,12 @@ namespace Avalonia.Ide.CompletionEngine
                     curStart += dotPos + 1;
                     var split = state.AttributeName.Split(new[] {'.'}, 2);
                     completions.AddRange(_helper.FilterPropertyNames(split[0], split[1], true)
-                        .Select(x => new Completion(x, x + "=\"\"", x)));
+                        .Select(x => new Completion(x, x + "=\"\"", x, x.Length + 2)));
                 }
                 else
                 {
-                    completions.AddRange(_helper.FilterPropertyNames(state.TagName, state.AttributeName).Select(x => new Completion(x, x + "=\"\"", x)));
+                    completions.AddRange(_helper.FilterPropertyNames(state.TagName, state.AttributeName)
+                        .Select(x => new Completion(x, x + "=\"\"", x, x.Length + 2)));
                     completions.AddRange(
                         _helper.FilterTypeNames(state.AttributeName, true)
                             .Select(v => new Completion(v, v + ".", v)));
