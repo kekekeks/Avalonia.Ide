@@ -65,11 +65,15 @@ namespace Avalonia.Ide.CompletionEngine.AssemblyMetadata
                 }
                 foreach (var nugetPath in nugetDirs)
                 {
-                    var packagePath = Path.Combine(nugetPath, l.PackageName, l.LibraryPath);
-                    if (File.Exists(packagePath))
+                    foreach (var tolower in new[]{false, true})
                     {
-                        yield return packagePath;
-                        break;
+                        var packagePath = Path.Combine(nugetPath,
+                            tolower ? l.PackageName.ToLowerInvariant() : l.PackageName, l.LibraryPath);
+                        if (File.Exists(packagePath))
+                        {
+                            yield return packagePath;
+                            break;
+                        }
                     }
                 }
 
