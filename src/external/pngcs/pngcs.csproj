@@ -1,0 +1,80 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <DefineConstants>NET45;RELEASE</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="pngcs\Hjg.Pngcs\Chunks\ChunkHelper.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\Chunks\ChunksList.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\Chunks\ChunkLoadBehaviour.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\Chunks\ChunkRaw.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\Chunks\ChunksListForWrite.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\Chunks\ChunkCopyBehaviour.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\Chunks\ChunkPredicate.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\Chunks\ChunkPredicateId.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\Chunks\ChunkPredicateId2.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\Chunks\ChunkPredicateEquiv.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\Chunks\PngChunkMultiple.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\Chunks\PngChunkSingle.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\Chunks\PngChunkSkipped.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\Chunks\PngMetadata.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\Chunks\PngChunkSTER.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\Chunks\PngChunkOFFS.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\Chunks\PngChunkSPLT.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\Chunks\PngChunkHIST.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\Chunks\PngChunkCHRM.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\Chunks\PngChunkSBIT.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\Chunks\PngChunkSRGB.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\IBytesConsumer.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\ImageLines.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\PngDeinterlacer.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\PngjExceptionInternal.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\FilterWriteStrategy.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\FileHelper.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\PngCsUtils.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\ImageInfo.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\ImageLine.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\ImageLineHelper.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\Chunks\PngChunk.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\Chunks\PngChunkBKGD.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\Chunks\PngChunkGAMA.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\Chunks\PngChunkICCP.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\Chunks\PngChunkIDAT.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\Chunks\PngChunkIEND.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\Chunks\PngChunkIHDR.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\Chunks\PngChunkITXT.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\Chunks\PngChunkUNKNOWN.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\Chunks\PngChunkPHYS.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\Chunks\PngChunkPLTE.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\Chunks\PngChunkTEXT.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\Chunks\PngChunkTextVar.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\Chunks\PngChunkTIME.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\Chunks\PngChunkTRNS.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\Chunks\PngChunkZTXT.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\FilterType.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\PngHelperInternal.cs"/>
+    <Compile Include="pngcs\Hjg.Pngcs\PngIDatChunkInputStream.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\PngIDatChunkOutputStream.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\PngjBadCrcException.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\PngjException.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\PngjInputException.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\PngjOutputException.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\PngjUnsupportedException.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\PngReader.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\PngWriter.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\ProgressiveOutputStream.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\Zlib\Adler32.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\Zlib\ZlibOutputStreamIs.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\Zlib\ZlibInputStreamIs.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\Zlib\ZlibInputStreamMs.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\Zlib\DeflateCompressLevel.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\Zlib\EDeflateCompressStrategy.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\Zlib\AZlibInputStream.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\Zlib\CRC32.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\Zlib\AZlibOutputStream.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\Zlib\ZlibOutputStreamMs.cs" />
+    <Compile Include="pngcs\Hjg.Pngcs\Zlib\ZlibStreamFactory.cs" />
+  </ItemGroup>
+</Project>

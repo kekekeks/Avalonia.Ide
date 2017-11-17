@@ -8,7 +8,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Avalonia.Ide.CompletionEngine.AssemblyMetadata
 {
-    static class DepsJsonAssemblyListLoader
+    public static class DepsJsonAssemblyListLoader
     {
         class Library
         {
