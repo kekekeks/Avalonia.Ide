@@ -51,6 +51,9 @@ namespace Avalonia.Ide.LanguageServer.MSBuild.Requests
 
         [DataMember]
         public List<string> MetaDataReferences { get; set; }
+
+        [DataMember]
+        public string CscCommandLine { get; set; }
     }
 
     [DataContract]
