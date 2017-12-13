@@ -75,7 +75,7 @@ namespace Avalonia.Ide.LanguageServer.MSBuild
                 ["CustomBeforeMicrosoftCommonTargets"] = targetsPath
             };
             var outputs = new Dictionary<string, ITaskItem[]>();
-            if (!BuildEngine.BuildProjectFile(req.FullPath, new[] { "ResolveAssemblyReferences", "GetTargetPath", "Compile", "AvaloniaGetEmbeddedResources" },
+            if (!BuildEngine.BuildProjectFile(req.FullPath, new[] { "ResolveAssemblyReferences", "GetTargetPath", "AvaloniaGetEmbeddedResources" },
                 props, outputs))
                 throw new Exception("Build failed");
             
