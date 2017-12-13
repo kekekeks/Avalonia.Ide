@@ -2,5 +2,6 @@
     <UsingTask AssemblyFile='Avalonia.Ide.LanguageServer.MSBuild.dll' TaskName='Avalonia.Ide.LanguageServer.MSBuild.AvaloniaIdeTask'/>
     <Target Name='InterceptorTarget'>
         <AvaloniaIdeTask Port="$(AvaloniaIdePort)" />
+        <AvaloniaIdeTask ContinueOnError="WarnAndContinue" />
     </Target>
 </Project>

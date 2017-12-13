@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Avalonia.Ide.LanguageServer.MSBuild.Requests;
+using Microsoft.Build.Framework;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -6,15 +8,9 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
-using System.Runtime.Serialization;
 using System.Threading;
-using System.Threading.Tasks;
-using System.Xml;
-using Avalonia.Ide.LanguageServer.MSBuild.Requests;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using MTask = Microsoft.Build.Utilities.Task;
-using Task = System.Threading.Tasks.Task;
+
 namespace Avalonia.Ide.LanguageServer.MSBuild
 {
     public class AvaloniaIdeTask : MTask
@@ -79,15 +75,22 @@ namespace Avalonia.Ide.LanguageServer.MSBuild
                 ["CustomBeforeMicrosoftCommonTargets"] = targetsPath
             };
             var outputs = new Dictionary<string, ITaskItem[]>();
-            if (!BuildEngine.BuildProjectFile(req.FullPath, new[] {"GetTargetPath", "AvaloniaGetEmbeddedResources"},
+            if (!BuildEngine.BuildProjectFile(req.FullPath, new[] { "ResolveAssemblyReferences", "GetTargetPath", "Compile", "AvaloniaGetEmbeddedResources" },
                 props, outputs))
                 throw new Exception("Build failed");
             
-            return new ProjectInfoResponse
+            var result = new ProjectInfoResponse
             {
                 TargetPath = outputs["GetTargetPath"][0].ItemSpec,
                 EmbeddedResources = outputs["AvaloniaGetEmbeddedResources"].Select(x=>x.ItemSpec).ToList()
             };
+
+            if(outputs.ContainsKey("ResolveAssemblyReferences"))
+            {
+                result.MetaDataReferences = outputs["ResolveAssemblyReferences"].Select(x => x.ItemSpec).ToList();
+            }
+
+            return result;
         }
     }
 }
