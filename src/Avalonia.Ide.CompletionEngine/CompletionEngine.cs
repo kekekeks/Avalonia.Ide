@@ -152,10 +152,10 @@ namespace Avalonia.Ide.CompletionEngine
                     var typeName = tagName.Substring(0, dotPos);
                     var compName = tagName.Substring(dotPos + 1);
                     curStart = curStart + dotPos + 1;
-                    completions.AddRange(_helper.FilterPropertyNames(typeName, compName).Select(p => new Completion(p)));
+                    completions.AddRange(_helper.FilterPropertyNames(typeName, compName).Select(p => new Completion(p, CompletionKind.Enum)));
                 }
                 else
-                    completions.AddRange(_helper.FilterTypeNames(tagName).Select(x => new Completion(x)));
+                    completions.AddRange(_helper.FilterTypeNames(tagName).Select(x => new Completion(x, CompletionKind.Class)));
             }
             else if (state.State == XmlParser.ParserState.InsideElement ||
                      state.State == XmlParser.ParserState.StartAttribute)
@@ -170,15 +170,15 @@ namespace Avalonia.Ide.CompletionEngine
                     curStart += dotPos + 1;
                     var split = state.AttributeName.Split(new[] {'.'}, 2);
                     completions.AddRange(_helper.FilterPropertyNames(split[0], split[1], true)
-                        .Select(x => new Completion(x, x + "=\"\"", x, x.Length + 2)));
+                        .Select(x => new Completion(x, x + "=\"\"", x, CompletionKind.Property, x.Length + 2)));
                 }
                 else
                 {
                     completions.AddRange(_helper.FilterPropertyNames(state.TagName, state.AttributeName)
-                        .Select(x => new Completion(x, x + "=\"\"", x, x.Length + 2)));
+                        .Select(x => new Completion(x, x + "=\"\"", x, CompletionKind.Property, x.Length + 2)));
                     completions.AddRange(
                         _helper.FilterTypeNames(state.AttributeName, true)
-                            .Select(v => new Completion(v, v + ".", v)));
+                            .Select(v => new Completion(v, v + ".", v, CompletionKind.Property)));
                 }
             }
             else if (state.State == XmlParser.ParserState.AttributeValue)
@@ -209,16 +209,16 @@ namespace Avalonia.Ide.CompletionEngine
                         if (state.AttributeValue.StartsWith("clr-namespace:"))
                             completions.AddRange(
                                 metadata.Namespaces.Keys.Where(v => v.StartsWith(state.AttributeValue))
-                                    .Select(v => new Completion(v.Substring("clr-namespace:".Length), v, v)));
+                                    .Select(v => new Completion(v.Substring("clr-namespace:".Length), v, v, CompletionKind.Namespace)));
                         else
                         {
-                            completions.Add(new Completion("clr-namespace:"));
+                            completions.Add(new Completion("clr-namespace:", CompletionKind.Namespace));
                             completions.AddRange(
                                 metadata.Namespaces.Keys.Where(
                                     v =>
                                         v.StartsWith(state.AttributeValue) &&
                                         !"clr-namespace".StartsWith(state.AttributeValue))
-                                    .Select(v => new Completion(v)));
+                                    .Select(v => new Completion(v, CompletionKind.Class)));
                         }
                     }
                 }
@@ -236,7 +236,7 @@ namespace Avalonia.Ide.CompletionEngine
             foreach (var val in enumValues)
             {
                 if (val.StartsWith(entered, StringComparison.OrdinalIgnoreCase))
-                    enumCompletions.Add(new Completion(val));
+                    enumCompletions.Add(new Completion(val, CompletionKind.Enum));
             }
             return enumCompletions;
         }
@@ -253,14 +253,14 @@ namespace Avalonia.Ide.CompletionEngine
             if (ext.State == MarkupExtensionParser.ParserStateType.StartElement)
                 completions.AddRange(_helper.FilterTypeNames(ext.ElementName, markupExtensionsOnly: true)
                     .Select(t => t.EndsWith("Extension") ? t.Substring(0, t.Length - "Extension".Length) : t)
-                    .Select(t => new Completion(t)));
+                    .Select(t => new Completion(t, CompletionKind.Property)));
             if (ext.State == MarkupExtensionParser.ParserStateType.StartAttribute ||
                 ext.State == MarkupExtensionParser.ParserStateType.InsideElement)
             {
                 if (ext.State == MarkupExtensionParser.ParserStateType.InsideElement)
                     forcedStart = data.Length;
                 completions.AddRange(_helper.FilterPropertyNames(transformedName, ext.AttributeName ?? "")
-                    .Select(x => new Completion(x, x + "=", x)));
+                    .Select(x => new Completion(x, x + "=", x, CompletionKind.Property)));
             }
             if (ext.State == MarkupExtensionParser.ParserStateType.AttributeValue 
                 || ext.State == MarkupExtensionParser.ParserStateType.BeforeAttributeValue)
