@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -13,6 +14,7 @@ namespace Avalonia.Designer
     /// </summary>
     public partial class AvaloniaDesigner
     {
+        public event Action<Process> SpawnedProcess;
         public static readonly DependencyProperty TargetExeProperty = DependencyProperty.Register(
             "TargetExe", typeof (string), typeof (AvaloniaDesigner), new FrameworkPropertyMetadata(TargetExeChanged));
 
@@ -63,6 +65,7 @@ namespace Avalonia.Designer
         public AvaloniaDesigner(DesignerConfiguration config)
         {
             _host = new ProcessHost(config);
+            _host.SpawnedProcess += proc => SpawnedProcess?.Invoke(proc);
             InitializeComponent();
             BindingOperations.SetBinding(State, TextBox.TextProperty,
                 new Binding(nameof(ProcessHost.State)) {Source = _host, Mode = BindingMode.OneWay});

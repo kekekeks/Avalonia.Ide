@@ -18,6 +18,7 @@ namespace Avalonia.Designer.Comm
     class ProcessHost : INotifyPropertyChanged
     {
         public event Action<object> OnMessage;
+        public event Action<Process> SpawnedProcess;
         private readonly DesignerConfiguration _config;
         private IAvaloniaRemoteTransportConnection _conn;
         private string _state;
@@ -144,7 +145,9 @@ namespace Avalonia.Designer.Comm
             try
             {
                 _proc.Start();
-                State = "Launching designer process...";
+                SpawnedProcess?.Invoke(_proc);
+                State = "Launching designer process: " + Environment.NewLine
+                        + exe + " " + cmdline + Environment.NewLine + "from directory " + targetDir;
                 StartReaders(_proc);
             }
             catch (Exception e)
