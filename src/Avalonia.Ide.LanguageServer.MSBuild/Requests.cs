@@ -39,6 +39,30 @@ namespace Avalonia.Ide.LanguageServer.MSBuild.Requests
         [DataMember]
         public string TargetFramework { get; set; }
     }
+
+    [DataContract]
+    public class BuildProjectRequest : RequestBase<BuildProjectResponse>
+    {
+        [DataMember]
+        public string FullPath { get; set; }
+        [DataMember]
+        public string SolutionDirectory { get; set; }
+        [DataMember]
+        public string TargetFramework { get; set; }
+        [DataMember]
+        public string Configuration { get; set; }
+    }
+
+    [DataContract]
+    public class BuildProjectResponse
+    {
+        [DataMember]
+        public bool Success { get; set; }
+
+        [DataMember]
+        public List<string> OutputAssemblies { get; set; }
+    }
+
     
     [DataContract]
     public class ProjectInfoResponse
