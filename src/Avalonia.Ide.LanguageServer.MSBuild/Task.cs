@@ -26,7 +26,7 @@ namespace Avalonia.Ide.LanguageServer.MSBuild
             var envelopeType = typeof(ResponseEnvelope<>).MakeGenericType(t);
             return Activator.CreateInstance(envelopeType, response, exception);
         }
-        
+
         public override bool Execute()
         {
             var cl = new TcpClient();
@@ -45,7 +45,9 @@ namespace Avalonia.Ide.LanguageServer.MSBuild
                 try
                 {
                     if (req is ProjectInfoRequest pnfo)
-                        response = Handle(pnfo);
+                        response = HandleProjectInfoRequest(pnfo);
+                    else if (req is BuildProjectRequest buildRequest)
+                        response = HandleBuildProjectRequest(buildRequest);
                     else
                         throw new InvalidOperationException();
                 }
@@ -56,10 +58,12 @@ namespace Avalonia.Ide.LanguageServer.MSBuild
                 if (response != null)
                     c.Send(CreateResponseEnvelope(t, response, null));
 
+                Console.WriteLine("*** Request Handled");
+
             }
         }
 
-        ProjectInfoResponse Handle(ProjectInfoRequest req)
+        ProjectInfoResponse HandleProjectInfoRequest(ProjectInfoRequest req)
         {
             var targetsPath = typeof(AvaloniaIdeTask).GetTypeInfo().Assembly.GetModules()[0].FullyQualifiedName;
             targetsPath = Path.Combine(Path.GetDirectoryName(targetsPath), "avalonia-ide.targets");
@@ -78,16 +82,54 @@ namespace Avalonia.Ide.LanguageServer.MSBuild
             if (!BuildEngine.BuildProjectFile(req.FullPath, new[] { "ResolveAssemblyReferences", "GetTargetPath", "AvaloniaGetEmbeddedResources" },
                 props, outputs))
                 throw new Exception("Build failed");
-            
+
             var result = new ProjectInfoResponse
             {
                 TargetPath = outputs["GetTargetPath"][0].ItemSpec,
-                EmbeddedResources = outputs["AvaloniaGetEmbeddedResources"].Select(x=>x.ItemSpec).ToList()
+                EmbeddedResources = outputs["AvaloniaGetEmbeddedResources"].Select(x => x.ItemSpec).ToList()
             };
 
-            if(outputs.ContainsKey("ResolveAssemblyReferences"))
+            if (outputs.ContainsKey("ResolveAssemblyReferences"))
             {
                 result.MetaDataReferences = outputs["ResolveAssemblyReferences"].Select(x => x.ItemSpec).ToList();
+            }
+
+            return result;
+        }
+
+        BuildProjectResponse HandleBuildProjectRequest(BuildProjectRequest req)
+        {
+            var targetsPath = typeof(AvaloniaIdeTask).GetTypeInfo().Assembly.GetModules()[0].FullyQualifiedName;
+            targetsPath = Path.Combine(Path.GetDirectoryName(targetsPath), "avalonia-ide.targets");
+            var props = new Dictionary<string, string>
+            {
+                ["DesignTimeBuild"] = "false",
+                ["BuildProjectReferences"] = "false",
+                ["_ResolveReferenceDependencies"] = "true",
+                ["SolutionDir"] = req.SolutionDirectory,
+                ["ProvideCommandLineInvocation"] = "false",
+                ["SkipCompilerExecution"] = "false",
+                ["BuildProjectReferences"] = "false",
+                ["TargetFramework"] = req.TargetFramework,
+                ["CustomBeforeMicrosoftCommonTargets"] = targetsPath
+            };
+            var outputs = new Dictionary<string, ITaskItem[]>();
+
+            var status = BuildEngine.BuildProjectFile(req.FullPath, null, props, outputs);
+
+            var result = new BuildProjectResponse
+            {
+                Success = status
+            };
+
+            if(!status)
+            {
+
+            }
+
+            if(outputs.ContainsKey("Build"))
+            {
+                result.OutputAssemblies = outputs["Build"].Select(item =>item.ItemSpec).ToList();
             }
 
             return result;
