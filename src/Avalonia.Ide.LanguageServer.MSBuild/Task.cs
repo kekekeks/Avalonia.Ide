@@ -56,6 +56,8 @@ namespace Avalonia.Ide.LanguageServer.MSBuild
                 if (response != null)
                     c.Send(CreateResponseEnvelope(t, response, null));
 
+                Console.WriteLine("*** Request Handled");
+
             }
         }
 
