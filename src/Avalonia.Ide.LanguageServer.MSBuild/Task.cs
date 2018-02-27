@@ -77,10 +77,12 @@ namespace Avalonia.Ide.LanguageServer.MSBuild
                 ["ProvideCommandLineArgs"] = "true",
                 ["SkipCompilerExecution"] = "true",
                 ["TargetFramework"] = req.TargetFramework,
-                ["CustomBeforeMicrosoftCommonTargets"] = targetsPath
+                ["CustomBeforeMicrosoftCommonTargets"] = targetsPath,
+                ["AvaloniaRandom"] = Guid.NewGuid().ToString(),
+                ["AvaloniaForceCoreCompile"] = "true"
             };
             var outputs = new Dictionary<string, ITaskItem[]>();
-            if (!BuildEngine.BuildProjectFile(req.FullPath, new[] { "ResolveAssemblyReferences", "GetTargetPath", "AvaloniaGetEmbeddedResources", "AvaloniaGetCscCommandLine" },
+            if (!BuildEngine.BuildProjectFile(req.FullPath, new[] { "ResolveAssemblyReferences", "GetTargetPath", "AvaloniaGetCscCommandLine", "AvaloniaGetEmbeddedResources",  },
                 props, outputs))
                 throw new Exception("Build failed");
 

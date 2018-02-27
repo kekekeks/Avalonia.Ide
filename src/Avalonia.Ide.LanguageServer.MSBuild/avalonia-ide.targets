@@ -5,5 +5,11 @@
     <Target Name="AvaloniaGetCscCommandLine" Returns="@(CscCommandLineArgs)" DependsOnTargets="Compile">
         
     </Target>
+    <PropertyGroup>
+        <ProvideCommandLineArgs>true</ProvideCommandLineArgs>
+    </PropertyGroup>
+    <ItemGroup Condition="'$(AvaloniaForceCoreCompile)' == 'true'">
+        <CustomAdditionalCompileInputs Include="$(AvaloniaRandom)"/>
+    </ItemGroup>
 
 </Project>
