@@ -8,6 +8,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Threading;
 using MTask = Microsoft.Build.Utilities.Task;
 
@@ -73,13 +74,15 @@ namespace Avalonia.Ide.LanguageServer.MSBuild
                 ["BuildProjectReferences"] = "false",
                 ["_ResolveReferenceDependencies"] = "true",
                 ["SolutionDir"] = req.SolutionDirectory,
+                ["ProvideCommandLineArgs"] = "true",
                 ["ProvideCommandLineInvocation"] = "true",
                 ["SkipCompilerExecution"] = "true",
                 ["TargetFramework"] = req.TargetFramework,
-                ["CustomBeforeMicrosoftCommonTargets"] = targetsPath
+                ["CustomBeforeMicrosoftCommonTargets"] = targetsPath,
             };
+
             var outputs = new Dictionary<string, ITaskItem[]>();
-            if (!BuildEngine.BuildProjectFile(req.FullPath, new[] { "ResolveAssemblyReferences", "GetTargetPath", "AvaloniaGetEmbeddedResources" },
+            if (!BuildEngine.BuildProjectFile(req.FullPath, new[] { "ResolveAssemblyReferences", "GetTargetPath", "AvaloniaGetEmbeddedResources", "CoreCompile" },
                 props, outputs))
                 throw new Exception("Build failed");
 
@@ -92,6 +95,14 @@ namespace Avalonia.Ide.LanguageServer.MSBuild
             if (outputs.ContainsKey("ResolveAssemblyReferences"))
             {
                 result.MetaDataReferences = outputs["ResolveAssemblyReferences"].Select(x => x.ItemSpec).ToList();
+            }
+
+            if (outputs.ContainsKey("CoreCompile"))
+            {
+                if (outputs["CoreCompile"].Length > 0)
+                {
+                    result.CscCommandLine = outputs["CoreCompile"][0].ItemSpec;
+                }
             }
 
             return result;
@@ -113,6 +124,12 @@ namespace Avalonia.Ide.LanguageServer.MSBuild
                 ["TargetFramework"] = req.TargetFramework,
                 ["CustomBeforeMicrosoftCommonTargets"] = targetsPath
             };
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                props["CscToolExe"] = "RunCsc.sh";
+            }
+
             var outputs = new Dictionary<string, ITaskItem[]>();
 
             var status = BuildEngine.BuildProjectFile(req.FullPath, null, props, outputs);
@@ -122,14 +139,14 @@ namespace Avalonia.Ide.LanguageServer.MSBuild
                 Success = status
             };
 
-            if(!status)
+            if (!status)
             {
 
             }
 
-            if(outputs.ContainsKey("Build"))
+            if (outputs.ContainsKey("Build"))
             {
-                result.OutputAssemblies = outputs["Build"].Select(item =>item.ItemSpec).ToList();
+                result.OutputAssemblies = outputs["Build"].Select(item => item.ItemSpec).ToList();
             }
 
             return result;
