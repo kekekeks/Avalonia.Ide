@@ -74,12 +74,13 @@ namespace Avalonia.Ide.LanguageServer.MSBuild
                 ["_ResolveReferenceDependencies"] = "true",
                 ["SolutionDir"] = req.SolutionDirectory,
                 ["ProvideCommandLineInvocation"] = "true",
+                ["ProvideCommandLineArgs"] = "true",
                 ["SkipCompilerExecution"] = "true",
                 ["TargetFramework"] = req.TargetFramework,
                 ["CustomBeforeMicrosoftCommonTargets"] = targetsPath
             };
             var outputs = new Dictionary<string, ITaskItem[]>();
-            if (!BuildEngine.BuildProjectFile(req.FullPath, new[] { "ResolveAssemblyReferences", "GetTargetPath", "AvaloniaGetEmbeddedResources" },
+            if (!BuildEngine.BuildProjectFile(req.FullPath, new[] { "ResolveAssemblyReferences", "GetTargetPath", "AvaloniaGetEmbeddedResources", "AvaloniaGetCscCommandLine" },
                 props, outputs))
                 throw new Exception("Build failed");
 
@@ -93,7 +94,10 @@ namespace Avalonia.Ide.LanguageServer.MSBuild
             {
                 result.MetaDataReferences = outputs["ResolveAssemblyReferences"].Select(x => x.ItemSpec).ToList();
             }
-
+            if (outputs.ContainsKey("AvaloniaGetCscCommandLine"))
+            {
+                result.CscCommandLine = outputs["AvaloniaGetCscCommandLine"].Select(x => x.ItemSpec).ToList();
+            }
             return result;
         }
 

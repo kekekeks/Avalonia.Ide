@@ -2,4 +2,8 @@
     <Target Name="AvaloniaGetEmbeddedResources" Returns="@(EmbeddedResource)" DependsOnTargets="Compile">
         
     </Target>
+    <Target Name="AvaloniaGetCscCommandLine" Returns="@(CscCommandLineArgs)" DependsOnTargets="Compile">
+        
+    </Target>
+
 </Project>
