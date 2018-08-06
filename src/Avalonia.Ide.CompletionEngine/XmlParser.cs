@@ -48,6 +48,8 @@ namespace Avalonia.Ide.CompletionEngine
                         ? _attributeValueStart
                         : (int?) null;
 
+        public int? ElementNameEnd => State >= ParserState.StartElement ? _elementNameEnd : null;
+
         public int ContainingTagStart => _containingTagStart.Count > 0 ? _containingTagStart.Peek() : 0;
 
         public int NestingLevel => _containingTagStart.Count;
