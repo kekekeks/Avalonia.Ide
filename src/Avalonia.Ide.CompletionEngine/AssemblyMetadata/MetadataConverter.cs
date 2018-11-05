@@ -10,7 +10,7 @@ namespace Avalonia.Ide.CompletionEngine
         {
             while (def != null)
             {
-                if (def.Namespace == "OmniXaml" && def.Name == "MarkupExtension")
+                if(def.Name == "MarkupExtension")
                     return true;
                 def = def.GetBaseType();
             }
