@@ -149,11 +149,17 @@ namespace Avalonia.Ide.CompletionEngine
                 IsEnum = true,
                 EnumValues = new[] { "True", "False" }
             });
+
+            types.Add("Avalonia.Media.IBrush", new MetadataType()
+            {
+                Name = "Avalonia.Media.IBrush",
+                IsEnum = true
+            });
         }
 
         private static void PostProcessTypes(Dictionary<string, MetadataType> types)
         {
-            if(types.TryGetValue("Avalonia.Markup.Xaml.MarkupExtensions.BindingExtension", out MetadataType bindingType))
+            if (types.TryGetValue("Avalonia.Markup.Xaml.MarkupExtensions.BindingExtension", out MetadataType bindingType))
             {
                 bindingType.SupportCtorArgument = MetadataTypeCtorArgument.None;
             }
@@ -161,6 +167,12 @@ namespace Avalonia.Ide.CompletionEngine
             if (types.TryGetValue("Portable.Xaml.Markup.TypeExtension", out MetadataType typeExtension))
             {
                 bindingType.SupportCtorArgument = MetadataTypeCtorArgument.Type;
+            }
+
+            if (types.TryGetValue("Avalonia.Media.IBrush", out MetadataType brushType) &&
+                types.TryGetValue("Avalonia.Media.Brushes", out MetadataType brushes))
+            {
+                brushType.EnumValues = brushes.Properties.Where(p => p.IsStatic && p.HasGetter).Select(p => p.Name).ToArray();
             }
         }
     }
