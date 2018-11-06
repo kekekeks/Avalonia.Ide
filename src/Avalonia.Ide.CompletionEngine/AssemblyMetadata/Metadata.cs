@@ -16,8 +16,8 @@ namespace Avalonia.Ide.CompletionEngine
     {
         public bool IsMarkupExtension { get; set; }
         public bool IsStatic { get; set; }
-        public bool IsEnum { get; set; }
-        public string[] EnumValues { get; set; }
+        public bool HasHintValues { get; set; }
+        public string[] HintValues { get; set; }
         public string Name { get; set; }
         public List<MetadataProperty> Properties { get; set; } = new List<MetadataProperty>();
         public bool HasAttachedProperties { get; set; }
@@ -32,7 +32,8 @@ namespace Avalonia.Ide.CompletionEngine
         None,
         Type,
         Object,
-        Any
+        TypeAndObject,
+        HintValues
     }
 
     public class MetadataProperty
