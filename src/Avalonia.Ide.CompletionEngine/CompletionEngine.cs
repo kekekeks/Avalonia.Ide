@@ -212,7 +212,17 @@ namespace Avalonia.Ide.CompletionEngine
                 else
                 {
                     if (prop?.Type?.IsEnum == true)
-                        completions.AddRange(GetEnumCompletions(text.Substring(state.CurrentValueStart.Value), prop.Type.EnumValues));
+                    {
+                        var search = text.Substring(state.CurrentValueStart.Value);
+                        if (prop.Type.IsCompositeValue)
+                        {
+                            var last = search.Split(' ', ',').LastOrDefault();
+                            curStart = curStart + search.Length - last?.Length ?? 0;
+                            search = last;
+                        }
+
+                        completions.AddRange(GetEnumCompletions(search, prop.Type.EnumValues));
+                    }
                     else if (state.AttributeName == "xmlns" || state.AttributeName.Contains("xmlns:"))
                     {
                         if (state.AttributeValue.StartsWith("clr-namespace:"))
@@ -234,11 +244,11 @@ namespace Avalonia.Ide.CompletionEngine
             }
 
             if (completions.Count != 0)
-                return new CompletionSet() {Completions = completions, StartPosition = curStart};
+                return new CompletionSet() { Completions = completions, StartPosition = curStart };
             return null;
         }
-        
-            
+
+
         List<Completion> GetEnumCompletions(string entered, string[] enumValues)
         {
             var enumCompletions = new List<Completion>();

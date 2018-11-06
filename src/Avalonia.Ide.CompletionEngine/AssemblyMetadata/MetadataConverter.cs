@@ -38,8 +38,7 @@ namespace Avalonia.Ide.CompletionEngine
             var typeDefs = new Dictionary<MetadataType, ITypeInformation>();
             var metadata = new Metadata();
 
-
-            PreProcessTypes(types);
+            PreProcessTypes(types, metadata);
 
             foreach (var asm in provider.Assemblies)
             {
@@ -112,6 +111,12 @@ namespace Avalonia.Ide.CompletionEngine
                             });
                         }
                     }
+
+                    if (typeDef.FullName == "Avalonia.AvaloniaObject")
+                    {
+                        type.IsAvaloniaObjectType = true;
+                    }
+
                     typeDef = typeDef.GetBaseType();
                 }
 
@@ -119,7 +124,7 @@ namespace Avalonia.Ide.CompletionEngine
                 type.HasStaticGetProperties = type.Properties.Any(p => p.IsStatic && p.HasGetter);
             }
 
-            PostProcessTypes(types);
+            PostProcessTypes(types, metadata);
 
             return metadata;
         }
@@ -141,7 +146,7 @@ namespace Avalonia.Ide.CompletionEngine
             aliases["Avalonia.Layout"] = "https://github.com/avaloniaui";
         }
 
-        private static void PreProcessTypes(Dictionary<string, MetadataType> types)
+        private static void PreProcessTypes(Dictionary<string, MetadataType> types, Metadata metadata)
         {
             types.Add(typeof(bool).FullName, new MetadataType()
             {
@@ -157,11 +162,23 @@ namespace Avalonia.Ide.CompletionEngine
             });
         }
 
-        private static void PostProcessTypes(Dictionary<string, MetadataType> types)
+        private static void PostProcessTypes(Dictionary<string, MetadataType> types, Metadata metadata)
         {
             if (types.TryGetValue("Avalonia.Markup.Xaml.MarkupExtensions.BindingExtension", out MetadataType bindingType))
             {
                 bindingType.SupportCtorArgument = MetadataTypeCtorArgument.None;
+            }
+
+            if (types.TryGetValue("Avalonia.Data.TemplateBinding", out MetadataType templBinding))
+            {
+                var tbext = new MetadataType()
+                {
+                    Name = "TemplateBindingExtension",
+                    IsMarkupExtension = true,
+                    Properties = templBinding.Properties
+                };
+                types["TemplateBindingExtension"] = tbext;
+                metadata.AddType("https://github.com/avaloniaui", tbext);
             }
 
             if (types.TryGetValue("Portable.Xaml.Markup.TypeExtension", out MetadataType typeExtension))
@@ -173,6 +190,45 @@ namespace Avalonia.Ide.CompletionEngine
                 types.TryGetValue("Avalonia.Media.Brushes", out MetadataType brushes))
             {
                 brushType.EnumValues = brushes.Properties.Where(p => p.IsStatic && p.HasGetter).Select(p => p.Name).ToArray();
+            }
+
+            if (types.TryGetValue("Avalonia.AvaloniaProperty", out MetadataType avProp))
+            {
+                var allProps = new Dictionary<string, MetadataProperty>();
+
+                foreach (var type in types.Where(t => t.Value.IsAvaloniaObjectType))
+                {
+                    foreach (var v in type.Value.Properties.Where(p => p.HasSetter && p.HasGetter))
+                    {
+                        allProps[v.Name] = v;
+                    }
+                }
+
+                avProp.IsEnum = true;
+                avProp.EnumValues = allProps.Keys.ToArray();
+            }
+
+            if (types.TryGetValue("Avalonia.Styling.Selector", out MetadataType styleSelector))
+            {
+                styleSelector.IsEnum = true;
+                styleSelector.IsCompositeValue = true;
+
+                List<string> hints = new List<string>();
+
+                //some reserved words
+                hints.AddRange(new[] { "/template/", ":is()", ">", "#", "." });
+
+                //some pseudo classes
+                hints.AddRange(new[]
+                {
+                    ":pointerover", ":pressed", ":disabled", ":focus",
+                    ":selected", ":vertical", ":horizontal",
+                    ":checked", ":unchecked", ":indeterminate"
+                });
+
+                hints.AddRange(types.Where(t => t.Value.IsAvaloniaObjectType).Select(t => t.Value.Name.Replace(":", "|")));
+
+                styleSelector.EnumValues = hints.ToArray();
             }
         }
     }

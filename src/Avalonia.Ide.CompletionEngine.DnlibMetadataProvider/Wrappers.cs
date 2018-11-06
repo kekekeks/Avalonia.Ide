@@ -94,17 +94,16 @@ namespace Avalonia.Ide.CompletionEngine.DnlibMetadataProvider
 
             IsStatic = setMethod?.IsStatic ?? getMethod?.IsStatic ?? false;
 
-
-
             if (setMethod != null)
             {
                 HasPublicSetter = true;
 
                 TypeFullName = setMethod.Parameters[setMethod.IsStatic ? 0 : 1].Type.FullName;
             }
+
             if (getMethod != null)
             {
-
+                HasPublicGetter = true;
             }
         }
 
