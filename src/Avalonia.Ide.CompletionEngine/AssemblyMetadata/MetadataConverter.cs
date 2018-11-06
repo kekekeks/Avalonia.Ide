@@ -10,7 +10,7 @@ namespace Avalonia.Ide.CompletionEngine
         {
             while (def != null)
             {
-                if(def.Name == "MarkupExtension")
+                if (def.Name == "MarkupExtension")
                     return true;
                 def = def.GetBaseType();
             }
@@ -42,18 +42,16 @@ namespace Avalonia.Ide.CompletionEngine
             {
                 Name = typeof(bool).FullName,
                 IsEnum = true,
-                EnumValues = new[] {"True", "False"}
+                EnumValues = new[] { "True", "False" }
             });
 
 
             foreach (var asm in provider.Assemblies)
             {
                 var aliases = new Dictionary<string, string>();
-                foreach (
-                    var attr in
-                    asm.CustomAttributes.Where(a => a.TypeFullName == "Avalonia.Metadata.XmlnsDefinitionAttribute"))
-                    aliases[attr.ConstructorArguments[1].Value.ToString()] =
-                        attr.ConstructorArguments[0].Value.ToString();
+
+                ProcessWellKnowAliases(asm, aliases);
+                ProcessCustomAttributes(asm, aliases);
 
                 foreach (var type in asm.Types.Where(x => !x.IsInterface && x.IsPublic))
                 {
@@ -70,17 +68,39 @@ namespace Avalonia.Ide.CompletionEngine
             {
                 ITypeInformation typeDef;
                 typeDefs.TryGetValue(type, out typeDef);
+
+                var ctors = typeDef?.Methods
+                    .Where(m => m.IsPublic && !m.IsStatic && m.Name == ".ctor" && m.Parameters.Count == 1);
+
+                if (ctors?.Any() == true)
+                {
+                    bool supportType = ctors.Any(m => m.Parameters[0].TypeFullName == "System.Type");
+                    bool supportOther = ctors.Any(m => m.Parameters[0].TypeFullName != "System.Type");
+
+                    if (supportType && supportOther)
+                        type.SupportCtorArgument = MetadataTypeCtorArgument.Any;
+                    else if (supportType)
+                        type.SupportCtorArgument = MetadataTypeCtorArgument.Type;
+                    else
+                        type.SupportCtorArgument = MetadataTypeCtorArgument.Object;
+                }
+
                 while (typeDef != null)
                 {
                     foreach (var prop in typeDef.Properties)
                     {
-                        if (prop.IsStatic || !prop.HasPublicSetter)
+                        if (!prop.HasPublicGetter && !prop.HasPublicSetter)
                             continue;
 
-                        var p = new MetadataProperty {Name = prop.Name};
+                        var p = new MetadataProperty
+                        {
+                            Name = prop.Name,
+                            Type = types.GetValueOrDefault(prop.TypeFullName),
+                            IsStatic = prop.IsStatic,
+                            HasGetter = prop.HasPublicGetter,
+                            HasSetter = prop.HasPublicSetter
+                        };
 
-                        p.Type = types.GetValueOrDefault(prop.TypeFullName);
-                        
                         type.Properties.Add(p);
                     }
                     foreach (var methodDef in typeDef.Methods)
@@ -98,10 +118,27 @@ namespace Avalonia.Ide.CompletionEngine
                     }
                     typeDef = typeDef.GetBaseType();
                 }
+
                 type.HasAttachedProperties = type.Properties.Any(p => p.IsAttached);
+                type.HasStaticGetProperties = type.Properties.Any(p => p.IsStatic && p.HasGetter);
             }
 
             return metadata;
+        }
+
+        private static void ProcessCustomAttributes(IAssemblyInformation asm, Dictionary<string, string> aliases)
+        {
+            foreach (
+                var attr in
+                asm.CustomAttributes.Where(a => a.TypeFullName == "Avalonia.Metadata.XmlnsDefinitionAttribute"))
+                aliases[attr.ConstructorArguments[1].Value.ToString()] =
+                    attr.ConstructorArguments[0].Value.ToString();
+        }
+
+        private static void ProcessWellKnowAliases(IAssemblyInformation asm, Dictionary<string, string> aliases)
+        {
+            //some internal portable xaml support for aliases
+            aliases["Portable.Xaml.Markup"] = "http://schemas.microsoft.com/winfx/2006/xaml";
         }
     }
 }

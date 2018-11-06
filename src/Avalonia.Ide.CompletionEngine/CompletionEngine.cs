@@ -57,7 +57,7 @@ namespace Avalonia.Ide.CompletionEngine
             }
 
 
-            public IEnumerable<string> FilterTypeNames(string prefix, bool withAttachedPropertiesOnly = false, bool markupExtensionsOnly = false)
+            public IEnumerable<string> FilterTypeNames(string prefix, bool withAttachedPropertiesOnly = false, bool markupExtensionsOnly = false, bool staticGettersOnly = false)
             {
                 prefix = prefix ?? "";
                 var e = _types
@@ -66,6 +66,8 @@ namespace Avalonia.Ide.CompletionEngine
                     e = e.Where(t => t.Value.HasAttachedProperties);
                 if (markupExtensionsOnly)
                     e = e.Where(t => t.Value.IsMarkupExtension);
+                if (staticGettersOnly)
+                    e = e.Where(t => t.Value.HasStaticGetProperties);
                 return e.Select(s => s.Key);
             }
 
@@ -76,19 +78,22 @@ namespace Avalonia.Ide.CompletionEngine
                 return rv;
             }
 
-            public IEnumerable<string> FilterPropertyNames(string typeName, string propName, bool attachedOnly = false)
+            public IEnumerable<string> FilterPropertyNames(string typeName, string propName, bool attachedOnly = false, bool staticGettersOnly = false)
             {
                 var t = LookupType(typeName);
                 propName = propName ?? "";
-                if(t == null)
+                if (t == null)
                     return new string[0];
                 var e = t.Properties.Where(p => p.Name.StartsWith(propName, StringComparison.OrdinalIgnoreCase));
                 if (attachedOnly)
                     e = e.Where(p => p.IsAttached);
+                if (staticGettersOnly)
+                    e = e.Where(p => p.IsStatic && p.HasGetter);
+
                 return e.Select(p => p.Name);
             }
 
-            public MetadataProperty LookupProperty(string typeName, string propName) 
+            public MetadataProperty LookupProperty(string typeName, string propName)
                 => LookupType(typeName)?.Properties?.FirstOrDefault(p => p.Name == propName);
         }
 
@@ -261,6 +266,31 @@ namespace Avalonia.Ide.CompletionEngine
                     forcedStart = data.Length;
                 completions.AddRange(_helper.FilterPropertyNames(transformedName, ext.AttributeName ?? "")
                     .Select(x => new Completion(x, x + "=", x)));
+
+                var attribName = ext.AttributeName ?? "";
+                var t = _helper.LookupType(transformedName);
+
+                if (t.IsMarkupExtension && t.SupportCtorArgument != MetadataTypeCtorArgument.None)
+                {
+                    if (attribName.Contains("."))
+                    {
+                        if (t.SupportCtorArgument != MetadataTypeCtorArgument.Type)
+                        {
+                            var split = attribName.Split('.');
+                            var type = split[0];
+                            var prop = split[1];
+                            var props = _helper.FilterPropertyNames(type, prop, staticGettersOnly: true);
+                            completions.AddRange(props.Select(x => new Completion(x, $"{type}.{x}", x)));
+                        }
+                    }
+                    else
+                    {
+                       
+                        var types = _helper.FilterTypeNames(attribName, 
+                            staticGettersOnly: t.SupportCtorArgument == MetadataTypeCtorArgument.Object);
+                        completions.AddRange(types.Select(x => new Completion(x, x, x)));
+                    }
+                }
             }
             if (ext.State == MarkupExtensionParser.ParserStateType.AttributeValue 
                 || ext.State == MarkupExtensionParser.ParserStateType.BeforeAttributeValue)

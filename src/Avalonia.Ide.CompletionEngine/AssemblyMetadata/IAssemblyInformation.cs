@@ -53,6 +53,7 @@ namespace Avalonia.Ide.CompletionEngine.AssemblyMetadata
     {
         bool IsStatic { get; }
         bool HasPublicSetter { get; }
+        bool HasPublicGetter { get; }
         string TypeFullName { get; }
         string Name { get; }
     }

@@ -5,31 +5,30 @@ namespace Avalonia.Ide.CompletionEngine.SrmMetadataProvider
 {
     internal class PropertyInformation : IPropertyInformation
     {
-        public PropertyInformation(AssemblyInformation assembly, TypeDefinition tdef, 
+        public PropertyInformation(AssemblyInformation assembly, TypeDefinition tdef,
             PropertyDefinitionHandle handle)
         {
             var def = assembly.Reader.GetPropertyDefinition(handle);
             Name = assembly.Reader.GetString(def.Name);
 
-            var accessors = def.GetAccessors();
-            MethodInformation accessor;
-            if (!accessors.Setter.IsNil)
-            {
-                accessor = new MethodInformation(assembly, accessors.Setter);
-                HasPublicSetter = accessor.IsPublic;
+            MethodInformation build(MethodDefinitionHandle mh)
+                => mh.IsNil ? default(MethodInformation) : new MethodInformation(assembly, mh);
 
-                TypeFullName = accessor.Parameters[0].TypeFullName;
-            }
-            else
-            {
-                accessor = new MethodInformation(assembly, accessors.Getter);
-                TypeFullName = accessor.ReturnTypeFullName;
-            }
-            IsStatic = accessor.IsStatic;
+            var accessors = def.GetAccessors();
+
+            var getter = build(accessors.Getter);
+            var setter = build(accessors.Setter);
+
+            HasPublicSetter = setter?.IsPublic ?? false;
+            HasPublicGetter = getter?.IsPublic ?? false;
+
+            TypeFullName = getter?.ReturnTypeFullName ?? setter?.Parameters[0].TypeFullName;
+            IsStatic = getter?.IsStatic ?? setter?.IsStatic ?? false;
         }
 
         public bool IsStatic { get; }
         public bool HasPublicSetter { get; }
+        public bool HasPublicGetter { get; }
         public string TypeFullName { get; }
         public string Name { get; }
     }
