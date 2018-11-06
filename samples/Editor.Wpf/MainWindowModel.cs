@@ -47,7 +47,15 @@ namespace Editor.Wpf
         {
             Metadata = metadata;
             Text = text ??
-                   "<UserControl xmlns='https://github.com/avaloniaui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'>\r\n    <Button></Button>\r\n</UserControl>"
+@"<UserControl xmlns='https://github.com/avaloniaui' 
+               xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'>
+<UserControl.Styles>
+    <Style Selector='Button'>
+        <Setter Property='Background' Value='Red' />
+    </Style>
+</UserControl.Styles>
+      <Button></Button>
+</UserControl>"
                        .Replace("'", "\"");
         }
 

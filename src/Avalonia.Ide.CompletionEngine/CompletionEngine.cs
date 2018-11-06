@@ -84,6 +84,10 @@ namespace Avalonia.Ide.CompletionEngine
                 propName = propName ?? "";
                 if (t == null)
                     return new string[0];
+
+                if (t.IsEnum)
+                    return t.EnumValues.Where(v => v.StartsWith(propName));
+
                 var e = t.Properties.Where(p => p.Name.StartsWith(propName, StringComparison.OrdinalIgnoreCase));
                 if (attachedOnly)
                     e = e.Where(p => p.IsAttached);
@@ -202,7 +206,7 @@ namespace Avalonia.Ide.CompletionEngine
                 if (state.AttributeValue.StartsWith("{"))
                 {
                     curStart = state.CurrentValueStart.Value +
-                               BuildCompletionsForMarkupExtension(completions,
+                               BuildCompletionsForMarkupExtension(prop, completions,
                                    text.Substring(state.CurrentValueStart.Value));
                 }
                 else
@@ -246,7 +250,7 @@ namespace Avalonia.Ide.CompletionEngine
             return enumCompletions;
         }
 
-        int BuildCompletionsForMarkupExtension(List<Completion> completions, string data)
+        int BuildCompletionsForMarkupExtension(MetadataProperty property, List<Completion> completions, string data)
         {
             int? forcedStart = null;
             var ext = MarkupExtensionParser.Parse(data);
@@ -285,10 +289,15 @@ namespace Avalonia.Ide.CompletionEngine
                     }
                     else
                     {
-                       
-                        var types = _helper.FilterTypeNames(attribName, 
+
+                        var types = _helper.FilterTypeNames(attribName,
                             staticGettersOnly: t.SupportCtorArgument == MetadataTypeCtorArgument.Object);
                         completions.AddRange(types.Select(x => new Completion(x, x, x)));
+
+                        if (property?.Type?.IsEnum == true)
+                        {
+                            completions.Add(new Completion(property.Type.Name, property.Type.Name + ".", property.Type.Name));
+                        }
                     }
                 }
             }

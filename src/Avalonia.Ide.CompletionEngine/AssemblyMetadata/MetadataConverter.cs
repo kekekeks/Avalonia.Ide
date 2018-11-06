@@ -38,13 +38,8 @@ namespace Avalonia.Ide.CompletionEngine
             var typeDefs = new Dictionary<MetadataType, ITypeInformation>();
             var metadata = new Metadata();
 
-            types.Add(typeof(bool).FullName, new MetadataType()
-            {
-                Name = typeof(bool).FullName,
-                IsEnum = true,
-                EnumValues = new[] { "True", "False" }
-            });
 
+            PreProcessTypes(types);
 
             foreach (var asm in provider.Assemblies)
             {
@@ -75,13 +70,14 @@ namespace Avalonia.Ide.CompletionEngine
                 if (ctors?.Any() == true)
                 {
                     bool supportType = ctors.Any(m => m.Parameters[0].TypeFullName == "System.Type");
-                    bool supportOther = ctors.Any(m => m.Parameters[0].TypeFullName != "System.Type");
+                    bool supportObject = ctors.Any(m => m.Parameters[0].TypeFullName == "System.Object" ||
+                                                        m.Parameters[0].TypeFullName == "System.String");
 
-                    if (supportType && supportOther)
+                    if (supportType && supportObject)
                         type.SupportCtorArgument = MetadataTypeCtorArgument.Any;
                     else if (supportType)
                         type.SupportCtorArgument = MetadataTypeCtorArgument.Type;
-                    else
+                    else if(supportObject)
                         type.SupportCtorArgument = MetadataTypeCtorArgument.Object;
                 }
 
@@ -123,6 +119,8 @@ namespace Avalonia.Ide.CompletionEngine
                 type.HasStaticGetProperties = type.Properties.Any(p => p.IsStatic && p.HasGetter);
             }
 
+            PostProcessTypes(types);
+
             return metadata;
         }
 
@@ -130,15 +128,40 @@ namespace Avalonia.Ide.CompletionEngine
         {
             foreach (
                 var attr in
-                asm.CustomAttributes.Where(a => a.TypeFullName == "Avalonia.Metadata.XmlnsDefinitionAttribute"))
+                asm.CustomAttributes.Where(a => a.TypeFullName == "Avalonia.Metadata.XmlnsDefinitionAttribute" ||
+                                                a.TypeFullName == "Portable.Xaml.Markup.XmlnsDefinitionAttribute"))
                 aliases[attr.ConstructorArguments[1].Value.ToString()] =
                     attr.ConstructorArguments[0].Value.ToString();
         }
 
         private static void ProcessWellKnowAliases(IAssemblyInformation asm, Dictionary<string, string> aliases)
         {
-            //some internal portable xaml support for aliases
-            aliases["Portable.Xaml.Markup"] = "http://schemas.microsoft.com/winfx/2006/xaml";
+            //some internal support for aliases
+            //look like we don't have xmlns for avalonia.layout TODO: add it in avalonia
+            aliases["Avalonia.Layout"] = "https://github.com/avaloniaui";
+        }
+
+        private static void PreProcessTypes(Dictionary<string, MetadataType> types)
+        {
+            types.Add(typeof(bool).FullName, new MetadataType()
+            {
+                Name = typeof(bool).FullName,
+                IsEnum = true,
+                EnumValues = new[] { "True", "False" }
+            });
+        }
+
+        private static void PostProcessTypes(Dictionary<string, MetadataType> types)
+        {
+            if(types.TryGetValue("Avalonia.Markup.Xaml.MarkupExtensions.BindingExtension", out MetadataType bindingType))
+            {
+                bindingType.SupportCtorArgument = MetadataTypeCtorArgument.None;
+            }
+
+            if (types.TryGetValue("Portable.Xaml.Markup.TypeExtension", out MetadataType typeExtension))
+            {
+                bindingType.SupportCtorArgument = MetadataTypeCtorArgument.Type;
+            }
         }
     }
 }
