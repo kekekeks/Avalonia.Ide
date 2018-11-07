@@ -92,6 +92,8 @@ namespace Avalonia.Ide.CompletionEngine
             }
         }
 
+        public int AttributesCount { get; private set; }
+
         ParserState _state;
         Stack<ParserState> _stack = new Stack<ParserState>();
 
@@ -104,6 +106,7 @@ namespace Avalonia.Ide.CompletionEngine
 
         private void Parse()
         {
+            AttributesCount = 0;
             for (int c = 0; c < _data.Length; c++)
             {
                 var st = _state.State;
@@ -113,6 +116,7 @@ namespace Avalonia.Ide.CompletionEngine
                 if (ch == ',')
                 {
                     _state.State = ParserStateType.InsideElement;
+                    AttributesCount++;
                 }
                 else if (ch == '{')
                 {
@@ -120,6 +124,7 @@ namespace Avalonia.Ide.CompletionEngine
                         _stack.Push(_state);
                     _state.Reset(ParserStateType.StartElement);
                     _state.ElementNameStart = c + 1;
+                    AttributesCount = 0;
                 }
                 else if (ch == '}')
                 {

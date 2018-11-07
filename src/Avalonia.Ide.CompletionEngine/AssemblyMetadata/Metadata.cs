@@ -22,6 +22,7 @@ namespace Avalonia.Ide.CompletionEngine
         public List<MetadataProperty> Properties { get; set; } = new List<MetadataProperty>();
         public bool HasAttachedProperties { get; set; }
         public bool HasStaticGetProperties { get; set; }
+        public bool HasSetProperties { get; set; }
         public bool IsAvaloniaObjectType { get; set; }
         public MetadataTypeCtorArgument SupportCtorArgument { get; set; }
         public bool IsCompositeValue { get; set; }

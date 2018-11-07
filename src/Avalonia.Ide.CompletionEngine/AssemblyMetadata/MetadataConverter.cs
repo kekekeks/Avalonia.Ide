@@ -109,6 +109,7 @@ namespace Avalonia.Ide.CompletionEngine
 
                 type.HasAttachedProperties = type.Properties.Any(p => p.IsAttached);
                 type.HasStaticGetProperties = type.Properties.Any(p => p.IsStatic && p.HasGetter);
+                type.HasSetProperties = type.Properties.Any(p => !p.IsStatic && p.HasSetter);
 
                 if (ctors?.Any() == true)
                 {
