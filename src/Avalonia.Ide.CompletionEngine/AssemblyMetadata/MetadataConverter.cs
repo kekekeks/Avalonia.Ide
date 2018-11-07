@@ -66,6 +66,7 @@ namespace Avalonia.Ide.CompletionEngine
                 var ctors = typeDef?.Methods
                     .Where(m => m.IsPublic && !m.IsStatic && m.Name == ".ctor" && m.Parameters.Count == 1);
 
+                int level = 0;
                 while (typeDef != null)
                 {
                     foreach (var prop in typeDef.Properties)
@@ -85,17 +86,21 @@ namespace Avalonia.Ide.CompletionEngine
                         type.Properties.Add(p);
                     }
 
-                    foreach (var methodDef in typeDef.Methods)
+                    //check for attached properties only on top level
+                    if (level == 0)
                     {
-                        if (methodDef.Name.StartsWith("Set") && methodDef.IsStatic && methodDef.IsPublic
-                            && methodDef.Parameters.Count == 2)
+                        foreach (var methodDef in typeDef.Methods)
                         {
-                            type.Properties.Add(new MetadataProperty()
+                            if (methodDef.Name.StartsWith("Set") && methodDef.IsStatic && methodDef.IsPublic
+                                && methodDef.Parameters.Count == 2)
                             {
-                                Name = methodDef.Name.Substring(3),
-                                IsAttached = true,
-                                Type = types.GetValueOrDefault(methodDef.Parameters[1].TypeFullName)
-                            });
+                                type.Properties.Add(new MetadataProperty()
+                                {
+                                    Name = methodDef.Name.Substring(3),
+                                    IsAttached = true,
+                                    Type = types.GetValueOrDefault(methodDef.Parameters[1].TypeFullName)
+                                });
+                            }
                         }
                     }
 
@@ -105,6 +110,7 @@ namespace Avalonia.Ide.CompletionEngine
                     }
 
                     typeDef = typeDef.GetBaseType();
+                    level++;
                 }
 
                 type.HasAttachedProperties = type.Properties.Any(p => p.IsAttached);

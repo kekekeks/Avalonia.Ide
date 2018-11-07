@@ -192,6 +192,10 @@ namespace Avalonia.Ide.CompletionEngine
                 {
                     completions.AddRange(_helper.FilterPropertyNames(state.TagName, state.AttributeName)
                         .Select(x => new Completion(x, x + "=\"\"", x, x.Length + 2)));
+
+                    var targetType = _helper.LookupType(state.TagName);
+                    
+                    if(targetType?.IsAvaloniaObjectType == true) 
                     completions.AddRange(
                         _helper.FilterTypeNames(state.AttributeName, true)
                             .Select(v => new Completion(v, v + ".", v)));
