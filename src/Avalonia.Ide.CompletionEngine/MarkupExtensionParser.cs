@@ -150,14 +150,21 @@ namespace Avalonia.Ide.CompletionEngine
                 }
                 else if (st == ParserStateType.StartAttribute)
                 {
-                    _state.AttributeNameEnd = c - 1;
                     if (ch == '=')
                     {
+                        _state.AttributeNameEnd = c - 1;
                         _state.State = ParserStateType.BeforeAttributeValue;
                         _state.AttributeValueStart = c + 1;
                     }
                     else if (char.IsWhiteSpace(ch))
+                    {
+                        _state.AttributeNameEnd = c - 1;
                         _state.State = ParserStateType.AfterAttribute;
+                    }
+                    else
+                    {
+                        _state.AttributeNameEnd = c;
+                    }
                 }
                 else if (st == ParserStateType.AfterAttribute)
                 {
