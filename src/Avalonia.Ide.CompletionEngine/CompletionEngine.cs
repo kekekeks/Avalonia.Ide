@@ -6,7 +6,7 @@ using System.Xml;
 
 namespace Avalonia.Ide.CompletionEngine
 {
-    public class CompletionEngine 
+    public class CompletionEngine
     {
         class MetadataHelper
         {
@@ -19,7 +19,7 @@ namespace Avalonia.Ide.CompletionEngine
             public void SetMetadata(Metadata metadata, string xml)
             {
                 var aliases = GetNamespaceAliases(xml);
-                
+
                 //Check if metadata and aliases can be reused
                 if (_metadata == metadata && Aliases != null && _types != null)
                 {
@@ -68,6 +68,10 @@ namespace Avalonia.Ide.CompletionEngine
                     e = e.Where(t => t.Value.IsMarkupExtension);
                 if (staticGettersOnly)
                     e = e.Where(t => t.Value.HasStaticGetProperties);
+
+                if (!markupExtensionsOnly && !staticGettersOnly && !withAttachedPropertiesOnly)
+                    e = e.Where(t => t.Value.HasSetProperties);
+
                 return e.Select(s => s.Key);
             }
 
@@ -94,6 +98,8 @@ namespace Avalonia.Ide.CompletionEngine
                     e = e.Where(p => p.IsAttached);
                 if (staticGettersOnly)
                     e = e.Where(p => p.IsStatic && p.HasGetter);
+                if (!attachedOnly && !staticGettersOnly)
+                    e = e.Where(p => !p.IsStatic && p.HasSetter);
 
                 return e.Select(p => p.Name);
             }
@@ -125,14 +131,14 @@ namespace Avalonia.Ide.CompletionEngine
                     rv[ns] = xmlRdr.Value;
                 }
 
-                
+
             }
-            catch 
+            catch
             {
                 //
             }
             if (!rv.ContainsKey(""))
-                    rv[""] = Utils.AvaloniaNamespace;
+                rv[""] = Utils.AvaloniaNamespace;
             return rv;
         }
 
@@ -178,7 +184,7 @@ namespace Avalonia.Ide.CompletionEngine
                 {
                     var dotPos = state.AttributeName.IndexOf('.');
                     curStart += dotPos + 1;
-                    var split = state.AttributeName.Split(new[] {'.'}, 2);
+                    var split = state.AttributeName.Split(new[] { '.' }, 2);
                     completions.AddRange(_helper.FilterPropertyNames(split[0], split[1], true)
                         .Select(x => new Completion(x, x + "=\"\"", x, x.Length + 2)));
                 }
@@ -186,6 +192,10 @@ namespace Avalonia.Ide.CompletionEngine
                 {
                     completions.AddRange(_helper.FilterPropertyNames(state.TagName, state.AttributeName)
                         .Select(x => new Completion(x, x + "=\"\"", x, x.Length + 2)));
+
+                    var targetType = _helper.LookupType(state.TagName);
+                    
+                    if(targetType?.IsAvaloniaObjectType == true) 
                     completions.AddRange(
                         _helper.FilterTypeNames(state.AttributeName, true)
                             .Select(v => new Completion(v, v + ".", v)));
@@ -285,7 +295,9 @@ namespace Avalonia.Ide.CompletionEngine
                 var attribName = ext.AttributeName ?? "";
                 var t = _helper.LookupType(transformedName);
 
-                if (t.IsMarkupExtension && t.SupportCtorArgument != MetadataTypeCtorArgument.None)
+                bool ctorArgument = ext.AttributesCount == 0;
+                //skip ctor hints when some property is already set
+                if (t.IsMarkupExtension && t.SupportCtorArgument != MetadataTypeCtorArgument.None && ctorArgument)
                 {
                     if (t.SupportCtorArgument == MetadataTypeCtorArgument.HintValues)
                     {
@@ -307,9 +319,9 @@ namespace Avalonia.Ide.CompletionEngine
                     }
                     else
                     {
-
                         var types = _helper.FilterTypeNames(attribName,
                             staticGettersOnly: t.SupportCtorArgument == MetadataTypeCtorArgument.Object);
+
                         completions.AddRange(types.Select(x => new Completion(x, x, x)));
 
                         if (property?.Type?.HasHintValues == true)
