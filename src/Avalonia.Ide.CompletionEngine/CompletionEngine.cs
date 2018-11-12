@@ -128,7 +128,14 @@ namespace Avalonia.Ide.CompletionEngine
                 var xmlRdr = XmlReader.Create(new StringReader(xml));
                 while (xmlRdr.NodeType != XmlNodeType.Element)
                 {
-                    xmlRdr.Read();
+                    try
+                    {
+                        xmlRdr.Read();
+                    }
+                    catch(Exception e)
+                    {
+                        if (xmlRdr.NodeType != XmlNodeType.Element) throw e;
+                    }
                 }
 
                 for (var c = 0; c < xmlRdr.AttributeCount; c++)
