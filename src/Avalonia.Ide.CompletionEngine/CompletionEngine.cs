@@ -15,13 +15,14 @@ namespace Avalonia.Ide.CompletionEngine
             public Dictionary<string, string> Aliases { get; private set; }
 
             Dictionary<string, MetadataType> _types;
+            private string _currentAssemblyName;
 
-            public void SetMetadata(Metadata metadata, string xml)
+            public void SetMetadata(Metadata metadata, string xml, string currentAssemblyName = null)
             {
                 var aliases = GetNamespaceAliases(xml);
 
                 //Check if metadata and aliases can be reused
-                if (_metadata == metadata && Aliases != null && _types != null)
+                if (_metadata == metadata && Aliases != null && _types != null && currentAssemblyName == _currentAssemblyName)
                 {
                     if (aliases.Count == Aliases.Count)
                     {
@@ -42,12 +43,21 @@ namespace Avalonia.Ide.CompletionEngine
                 Aliases = aliases;
                 _metadata = metadata;
                 _types = null;
+                _currentAssemblyName = currentAssemblyName;
+
                 var types = new Dictionary<string, MetadataType>();
                 foreach (var alias in Aliases)
                 {
                     Dictionary<string, MetadataType> ns;
-                    if (!metadata.Namespaces.TryGetValue(alias.Value, out ns))
+
+                    string aliasValue = alias.Value ?? "";
+
+                    if (!string.IsNullOrEmpty(_currentAssemblyName) && aliasValue.StartsWith("clr-namespace:") && !aliasValue.Contains(";assembly="))
+                        aliasValue = $"{aliasValue};assembly={_currentAssemblyName}";
+
+                    if (!metadata.Namespaces.TryGetValue(aliasValue, out ns))
                         continue;
+
                     var prefix = alias.Key.Length == 0 ? "" : (alias.Key + ":");
                     foreach (var type in ns.Values)
                         types[prefix + type.Name] = type;
@@ -142,9 +152,9 @@ namespace Avalonia.Ide.CompletionEngine
             return rv;
         }
 
-        public CompletionSet GetCompletions(Metadata metadata, string text, int pos)
+        public CompletionSet GetCompletions(Metadata metadata, string text, int pos, string currentAssemblyName = null)
         {
-            _helper.SetMetadata(metadata, text);
+            _helper.SetMetadata(metadata, text, currentAssemblyName);
 
             if (_helper.Metadata == null)
                 return null;

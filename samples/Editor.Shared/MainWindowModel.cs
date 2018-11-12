@@ -13,6 +13,7 @@ namespace Editor
 {
     public class MainWindowModel : INotifyPropertyChanged
     {
+        private string _currentAssemblyName;
         private string _text;
         private CompletionSet _completionSet;
         CompletionEngine _engine = new CompletionEngine();
@@ -40,11 +41,12 @@ namespace Editor
 
         public void UpdateCompletions(int position)
         {
-            CompletionSet = _engine.GetCompletions(Metadata, Text, position);
+            CompletionSet = _engine.GetCompletions(Metadata, Text, position, _currentAssemblyName);
         }
 
-        public MainWindowModel(Metadata metadata, string text)
+        public MainWindowModel(Metadata metadata, string text, string currentAssemblyName)
         {
+            _currentAssemblyName = currentAssemblyName;
             Metadata = metadata;
             Text = text ??
                    "<UserControl xmlns='https://github.com/avaloniaui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'>\r\n    <Button></Button>\r\n</UserControl>"
