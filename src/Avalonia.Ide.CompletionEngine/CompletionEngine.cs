@@ -308,7 +308,7 @@ namespace Avalonia.Ide.CompletionEngine
 
                 bool ctorArgument = ext.AttributesCount == 0;
                 //skip ctor hints when some property is already set
-                if (t.IsMarkupExtension && t.SupportCtorArgument != MetadataTypeCtorArgument.None && ctorArgument)
+                if (t != null && t.IsMarkupExtension && t.SupportCtorArgument != MetadataTypeCtorArgument.None && ctorArgument)
                 {
                     if (t.SupportCtorArgument == MetadataTypeCtorArgument.HintValues)
                     {
