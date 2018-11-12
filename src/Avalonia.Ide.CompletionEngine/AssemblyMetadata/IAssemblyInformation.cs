@@ -7,6 +7,7 @@ namespace Avalonia.Ide.CompletionEngine.AssemblyMetadata
         string Name { get; }
         IEnumerable<ITypeInformation> Types { get; }
         IEnumerable<ICustomAttributeInformation> CustomAttributes { get; }
+        IEnumerable<string> ManifestResourceNames { get; }
     }
 
     public interface ICustomAttributeInformation

@@ -22,6 +22,9 @@ namespace Avalonia.Ide.CompletionEngine.DnlibMetadataProvider
 
         public IEnumerable<ICustomAttributeInformation> CustomAttributes
             => _asm.CustomAttributes.Select(a => new CustomAttributeWrapper(a));
+
+        public IEnumerable<string> ManifestResourceNames 
+            => _asm.ManifestModule.Resources.Select(r => r.Name.ToString());
     }
 
     class TypeWrapper : ITypeInformation

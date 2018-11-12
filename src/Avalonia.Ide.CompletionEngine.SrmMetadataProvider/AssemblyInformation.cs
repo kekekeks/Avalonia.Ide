@@ -65,6 +65,14 @@ namespace Avalonia.Ide.CompletionEngine.SrmMetadataProvider
             }
         }
 
+        IEnumerable<string> IAssemblyInformation.ManifestResourceNames
+        {
+            get
+            {
+                return Reader.ManifestResources.Where(r => !r.IsNil)
+                            .Select(r => Reader.GetString(Reader.GetManifestResource(r).Name));
+            }
+        }
 
         public IEnumerable<ICustomAttributeInformation> CustomAttributes
             => Reader.CustomAttributes.Select(a => new CustomAttributeInformation(this, a));

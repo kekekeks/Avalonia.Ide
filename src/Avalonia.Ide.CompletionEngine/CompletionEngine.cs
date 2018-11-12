@@ -101,7 +101,7 @@ namespace Avalonia.Ide.CompletionEngine
                     return new string[0];
 
                 if (hintValues && t.HasHintValues)
-                    return t.HintValues.Where(v => v.StartsWith(propName));
+                    return t.HintValues.Where(v => v.StartsWith(propName, StringComparison.OrdinalIgnoreCase));
 
                 var e = t.Properties.Where(p => p.Name.StartsWith(propName, StringComparison.OrdinalIgnoreCase));
                 if (attachedOnly)
@@ -252,12 +252,13 @@ namespace Avalonia.Ide.CompletionEngine
                                     .Select(v => new Completion(v.Substring("clr-namespace:".Length), v, v)));
                         else
                         {
-                            completions.Add(new Completion("clr-namespace:"));
+                            if ("clr-namespace:".StartsWith(state.AttributeValue))
+                                completions.Add(new Completion("clr-namespace:"));
                             completions.AddRange(
                                 metadata.Namespaces.Keys.Where(
                                     v =>
                                         v.StartsWith(state.AttributeValue) &&
-                                        !"clr-namespace".StartsWith(state.AttributeValue))
+                                        !v.StartsWith("clr-namespace"))
                                     .Select(v => new Completion(v)));
                         }
                     }

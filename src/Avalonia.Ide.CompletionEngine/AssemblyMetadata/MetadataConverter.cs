@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Ide.CompletionEngine.AssemblyMetadata;
 
@@ -37,6 +38,11 @@ namespace Avalonia.Ide.CompletionEngine
             var types = new Dictionary<string, MetadataType>();
             var typeDefs = new Dictionary<MetadataType, ITypeInformation>();
             var metadata = new Metadata();
+            var resourceUrls = new List<string>();
+
+            var ignoredResExt = new[] { ".resources", ".rd.xml" };
+
+            bool skipRes(string res) => ignoredResExt.Any(r => res.EndsWith(r, StringComparison.OrdinalIgnoreCase));
 
             PreProcessTypes(types, metadata);
 
@@ -56,6 +62,8 @@ namespace Avalonia.Ide.CompletionEngine
                     if (aliases.TryGetValue(type.Namespace, out alias))
                         metadata.AddType(alias, mt);
                 }
+
+                resourceUrls.AddRange(asm.ManifestResourceNames.Where(r => !skipRes(r)).Select(r => $"resm:{r}?assembly={asm.Name}"));
             }
 
             foreach (var type in types.Values)
@@ -139,7 +147,7 @@ namespace Avalonia.Ide.CompletionEngine
                 }
             }
 
-            PostProcessTypes(types, metadata);
+            PostProcessTypes(types, metadata, resourceUrls);
 
             return metadata;
         }
@@ -163,22 +171,48 @@ namespace Avalonia.Ide.CompletionEngine
 
         private static void PreProcessTypes(Dictionary<string, MetadataType> types, Metadata metadata)
         {
-            types.Add(typeof(bool).FullName, new MetadataType()
+            var toAdd = new[]
             {
-                Name = typeof(bool).FullName,
-                HasHintValues = true,
-                HintValues = new[] { "True", "False" }
-            });
+                new MetadataType()
+                {
+                    Name = typeof(bool).FullName,
+                    HasHintValues = true,
+                    HintValues = new[] { "True", "False" }
+                },
+                new MetadataType(){ Name = typeof(System.Uri).FullName },
+                new MetadataType(){ Name = "Avalonia.Media.IBrush" },
+                new MetadataType(){ Name = "Avalonia.Media.Imaging.IBitmap" }
+            };
 
-            types.Add("Avalonia.Media.IBrush", new MetadataType()
-            {
-                Name = "Avalonia.Media.IBrush",
-                HasHintValues = true
-            });
+            foreach (var t in toAdd)
+                types.Add(t.Name, t);
         }
 
-        private static void PostProcessTypes(Dictionary<string, MetadataType> types, Metadata metadata)
+        private static void PostProcessTypes(Dictionary<string, MetadataType> types, Metadata metadata, IEnumerable<string> resourceUrls)
         {
+            bool rhasext(string resource, string ext) => resource.Contains(ext + "?assembly=");
+
+            var resmType = new MetadataType()
+            {
+                Name = "resm:",
+                IsStatic = true,
+                HasHintValues = true,
+                HintValues = resourceUrls.ToArray()
+            };
+
+            types.Add(resmType.Name, resmType);
+            metadata.AddType(Utils.AvaloniaNamespace, resmType);
+
+            var xamlResmType = new MetadataType()
+            {
+                Name = "resm:*.xaml",
+                HasHintValues = true,
+                HintValues = resourceUrls.Where(r => rhasext(r, ".xaml") || rhasext(r, ".paml")).ToArray()
+            };
+
+            types.Add(xamlResmType.Name, xamlResmType);
+            metadata.AddType(Utils.AvaloniaNamespace, xamlResmType);
+
             MetadataType avProperty;
 
             if (types.TryGetValue("Avalonia.AvaloniaProperty", out avProperty))
@@ -256,6 +290,7 @@ namespace Avalonia.Ide.CompletionEngine
             if (types.TryGetValue("Avalonia.Media.IBrush", out MetadataType brushType) &&
                 types.TryGetValue("Avalonia.Media.Brushes", out MetadataType brushes))
             {
+                brushType.HasHintValues = true;
                 brushType.HintValues = brushes.Properties.Where(p => p.IsStatic && p.HasGetter).Select(p => p.Name).ToArray();
             }
 
@@ -280,6 +315,44 @@ namespace Avalonia.Ide.CompletionEngine
                 hints.AddRange(types.Where(t => t.Value.IsAvaloniaObjectType).Select(t => t.Value.Name.Replace(":", "|")));
 
                 styleSelector.HintValues = hints.ToArray();
+            }
+
+            string[] bitmaptypes = new[] { ".jpg", ".bmp", ".png", ".ico" };
+
+            bool isbitmaptype(string resource) => bitmaptypes.Any(ext => rhasext(resource, ext));
+
+            if (types.TryGetValue("Avalonia.Media.Imaging.IBitmap", out MetadataType ibitmapType))
+            {
+                ibitmapType.HasHintValues = true;
+                ibitmapType.HintValues = resourceUrls.Where(r => isbitmaptype(r)).ToArray();
+            }
+
+            if (types.TryGetValue("Avalonia.Controls.WindowIcon", out MetadataType winIcon))
+            {
+                winIcon.HasHintValues = true;
+                winIcon.HintValues = resourceUrls.Where(r => rhasext(r, ".ico")).ToArray();
+            }
+
+            if (types.TryGetValue("Avalonia.Markup.Xaml.Styling.StyleInclude", out MetadataType styleIncludeType))
+            {
+                var source = styleIncludeType.Properties.FirstOrDefault(p => p.Name == "Source");
+
+                if (source != null)
+                    source.Type = xamlResmType;
+            }
+
+            if (types.TryGetValue("Avalonia.Markup.Xaml.Styling.StyleIncludeExtension", out MetadataType styleIncludeExtType))
+            {
+                var source = styleIncludeExtType.Properties.FirstOrDefault(p => p.Name == "Source");
+
+                if (source != null)
+                    source.Type = xamlResmType;
+            }
+
+            if (types.TryGetValue(typeof(Uri).FullName, out MetadataType uriType))
+            {
+                uriType.HasHintValues = true;
+                uriType.HintValues = resourceUrls.ToArray();
             }
         }
     }

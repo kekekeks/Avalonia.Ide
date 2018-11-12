@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using Avalonia;
@@ -46,6 +47,6 @@ class Program
         if (path == "--self")
             path = typeof(Program).GetTypeInfo().Assembly.GetModules()[0].FullyQualifiedName;
         return new MainWindowModel(new MetadataReader(new SrmMetadataProvider()).GetForTargetAssembly(path),
-            null);
+            null, Path.GetFileNameWithoutExtension(path));
     }
 }
