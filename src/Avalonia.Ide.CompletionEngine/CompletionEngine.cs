@@ -126,29 +126,31 @@ namespace Avalonia.Ide.CompletionEngine
             try
             {
                 var xmlRdr = XmlReader.Create(new StringReader(xml));
-                while (xmlRdr.NodeType != XmlNodeType.Element)
+                bool result = true;
+                while (result && xmlRdr.NodeType != XmlNodeType.Element)
                 {
                     try
                     {
-                        xmlRdr.Read();
+                        result = xmlRdr.Read();
                     }
-                    catch(Exception e)
+                    catch
                     {
-                        if (xmlRdr.NodeType != XmlNodeType.Element) throw e;
+                        if (xmlRdr.NodeType != XmlNodeType.Element) result = false;
                     }
                 }
 
-                for (var c = 0; c < xmlRdr.AttributeCount; c++)
+                if (result)
                 {
-                    xmlRdr.MoveToAttribute(c);
-                    var ns = xmlRdr.Name;
-                    if (ns != "xmlns" && !ns.StartsWith("xmlns:"))
-                        continue;
-                    ns = ns == "xmlns" ? "" : ns.Substring(6);
-                    rv[ns] = xmlRdr.Value;
+                    for (var c = 0; c < xmlRdr.AttributeCount; c++)
+                    {
+                        xmlRdr.MoveToAttribute(c);
+                        var ns = xmlRdr.Name;
+                        if (ns != "xmlns" && !ns.StartsWith("xmlns:"))
+                            continue;
+                        ns = ns == "xmlns" ? "" : ns.Substring(6);
+                        rv[ns] = xmlRdr.Value;
+                    }
                 }
-
-
             }
             catch
             {
