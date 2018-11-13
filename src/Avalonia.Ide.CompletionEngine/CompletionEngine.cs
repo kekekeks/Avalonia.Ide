@@ -15,13 +15,14 @@ namespace Avalonia.Ide.CompletionEngine
             public Dictionary<string, string> Aliases { get; private set; }
 
             Dictionary<string, MetadataType> _types;
+            private string _currentAssemblyName;
 
-            public void SetMetadata(Metadata metadata, string xml)
+            public void SetMetadata(Metadata metadata, string xml, string currentAssemblyName = null)
             {
                 var aliases = GetNamespaceAliases(xml);
 
                 //Check if metadata and aliases can be reused
-                if (_metadata == metadata && Aliases != null && _types != null)
+                if (_metadata == metadata && Aliases != null && _types != null && currentAssemblyName == _currentAssemblyName)
                 {
                     if (aliases.Count == Aliases.Count)
                     {
@@ -42,12 +43,21 @@ namespace Avalonia.Ide.CompletionEngine
                 Aliases = aliases;
                 _metadata = metadata;
                 _types = null;
+                _currentAssemblyName = currentAssemblyName;
+
                 var types = new Dictionary<string, MetadataType>();
                 foreach (var alias in Aliases)
                 {
                     Dictionary<string, MetadataType> ns;
-                    if (!metadata.Namespaces.TryGetValue(alias.Value, out ns))
+
+                    string aliasValue = alias.Value ?? "";
+
+                    if (!string.IsNullOrEmpty(_currentAssemblyName) && aliasValue.StartsWith("clr-namespace:") && !aliasValue.Contains(";assembly="))
+                        aliasValue = $"{aliasValue};assembly={_currentAssemblyName}";
+
+                    if (!metadata.Namespaces.TryGetValue(aliasValue, out ns))
                         continue;
+
                     var prefix = alias.Key.Length == 0 ? "" : (alias.Key + ":");
                     foreach (var type in ns.Values)
                         types[prefix + type.Name] = type;
@@ -91,7 +101,7 @@ namespace Avalonia.Ide.CompletionEngine
                     return new string[0];
 
                 if (hintValues && t.HasHintValues)
-                    return t.HintValues.Where(v => v.StartsWith(propName));
+                    return t.HintValues.Where(v => v.StartsWith(propName, StringComparison.OrdinalIgnoreCase));
 
                 var e = t.Properties.Where(p => p.Name.StartsWith(propName, StringComparison.OrdinalIgnoreCase));
                 if (attachedOnly)
@@ -116,22 +126,31 @@ namespace Avalonia.Ide.CompletionEngine
             try
             {
                 var xmlRdr = XmlReader.Create(new StringReader(xml));
-                while (xmlRdr.NodeType != XmlNodeType.Element)
+                bool result = true;
+                while (result && xmlRdr.NodeType != XmlNodeType.Element)
                 {
-                    xmlRdr.Read();
+                    try
+                    {
+                        result = xmlRdr.Read();
+                    }
+                    catch
+                    {
+                        if (xmlRdr.NodeType != XmlNodeType.Element) result = false;
+                    }
                 }
 
-                for (var c = 0; c < xmlRdr.AttributeCount; c++)
+                if (result)
                 {
-                    xmlRdr.MoveToAttribute(c);
-                    var ns = xmlRdr.Name;
-                    if (ns != "xmlns" && !ns.StartsWith("xmlns:"))
-                        continue;
-                    ns = ns == "xmlns" ? "" : ns.Substring(6);
-                    rv[ns] = xmlRdr.Value;
+                    for (var c = 0; c < xmlRdr.AttributeCount; c++)
+                    {
+                        xmlRdr.MoveToAttribute(c);
+                        var ns = xmlRdr.Name;
+                        if (ns != "xmlns" && !ns.StartsWith("xmlns:"))
+                            continue;
+                        ns = ns == "xmlns" ? "" : ns.Substring(6);
+                        rv[ns] = xmlRdr.Value;
+                    }
                 }
-
-
             }
             catch
             {
@@ -142,9 +161,9 @@ namespace Avalonia.Ide.CompletionEngine
             return rv;
         }
 
-        public CompletionSet GetCompletions(Metadata metadata, string text, int pos)
+        public CompletionSet GetCompletions(Metadata metadata, string text, int pos, string currentAssemblyName = null)
         {
-            _helper.SetMetadata(metadata, text);
+            _helper.SetMetadata(metadata, text, currentAssemblyName);
 
             if (_helper.Metadata == null)
                 return null;
@@ -242,12 +261,13 @@ namespace Avalonia.Ide.CompletionEngine
                                     .Select(v => new Completion(v.Substring("clr-namespace:".Length), v, v)));
                         else
                         {
-                            completions.Add(new Completion("clr-namespace:"));
+                            if ("clr-namespace:".StartsWith(state.AttributeValue))
+                                completions.Add(new Completion("clr-namespace:"));
                             completions.AddRange(
                                 metadata.Namespaces.Keys.Where(
                                     v =>
                                         v.StartsWith(state.AttributeValue) &&
-                                        !"clr-namespace".StartsWith(state.AttributeValue))
+                                        !v.StartsWith("clr-namespace"))
                                     .Select(v => new Completion(v)));
                         }
                     }
@@ -297,7 +317,7 @@ namespace Avalonia.Ide.CompletionEngine
 
                 bool ctorArgument = ext.AttributesCount == 0;
                 //skip ctor hints when some property is already set
-                if (t.IsMarkupExtension && t.SupportCtorArgument != MetadataTypeCtorArgument.None && ctorArgument)
+                if (t != null && t.IsMarkupExtension && t.SupportCtorArgument != MetadataTypeCtorArgument.None && ctorArgument)
                 {
                     if (t.SupportCtorArgument == MetadataTypeCtorArgument.HintValues)
                     {

@@ -16,6 +16,8 @@ namespace Editor.Wpf
         private string _text;
         private CompletionSet _completionSet;
         CompletionEngine _engine = new CompletionEngine();
+        private string _currentAssemblyName;
+
         public Metadata Metadata { get; }
 
         public string Text
@@ -40,11 +42,12 @@ namespace Editor.Wpf
 
         public void UpdateCompletions(int position)
         {
-            CompletionSet = _engine.GetCompletions(Metadata, Text, position);
+            CompletionSet = _engine.GetCompletions(Metadata, Text, position, _currentAssemblyName);
         }
 
-        public MainWindowModel(Metadata metadata, string text)
+        public MainWindowModel(Metadata metadata, string text, string currentAssemblyName)
         {
+            _currentAssemblyName = currentAssemblyName;
             Metadata = metadata;
             Text = text ??
 @"<UserControl xmlns='https://github.com/avaloniaui' 
