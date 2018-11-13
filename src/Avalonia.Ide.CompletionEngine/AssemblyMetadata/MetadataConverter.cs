@@ -48,7 +48,7 @@ namespace Avalonia.Ide.CompletionEngine
 
             foreach (var asm in provider.Assemblies)
             {
-                var aliases = new Dictionary<string, string>();
+                var aliases = new Dictionary<string, string[]>();
 
                 ProcessWellKnowAliases(asm, aliases);
                 ProcessCustomAttributes(asm, aliases);
@@ -58,9 +58,9 @@ namespace Avalonia.Ide.CompletionEngine
                     var mt = types[type.FullName] = ConvertTypeInfomation(type);
                     typeDefs[mt] = type;
                     metadata.AddType("clr-namespace:" + type.Namespace + ";assembly=" + asm.Name, mt);
-                    string alias = null;
-                    if (aliases.TryGetValue(type.Namespace, out alias))
-                        metadata.AddType(alias, mt);
+                    string[] nsAliases = null;
+                    if (aliases.TryGetValue(type.Namespace, out nsAliases))
+                        foreach (var alias in nsAliases) metadata.AddType(alias, mt);
                 }
 
                 resourceUrls.AddRange(asm.ManifestResourceNames.Where(r => !skipRes(r)).Select(r => $"resm:{r}?assembly={asm.Name}"));
@@ -152,21 +152,29 @@ namespace Avalonia.Ide.CompletionEngine
             return metadata;
         }
 
-        private static void ProcessCustomAttributes(IAssemblyInformation asm, Dictionary<string, string> aliases)
+        private static void ProcessCustomAttributes(IAssemblyInformation asm, Dictionary<string, string[]> aliases)
         {
             foreach (
                 var attr in
                 asm.CustomAttributes.Where(a => a.TypeFullName == "Avalonia.Metadata.XmlnsDefinitionAttribute" ||
                                                 a.TypeFullName == "Portable.Xaml.Markup.XmlnsDefinitionAttribute"))
-                aliases[attr.ConstructorArguments[1].Value.ToString()] =
-                    attr.ConstructorArguments[0].Value.ToString();
+            {
+                var ns = attr.ConstructorArguments[1].Value.ToString();
+                var current = new[] { attr.ConstructorArguments[0].Value.ToString() };
+                string[] allns = null;
+
+                if (aliases.TryGetValue(ns, out allns))
+                    allns = allns.Union(current).Distinct().ToArray();
+
+                aliases[ns] = allns ?? current;
+            }
         }
 
-        private static void ProcessWellKnowAliases(IAssemblyInformation asm, Dictionary<string, string> aliases)
+        private static void ProcessWellKnowAliases(IAssemblyInformation asm, Dictionary<string, string[]> aliases)
         {
-            //some internal support for aliases
             //look like we don't have xmlns for avalonia.layout TODO: add it in avalonia
-            aliases["Avalonia.Layout"] = "https://github.com/avaloniaui";
+            //may be don 't remove it for avalonia 0.7 or below for support completion for layout enums etc.
+            aliases["Avalonia.Layout"] = new[] { "https://github.com/avaloniaui" };
         }
 
         private static void PreProcessTypes(Dictionary<string, MetadataType> types, Metadata metadata)
