@@ -8,7 +8,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Avalonia.Ide.CompletionEngine.AssemblyMetadata
 {
-    static class DepsJsonAssemblyListLoader
+    public static class DepsJsonAssemblyListLoader
     {
         class Library
         {
@@ -50,7 +50,17 @@ namespace Avalonia.Ide.CompletionEngine.AssemblyMetadata
 #endif
                     ? "USERPROFILE"
                     : "HOME");
-            return new[] {Path.Combine(home, ".nuget/packages")};
+
+            var redirectedPath = Environment.GetEnvironmentVariable("NUGET_PACKAGES");
+
+            if (redirectedPath != null)
+            {
+                return new[] { Path.Combine(home, ".nuget/packages"), redirectedPath };
+            }
+            else
+            {
+                return new[] { Path.Combine(home, ".nuget/packages") };
+            }
         }
 
         public static IEnumerable<string> ParseFile(string path)

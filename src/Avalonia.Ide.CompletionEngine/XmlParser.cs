@@ -1,4 +1,6 @@
-﻿namespace Avalonia.Ide.CompletionEngine
+﻿using System.Collections.Generic;
+
+namespace Avalonia.Ide.CompletionEngine
 {
     public class XmlParser
     {
@@ -24,6 +26,7 @@
         private int? _elementNameEnd;
         private int? _attributeNameEnd;
         private int _attributeValueStart;
+        private Stack<int> _containingTagStart;
 
         public string TagName => State >= ParserState.StartElement
             ? _data.Substring(_elementNameStart, (_elementNameEnd ?? (_data.Length - 1)) - _elementNameStart + 1)
@@ -45,9 +48,16 @@
                         ? _attributeValueStart
                         : (int?) null;
 
+        public int? ElementNameEnd => State >= ParserState.StartElement ? _elementNameEnd : null;
+
+        public int ContainingTagStart => _containingTagStart.Count > 0 ? _containingTagStart.Peek() : 0;
+
+        public int NestingLevel => _containingTagStart.Count;
+
         XmlParser(string data)
         {
             _data = data;
+            _containingTagStart = new Stack<int>();
         }
 
         private const string CommentStart = "!--";
@@ -80,6 +90,8 @@
                     State = ParserState.StartElement;
                     _elementNameStart = i + 1;
                     _elementNameEnd = null;
+
+                    _containingTagStart.Push(i);
                 }
                 else if (State == ParserState.StartElement && CheckPrev(i, CommentStart))
                 {
@@ -102,6 +114,22 @@
                     State = ParserState.InsideElement;
                     _attributeNameStart = i;
                     _elementNameEnd = i - 1;
+                }
+                else if ((State == ParserState.InsideElement
+                   || State == ParserState.StartElement
+                   || State == ParserState.AfterAttributeValue)
+                       && c == '/' && CheckPrev(i - 1, "<"))
+                {
+                    _containingTagStart.Pop();
+                    _containingTagStart.Pop();
+                }
+                else if ((State == ParserState.InsideElement
+                    || State == ParserState.StartElement
+                    || State == ParserState.AfterAttributeValue)
+                        && c == '>' && CheckPrev(i - 1, "/"))
+                {
+                    State = ParserState.None;
+                    _containingTagStart.Pop();
                 }
                 else if ((State == ParserState.InsideElement 
                     || State == ParserState.StartElement 
@@ -146,7 +174,7 @@
 
         public override string ToString()
         {
-            return $"State: {State}, TagName: {TagName}, AttributeName: {AttributeName}, Attribute: {AttributeValue}";
+            return $"State: {State}, TagName: {TagName}, AttributeName: {AttributeName}, Attribute: {AttributeValue}, ContainingTagStart: {ContainingTagStart}";
         }
     }
 }

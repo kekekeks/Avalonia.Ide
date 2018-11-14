@@ -23,10 +23,13 @@ namespace Avalonia.Ide.CompletionEngine.SrmMetadataProvider
 
         public void Add(LoadedAssembly asm)
         {
-            _rawAsms.Add(asm.AssemblyName, asm);
-            var nfo = new AssemblyInformation(asm, this);
-            _assemblies[nfo.Name] = nfo;
-            _readersToAsms[asm.Reader] = nfo;
+            if (!_rawAsms.ContainsKey(asm.AssemblyName))
+            {
+                _rawAsms.Add(asm.AssemblyName, asm);
+                var nfo = new AssemblyInformation(asm, this);
+                _assemblies[nfo.Name] = nfo;
+                _readersToAsms[asm.Reader] = nfo;
+            }
         }
 
         public IEnumerable<AssemblyInformation> Assemblies => _assemblies.Values;

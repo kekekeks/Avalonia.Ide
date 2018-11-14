@@ -1,0 +1,586 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ContentModelStore">
+    <e p="$USER_HOME$/.Rider2017.3/system/resharper-host/local/Transient/ReSharperHost/v11/SolutionCaches/_Avalonia.IDE.-1080728186.00" t="ExcludeRecursive" />
+    <e p="$USER_HOME$/.nuget/packages/avalonia.skia.linux.natives/1.57.1.3/runtimes/linux-x64/native/libSkiaSharp.so" t="Include" />
+    <e p="$USER_HOME$/.nuget/packages/skiasharp/1.57.1/build/net45/SkiaSharp.dll.config" t="Include" />
+    <e p="$USER_HOME$/.nuget/packages/skiasharp/1.57.1/runtimes/osx/native/libSkiaSharp.dylib" t="Include" />
+    <e p="$PROJECT_DIR$" t="IncludeFlat">
+      <e p="Avalonia.IDE.sln" t="IncludeFlat" />
+      <e p="packages" t="ExcludeRecursive" />
+      <e p="samples" t="Include">
+        <e p="Editor.Avalonia" t="IncludeRecursive">
+          <e p="App.xaml" t="Include" />
+          <e p="App.xaml.cs" t="Include" />
+          <e p="Editor.Avalonia.csproj" t="IncludeRecursive" />
+          <e p="MainWindow.paml" t="Include" />
+          <e p="MainWindow.paml.cs" t="Include" />
+          <e p="Program.cs" t="Include" />
+          <e p="bin" t="ExcludeRecursive" />
+          <e p="obj" t="ExcludeRecursive">
+            <e p="Debug" t="Include">
+              <e p="net461" t="Include">
+                <e p="Editor.Avalonia.AssemblyInfo.cs" t="Include" />
+              </e>
+              <e p="netcoreapp1.1" t="Include">
+                <e p="Editor.Avalonia.AssemblyInfo.cs" t="Include" />
+              </e>
+            </e>
+          </e>
+        </e>
+        <e p="Editor.Shared" t="IncludeRecursive">
+          <e p="Editor.Shared.projitems" t="Include" />
+          <e p="Editor.Shared.shproj" t="IncludeRecursive" />
+          <e p="MainWindowModel.cs" t="Include" />
+        </e>
+        <e p="Editor.Wpf/Editor.Wpf.csproj" t="IncludeRecursive" />
+      </e>
+      <e p="src" t="Include">
+        <e p="Avalonia.Ide.CompletionEngine" t="IncludeRecursive">
+          <e p="AssemblyMetadata" t="Include">
+            <e p="DepsJsonAssemblyListLoader.cs" t="Include" />
+            <e p="IAssemblyInformation.cs" t="Include" />
+            <e p="IMetadataProvider.cs" t="Include" />
+            <e p="Metadata.cs" t="Include" />
+            <e p="MetadataConverter.cs" t="Include" />
+            <e p="MetadataReader.cs" t="Include" />
+          </e>
+          <e p="Avalonia.Ide.CompletionEngine.csproj" t="IncludeRecursive" />
+          <e p="Completion.cs" t="Include" />
+          <e p="CompletionEngine.cs" t="Include" />
+          <e p="CompletionSet.cs" t="Include" />
+          <e p="MarkupExtensionParser.cs" t="Include" />
+          <e p="Utils.cs" t="Include" />
+          <e p="XmlParser.cs" t="Include" />
+          <e p="bin" t="ExcludeRecursive" />
+          <e p="obj" t="ExcludeRecursive">
+            <e p="Debug" t="Include">
+              <e p="netstandard1.4" t="Include">
+                <e p="Avalonia.Ide.CompletionEngine.AssemblyInfo.cs" t="Include" />
+              </e>
+            </e>
+          </e>
+        </e>
+        <e p="Avalonia.Ide.CompletionEngine.DnlibMetadataProvider/Avalonia.Ide.CompletionEngine.DnlibMetadataProvider.csproj" t="IncludeRecursive" />
+        <e p="Avalonia.Ide.CompletionEngine.SrmMetadataProvider" t="IncludeRecursive">
+          <e p="AssemblyInformation.cs" t="Include" />
+          <e p="Avalonia.Ide.CompletionEngine.SrmMetadataProvider.csproj" t="IncludeRecursive" />
+          <e p="CustomAttributeInformation.cs" t="Include" />
+          <e p="LoadedAssembly.cs" t="Include" />
+          <e p="MetadataBlockHolder.cs" t="Include" />
+          <e p="MethodInformation.cs" t="Include" />
+          <e p="PropertyInformation.cs" t="Include" />
+          <e p="Resolver.cs" t="Include" />
+          <e p="SrmMetadataProvider.cs" t="Include" />
+          <e p="TypeInformation.cs" t="Include" />
+          <e p="TypeProvider.cs" t="Include" />
+          <e p="bin" t="ExcludeRecursive" />
+          <e p="obj" t="ExcludeRecursive">
+            <e p="Debug" t="Include">
+              <e p="netstandard1.4" t="Include">
+                <e p="Avalonia.Ide.CompletionEngine.SrmMetadataProvider.AssemblyInfo.cs" t="Include" />
+              </e>
+            </e>
+          </e>
+        </e>
+        <e p="Avalonia.Ide.LanguageServer" t="IncludeRecursive">
+          <e p="Avalonia.Ide.LanguageServer.csproj" t="IncludeRecursive" />
+          <e p="AvaloniaServerInfo.cs" t="Include" />
+          <e p="ConsoleLogStream.cs" t="Include" />
+          <e p="Editor" t="Include">
+            <e p="EditorSession.cs" t="Include" />
+            <e p="EditorSessionManager.cs" t="Include" />
+            <e p="PreviewerSession.cs" t="Include" />
+            <e p="Ref.cs" t="Include" />
+          </e>
+          <e p="Globals.cs" t="Include" />
+          <e p="Helpers.cs" t="Include" />
+          <e p="Log.cs" t="Include" />
+          <e p="MsBuildHost.cs" t="Include" />
+          <e p="Program.cs" t="Include" />
+          <e p="ProjectModel" t="Include">
+            <e p="SolutionLoader.cs" t="Include" />
+            <e p="Workspace.cs" t="Include" />
+          </e>
+          <e p="Views" t="Include" />
+          <e p="Web" t="Include">
+            <e p="PreviewerMiddleware.cs" t="Include" />
+            <e p="PreviewerWebSocketSession.cs" t="Include" />
+            <e p="Startup.cs" t="Include" />
+          </e>
+          <e p="XamlDocumentHandler.cs" t="Include" />
+          <e p="bin" t="ExcludeRecursive" />
+          <e p="obj" t="ExcludeRecursive">
+            <e p="Debug" t="Include">
+              <e p="netcoreapp2.0" t="Include">
+                <e p="Avalonia.Ide.LanguageServer.AssemblyInfo.cs" t="Include" />
+              </e>
+            </e>
+          </e>
+          <e p="wwwroot" t="Include">
+            <e p="previewer.html" t="Include" />
+          </e>
+        </e>
+        <e p="Avalonia.Ide.LanguageServer.MSBuild" t="IncludeRecursive">
+          <e p="Avalonia.Ide.LanguageServer.MSBuild.csproj" t="IncludeRecursive" />
+          <e p="Requests.cs" t="Include" />
+          <e p="Task.cs" t="Include" />
+          <e p="WireHelper.cs" t="Include" />
+          <e p="avalonia-ide.targets" t="Include" />
+          <e p="bin" t="ExcludeRecursive" />
+          <e p="host.csproj" t="Include" />
+          <e p="obj" t="ExcludeRecursive">
+            <e p="Debug" t="Include">
+              <e p="netstandard1.3" t="Include">
+                <e p="Avalonia.Ide.LanguageServer.MSBuild.AssemblyInfo.cs" t="Include" />
+              </e>
+            </e>
+          </e>
+        </e>
+        <e p="external" t="Include">
+          <e p="lsp" t="IncludeRecursive">
+            <e p="bin" t="ExcludeRecursive" />
+            <e p="csharp-language-server-protocol" t="Include">
+              <e p="src" t="Include">
+                <e p="JsonRpc" t="Include">
+                  <e p="Client" t="Include">
+                    <e p="Notification.cs" t="Include" />
+                    <e p="Request.cs" t="Include" />
+                    <e p="Response.cs" t="Include" />
+                  </e>
+                  <e p="Connection.cs" t="Include" />
+                  <e p="ErrorResponse.cs" t="Include" />
+                  <e p="Events.cs" t="Include" />
+                  <e p="HandlerCollection.cs" t="Include" />
+                  <e p="IHandlerDescriptor.cs" t="Include" />
+                  <e p="IInputHandler.cs" t="Include" />
+                  <e p="IJsonRpcHandler.cs" t="Include" />
+                  <e p="INotificationHandler.cs" t="Include" />
+                  <e p="IOutputHandler.cs" t="Include" />
+                  <e p="IReciever.cs" t="Include" />
+                  <e p="IRequestHandler.cs" t="Include" />
+                  <e p="IRequestProcessIdentifier.cs" t="Include" />
+                  <e p="IRequestRouter.cs" t="Include" />
+                  <e p="IResponseHandler.cs" t="Include" />
+                  <e p="IResponseRouter.cs" t="Include" />
+                  <e p="IScheduler.cs" t="Include" />
+                  <e p="InputHandler.cs" t="Include" />
+                  <e p="MethodAttribute.cs" t="Include" />
+                  <e p="OutputHandler.cs" t="Include" />
+                  <e p="ParallelAttrbute.cs" t="Include" />
+                  <e p="ParallelRequestProcessIdentifier.cs" t="Include" />
+                  <e p="ProcessAttribute.cs" t="Include" />
+                  <e p="ProcessScheduler.cs" t="Include" />
+                  <e p="Properties" t="Include">
+                    <e p="AssemblyInfo.cs" t="Include" />
+                  </e>
+                  <e p="Reciever.cs" t="Include" />
+                  <e p="ReflectionRequestHandlers.cs" t="Include" />
+                  <e p="RequestProcessType.cs" t="Include" />
+                  <e p="RequestRouter.cs" t="Include" />
+                  <e p="ResponseRouter.cs" t="Include" />
+                  <e p="RpcError.cs" t="Include" />
+                  <e p="RpcErrorConverter.cs" t="Include" />
+                  <e p="SerialAttribute.cs" t="Include" />
+                  <e p="SerialRequestProcessIdentifier.cs" t="Include" />
+                  <e p="Server" t="Include">
+                    <e p="IMethodWithParams.cs" t="Include" />
+                    <e p="JsonRpcException.cs" t="Include" />
+                    <e p="JsonRpcInvalidRequestException.cs" t="Include" />
+                    <e p="Messages" t="Include">
+                      <e p="ErrorMessage.cs" t="Include" />
+                      <e p="IErrorMessage.cs" t="Include" />
+                      <e p="InternalError.cs" t="Include" />
+                      <e p="InvalidParams.cs" t="Include" />
+                      <e p="InvalidRequest.cs" t="Include" />
+                      <e p="MethodNotFound.cs" t="Include" />
+                      <e p="ParseError.cs" t="Include" />
+                    </e>
+                    <e p="Notification.cs" t="Include" />
+                    <e p="Renor.cs" t="Include" />
+                    <e p="Request.cs" t="Include" />
+                    <e p="ResponseBase.cs" t="Include" />
+                    <e p="ServerError.cs" t="Include" />
+                    <e p="ServerResponse.cs" t="Include" />
+                  </e>
+                </e>
+                <e p="Lsp" t="Include">
+                  <e p="Abstractions" t="Include">
+                    <e p="IAwaitableTermination.cs" t="Include" />
+                    <e p="ICapability.cs" t="Include" />
+                    <e p="IHandlerCollection.cs" t="Include" />
+                    <e p="ILspHandlerDescriptor.cs" t="Include" />
+                    <e p="IRegistration.cs" t="Include" />
+                  </e>
+                  <e p="Capabilities" t="Include">
+                    <e p="Client" t="Include">
+                      <e p="ClientCapabilities.cs" t="Include" />
+                      <e p="ClientCapabilitiesExtensions.cs" t="Include" />
+                      <e p="ClientVersion.cs" t="Include" />
+                      <e p="CodeActionCapability.cs" t="Include" />
+                      <e p="CodeLensCapability.cs" t="Include" />
+                      <e p="CompletionCapability.cs" t="Include" />
+                      <e p="CompletionItemCapability.cs" t="Include" />
+                      <e p="ConnectedCapability.cs" t="Include" />
+                      <e p="DefinitionCapability.cs" t="Include" />
+                      <e p="DidChangeConfigurationCapability.cs" t="Include" />
+                      <e p="DidChangeWatchedFilesCapability.cs" t="Include" />
+                      <e p="DocumentFormattingCapability.cs" t="Include" />
+                      <e p="DocumentHighlightCapability.cs" t="Include" />
+                      <e p="DocumentLinkCapability.cs" t="Include" />
+                      <e p="DocumentOnTypeFormattingCapability.cs" t="Include" />
+                      <e p="DocumentRangeFormattingCapability.cs" t="Include" />
+                      <e p="DocumentSymbolCapability.cs" t="Include" />
+                      <e p="DynamicCapability.cs" t="Include" />
+                      <e p="ExecuteCommandCapability.cs" t="Include" />
+                      <e p="HoverCapability.cs" t="Include" />
+                      <e p="ISupports.cs" t="Include" />
+                      <e p="ReferencesCapability.cs" t="Include" />
+                      <e p="RenameCapability.cs" t="Include" />
+                      <e p="SignatureHelpCapability.cs" t="Include" />
+                      <e p="Supports.cs" t="Include" />
+                      <e p="SynchronizationCapability.cs" t="Include" />
+                      <e p="TextDocumentClientCapabilities.cs" t="Include" />
+                      <e p="WorkspaceClientCapabilites.cs" t="Include" />
+                      <e p="WorkspaceEditCapability.cs" t="Include" />
+                      <e p="WorkspaceSymbolCapability.cs" t="Include" />
+                    </e>
+                    <e p="Server" t="Include">
+                      <e p="CodeLensOptions.cs" t="Include" />
+                      <e p="CompletionOptions.cs" t="Include" />
+                      <e p="DocumentLinkOptions.cs" t="Include" />
+                      <e p="DocumentOnTypeFormattingOptions.cs" t="Include" />
+                      <e p="ExecuteCommandOptions.cs" t="Include" />
+                      <e p="SaveOptions.cs" t="Include" />
+                      <e p="ServerCapabilities.cs" t="Include" />
+                      <e p="SignatureHelpOptions.cs" t="Include" />
+                      <e p="SynchronizationOptions.cs" t="Include" />
+                      <e p="TextDocumentSync.cs" t="Include" />
+                      <e p="TextDocumentSyncKind.cs" t="Include" />
+                      <e p="TextDocumentSyncOptions.cs" t="Include" />
+                    </e>
+                  </e>
+                  <e p="ClientCapabilityProvider.cs" t="Include" />
+                  <e p="CompositeDisposable.cs" t="Include" />
+                  <e p="Converters" t="Include">
+                    <e p="BooleanNumberStringConverter.cs" t="Include" />
+                    <e p="CompletionListConverter.cs" t="Include" />
+                    <e p="DiagnosticCodeConverter.cs" t="Include" />
+                    <e p="LocationOrLocationsConverter.cs" t="Include" />
+                    <e p="MarkedStringCollectionConverter.cs" t="Include" />
+                    <e p="MarkedStringConverter.cs" t="Include" />
+                    <e p="NumberEnumConverter.cs" t="Include" />
+                    <e p="SupportsConverter.cs" t="Include" />
+                    <e p="TextDocumentSyncConverter.cs" t="Include" />
+                  </e>
+                  <e p="Disposable.cs" t="Include" />
+                  <e p="HandlerCollection.cs" t="Include" />
+                  <e p="HandlerDescriptor.cs" t="Include" />
+                  <e p="HandlerTypeHelpers.cs" t="Include" />
+                  <e p="Handlers" t="Include">
+                    <e p="CancelRequestHandler.cs" t="Include" />
+                    <e p="ExitEventHandler.cs" t="Include" />
+                    <e p="ExitHandler.cs" t="Include" />
+                    <e p="ShutdownEventHandler.cs" t="Include" />
+                    <e p="ShutdownHandler.cs" t="Include" />
+                  </e>
+                  <e p="ILanguageServer.cs" t="Include" />
+                  <e p="ImmutableDisposable.cs" t="Include" />
+                  <e p="InitializeDelegate.cs" t="Include" />
+                  <e p="LanguageServer.cs" t="Include" />
+                  <e p="LanguageServerLogger.cs" t="Include" />
+                  <e p="LanguageServerLoggerProvider.cs" t="Include" />
+                  <e p="LspHelper.cs" t="Include" />
+                  <e p="LspReciever.cs" t="Include" />
+                  <e p="LspRequestRouter.cs" t="Include" />
+                  <e p="Messages" t="Include">
+                    <e p="RequestCancelled.cs" t="Include" />
+                    <e p="ServerErrorEnd.cs" t="Include" />
+                    <e p="ServerErrorStart.cs" t="Include" />
+                    <e p="ServerNotInitialized.cs" t="Include" />
+                    <e p="UnknownErrorCode.cs" t="Include" />
+                  </e>
+                  <e p="Methods" t="Include">
+                    <e p="DynamicNotification.cs" t="Include" />
+                    <e p="DynamicRequest.cs" t="Include" />
+                    <e p="Method.cs" t="Include" />
+                    <e p="Notification.cs" t="Include" />
+                    <e p="Request.cs" t="Include" />
+                  </e>
+                  <e p="Minimatch" t="Include">
+                    <e p="Minimatcher.cs" t="Include" />
+                    <e p="Options.cs" t="Include" />
+                  </e>
+                  <e p="Models" t="Include">
+                    <e p="ApplyWorkspaceEditParams.cs" t="Include" />
+                    <e p="ApplyWorkspaceEditResponse.cs" t="Include" />
+                    <e p="BooleanNumberString.cs" t="Include" />
+                    <e p="CancelParams.cs" t="Include" />
+                    <e p="CodeActionContext.cs" t="Include" />
+                    <e p="CodeActionParams.cs" t="Include" />
+                    <e p="CodeLens.cs" t="Include" />
+                    <e p="CodeLensContainer.cs" t="Include" />
+                    <e p="CodeLensParams.cs" t="Include" />
+                    <e p="CodeLensRegistrationOptions.cs" t="Include" />
+                    <e p="Command.cs" t="Include" />
+                    <e p="CommandContainer.cs" t="Include" />
+                    <e p="CompletionItem.cs" t="Include" />
+                    <e p="CompletionItemKind.cs" t="Include" />
+                    <e p="CompletionList.cs" t="Include" />
+                    <e p="CompletionRegistrationOptions.cs" t="Include" />
+                    <e p="Container.cs" t="Include" />
+                    <e p="ContainerBase.cs" t="Include" />
+                    <e p="Diagnostic.cs" t="Include" />
+                    <e p="DiagnosticCode.cs" t="Include" />
+                    <e p="DiagnosticSeverity.cs" t="Include" />
+                    <e p="DidChangeConfigurationParams.cs" t="Include" />
+                    <e p="DidChangeTextDocumentParams.cs" t="Include" />
+                    <e p="DidChangeWatchedFilesParams.cs" t="Include" />
+                    <e p="DidCloseTextDocumentParams.cs" t="Include" />
+                    <e p="DidOpenTextDocumentParams.cs" t="Include" />
+                    <e p="DidSaveTextDocumentParams.cs" t="Include" />
+                    <e p="DocumentFilter.cs" t="Include" />
+                    <e p="DocumentFormattingParams.cs" t="Include" />
+                    <e p="DocumentHighlight.cs" t="Include" />
+                    <e p="DocumentHighlightContainer.cs" t="Include" />
+                    <e p="DocumentHighlightKind.cs" t="Include" />
+                    <e p="DocumentLink.cs" t="Include" />
+                    <e p="DocumentLinkParams.cs" t="Include" />
+                    <e p="DocumentLinkRegistrationOptions.cs" t="Include" />
+                    <e p="DocumentOnTypeFormattingParams.cs" t="Include" />
+                    <e p="DocumentOnTypeFormattingRegistrationOptions.cs" t="Include" />
+                    <e p="DocumentRangeFormattingParams.cs" t="Include" />
+                    <e p="DocumentSelector.cs" t="Include" />
+                    <e p="DocumentSymbolParams.cs" t="Include" />
+                    <e p="ExecuteCommandParams.cs" t="Include" />
+                    <e p="ExecuteCommandRegistrationOptions.cs" t="Include" />
+                    <e p="FileChangeType.cs" t="Include" />
+                    <e p="FileEvent.cs" t="Include" />
+                    <e p="FormattingOptions.cs" t="Include" />
+                    <e p="Hover.cs" t="Include" />
+                    <e p="ICodeLensOptions.cs" t="Include" />
+                    <e p="ICompletionOptions.cs" t="Include" />
+                    <e p="IDocumentLinkOptions.cs" t="Include" />
+                    <e p="IDocumentOnTypeFormattingOptions.cs" t="Include" />
+                    <e p="IExecuteCommandOptions.cs" t="Include" />
+                    <e p="ISignatureHelpOptions.cs" t="Include" />
+                    <e p="ISynchronizationOptions.cs" t="Include" />
+                    <e p="ITextDocumentIdentifierParams.cs" t="Include" />
+                    <e p="ITextDocumentRegistrationOptions.cs" t="Include" />
+                    <e p="InitializeError.cs" t="Include" />
+                    <e p="InitializeParams.cs" t="Include" />
+                    <e p="InitializeResult.cs" t="Include" />
+                    <e p="InitializeTrace.cs" t="Include" />
+                    <e p="InsertTextFormat.cs" t="Include" />
+                    <e p="Location.cs" t="Include" />
+                    <e p="LocationContainer.cs" t="Include" />
+                    <e p="LocationOrLocations.cs" t="Include" />
+                    <e p="LogMessageParams.cs" t="Include" />
+                    <e p="MarkedString.cs" t="Include" />
+                    <e p="MarkedStringContainer.cs" t="Include" />
+                    <e p="MessageActionItem.cs" t="Include" />
+                    <e p="MessageType.cs" t="Include" />
+                    <e p="ObjectContainer.cs" t="Include" />
+                    <e p="ParameterInformation.cs" t="Include" />
+                    <e p="Position.cs" t="Include" />
+                    <e p="PublishDiagnosticsParams.cs" t="Include" />
+                    <e p="Range.cs" t="Include" />
+                    <e p="ReferenceContext.cs" t="Include" />
+                    <e p="ReferenceParams.cs" t="Include" />
+                    <e p="Registration.cs" t="Include" />
+                    <e p="RegistrationContainer.cs" t="Include" />
+                    <e p="RegistrationParams.cs" t="Include" />
+                    <e p="RenameParams.cs" t="Include" />
+                    <e p="ShowMessageParams.cs" t="Include" />
+                    <e p="ShowMessageRequestParams.cs" t="Include" />
+                    <e p="SignatureHelp.cs" t="Include" />
+                    <e p="SignatureHelpRegistrationOptions.cs" t="Include" />
+                    <e p="SignatureInformation.cs" t="Include" />
+                    <e p="SymbolInformation.cs" t="Include" />
+                    <e p="SymbolInformationContainer.cs" t="Include" />
+                    <e p="SymbolKind.cs" t="Include" />
+                    <e p="TextDocument.cs" t="Include" />
+                    <e p="TextDocumentChangeRegistrationOptions.cs" t="Include" />
+                    <e p="TextDocumentContentChangeEvent.cs" t="Include" />
+                    <e p="TextDocumentEdit.cs" t="Include" />
+                    <e p="TextDocumentIdentifier.cs" t="Include" />
+                    <e p="TextDocumentItem.cs" t="Include" />
+                    <e p="TextDocumentPositionParams.cs" t="Include" />
+                    <e p="TextDocumentRegistrationOptions.cs" t="Include" />
+                    <e p="TextDocumentSaveReason.cs" t="Include" />
+                    <e p="TextDocumentSaveRegistrationOptions.cs" t="Include" />
+                    <e p="TextEdit.cs" t="Include" />
+                    <e p="TextEditContainer.cs" t="Include" />
+                    <e p="Unregistration.cs" t="Include" />
+                    <e p="UnregistrationContainer.cs" t="Include" />
+                    <e p="UnregistrationParams.cs" t="Include" />
+                    <e p="VersionedTextDocumentIdentifier.cs" t="Include" />
+                    <e p="WillSaveTextDocumentParams.cs" t="Include" />
+                    <e p="WorkspaceEdit.cs" t="Include" />
+                    <e p="WorkspaceSymbolParams.cs" t="Include" />
+                  </e>
+                  <e p="Properties" t="Include">
+                    <e p="AssemblyInfo.cs" t="Include" />
+                  </e>
+                  <e p="Protocol" t="Include">
+                    <e p="Client" t="Include">
+                      <e p="RegisterCapabilityExtensions.cs" t="Include" />
+                      <e p="UnregisterCapabilityExtensions.cs" t="Include" />
+                    </e>
+                    <e p="Document" t="Include">
+                      <e p="ICodeActionHandler.cs" t="Include" />
+                      <e p="ICodeLensHandler.cs" t="Include" />
+                      <e p="ICodeLensResolveHandler.cs" t="Include" />
+                      <e p="ICompletionHandler.cs" t="Include" />
+                      <e p="ICompletionResolveHandler.cs" t="Include" />
+                      <e p="IDefinitionHandler.cs" t="Include" />
+                      <e p="IDidChangeTextDocumentHandler.cs" t="Include" />
+                      <e p="IDidCloseTextDocumentHandler.cs" t="Include" />
+                      <e p="IDidOpenTextDocumentHandler.cs" t="Include" />
+                      <e p="IDidSaveTextDocumentHandler.cs" t="Include" />
+                      <e p="IDocumentFormattingHandler.cs" t="Include" />
+                      <e p="IDocumentHighlightHandler.cs" t="Include" />
+                      <e p="IDocumentLinkHandler.cs" t="Include" />
+                      <e p="IDocumentLinkResolveHandler.cs" t="Include" />
+                      <e p="IDocumentOnTypeFormatHandler.cs" t="Include" />
+                      <e p="IDocumentRangeFormattingHandler.cs" t="Include" />
+                      <e p="IDocumentSymbolHandler.cs" t="Include" />
+                      <e p="IHoverHandler.cs" t="Include" />
+                      <e p="IReferencesHandler.cs" t="Include" />
+                      <e p="IRenameHandler.cs" t="Include" />
+                      <e p="ISignatureHelpHandler.cs" t="Include" />
+                      <e p="ITextDocumentSyncHandler.cs" t="Include" />
+                      <e p="IWillSaveTextDocumentHandler.cs" t="Include" />
+                      <e p="IWillSaveWaitUntilTextDocumentHandler.cs" t="Include" />
+                      <e p="PublishDiagnosticsExtensions.cs" t="Include" />
+                      <e p="TextDocumentAttributes.cs" t="Include" />
+                    </e>
+                    <e p="General" t="Include">
+                      <e p="CancelRequestExtensions.cs" t="Include" />
+                      <e p="ICancelRequestHandler.cs" t="Include" />
+                      <e p="IExitHandler.cs" t="Include" />
+                      <e p="IInitializeHandler.cs" t="Include" />
+                      <e p="IInitializedHandler.cs" t="Include" />
+                      <e p="IShutdownHandler.cs" t="Include" />
+                    </e>
+                    <e p="Window" t="Include">
+                      <e p="LogMessageExtensions.cs" t="Include" />
+                      <e p="SendTelemetryExtensions.cs" t="Include" />
+                      <e p="ShowMessageExtensions.cs" t="Include" />
+                      <e p="ShowMessageRequestExtensions.cs" t="Include" />
+                    </e>
+                    <e p="Workspace" t="Include">
+                      <e p="ApplyEditExtensions.cs" t="Include" />
+                      <e p="IDidChangeConfigurationHandler.cs" t="Include" />
+                      <e p="IDidChangeWatchedFilesHandler.cs" t="Include" />
+                      <e p="IExecuteCommandHandler.cs" t="Include" />
+                      <e p="IWorkspaceSymbolsHandler.cs" t="Include" />
+                    </e>
+                  </e>
+                  <e p="RequestProcessIdentifier.cs" t="Include" />
+                </e>
+              </e>
+            </e>
+            <e p="lsp.csproj" t="IncludeRecursive" />
+            <e p="obj" t="ExcludeRecursive">
+              <e p="Debug" t="Include">
+                <e p="netstandard2.0" t="Include">
+                  <e p="lsp.AssemblyInfo.cs" t="Include" />
+                </e>
+              </e>
+            </e>
+          </e>
+          <e p="pngcs" t="IncludeRecursive">
+            <e p="bin" t="ExcludeRecursive" />
+            <e p="obj" t="ExcludeRecursive">
+              <e p="Debug" t="Include">
+                <e p="netstandard2.0" t="Include">
+                  <e p="pngcs.AssemblyInfo.cs" t="Include" />
+                </e>
+              </e>
+            </e>
+            <e p="pngcs" t="Include">
+              <e p="Hjg.Pngcs" t="Include">
+                <e p="Chunks" t="Include">
+                  <e p="ChunkCopyBehaviour.cs" t="Include" />
+                  <e p="ChunkHelper.cs" t="Include" />
+                  <e p="ChunkLoadBehaviour.cs" t="Include" />
+                  <e p="ChunkPredicate.cs" t="Include" />
+                  <e p="ChunkPredicateEquiv.cs" t="Include" />
+                  <e p="ChunkPredicateId.cs" t="Include" />
+                  <e p="ChunkPredicateId2.cs" t="Include" />
+                  <e p="ChunkRaw.cs" t="Include" />
+                  <e p="ChunksList.cs" t="Include" />
+                  <e p="ChunksListForWrite.cs" t="Include" />
+                  <e p="PngChunk.cs" t="Include" />
+                  <e p="PngChunkBKGD.cs" t="Include" />
+                  <e p="PngChunkCHRM.cs" t="Include" />
+                  <e p="PngChunkGAMA.cs" t="Include" />
+                  <e p="PngChunkHIST.cs" t="Include" />
+                  <e p="PngChunkICCP.cs" t="Include" />
+                  <e p="PngChunkIDAT.cs" t="Include" />
+                  <e p="PngChunkIEND.cs" t="Include" />
+                  <e p="PngChunkIHDR.cs" t="Include" />
+                  <e p="PngChunkITXT.cs" t="Include" />
+                  <e p="PngChunkMultiple.cs" t="Include" />
+                  <e p="PngChunkOFFS.cs" t="Include" />
+                  <e p="PngChunkPHYS.cs" t="Include" />
+                  <e p="PngChunkPLTE.cs" t="Include" />
+                  <e p="PngChunkSBIT.cs" t="Include" />
+                  <e p="PngChunkSPLT.cs" t="Include" />
+                  <e p="PngChunkSRGB.cs" t="Include" />
+                  <e p="PngChunkSTER.cs" t="Include" />
+                  <e p="PngChunkSingle.cs" t="Include" />
+                  <e p="PngChunkSkipped.cs" t="Include" />
+                  <e p="PngChunkTEXT.cs" t="Include" />
+                  <e p="PngChunkTIME.cs" t="Include" />
+                  <e p="PngChunkTRNS.cs" t="Include" />
+                  <e p="PngChunkTextVar.cs" t="Include" />
+                  <e p="PngChunkUNKNOWN.cs" t="Include" />
+                  <e p="PngChunkZTXT.cs" t="Include" />
+                  <e p="PngMetadata.cs" t="Include" />
+                </e>
+                <e p="FileHelper.cs" t="Include" />
+                <e p="FilterType.cs" t="Include" />
+                <e p="FilterWriteStrategy.cs" t="Include" />
+                <e p="IBytesConsumer.cs" t="Include" />
+                <e p="ImageInfo.cs" t="Include" />
+                <e p="ImageLine.cs" t="Include" />
+                <e p="ImageLineHelper.cs" t="Include" />
+                <e p="ImageLines.cs" t="Include" />
+                <e p="PngCsUtils.cs" t="Include" />
+                <e p="PngDeinterlacer.cs" t="Include" />
+                <e p="PngHelperInternal.cs" t="Include" />
+                <e p="PngIDatChunkInputStream.cs" t="Include" />
+                <e p="PngIDatChunkOutputStream.cs" t="Include" />
+                <e p="PngReader.cs" t="Include" />
+                <e p="PngWriter.cs" t="Include" />
+                <e p="PngjBadCrcException.cs" t="Include" />
+                <e p="PngjException.cs" t="Include" />
+                <e p="PngjExceptionInternal.cs" t="Include" />
+                <e p="PngjInputException.cs" t="Include" />
+                <e p="PngjOutputException.cs" t="Include" />
+                <e p="PngjUnsupportedException.cs" t="Include" />
+                <e p="ProgressiveOutputStream.cs" t="Include" />
+                <e p="Zlib" t="Include">
+                  <e p="AZlibInputStream.cs" t="Include" />
+                  <e p="AZlibOutputStream.cs" t="Include" />
+                  <e p="Adler32.cs" t="Include" />
+                  <e p="CRC32.cs" t="Include" />
+                  <e p="DeflateCompressLevel.cs" t="Include" />
+                  <e p="EDeflateCompressStrategy.cs" t="Include" />
+                  <e p="ZlibInputStreamIs.cs" t="Include" />
+                  <e p="ZlibInputStreamMs.cs" t="Include" />
+                  <e p="ZlibOutputStreamIs.cs" t="Include" />
+                  <e p="ZlibOutputStreamMs.cs" t="Include" />
+                  <e p="ZlibStreamFactory.cs" t="Include" />
+                </e>
+              </e>
+            </e>
+            <e p="pngcs.csproj" t="IncludeRecursive" />
+          </e>
+        </e>
+      </e>
+    </e>
+  </component>
+</project>

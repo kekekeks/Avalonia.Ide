@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="RIDER_MODULE" version="4">
+  <component name="NewModuleRootManager">
+    <content url="file://$USER_HOME$/.nuget/packages/avalonia.skia.linux.natives/1.57.1.3/runtimes/linux-x64/native/libSkiaSharp.so" />
+    <content url="file://$USER_HOME$/.nuget/packages/skiasharp/1.57.1/build/net45/SkiaSharp.dll.config" />
+    <content url="file://$USER_HOME$/.nuget/packages/skiasharp/1.57.1/runtimes/osx/native/libSkiaSharp.dylib" />
+    <content url="file://$MODULE_DIR$/../.." />
+    <orderEntry type="sourceFolder" forTests="false" />
+  </component>
+</module>
