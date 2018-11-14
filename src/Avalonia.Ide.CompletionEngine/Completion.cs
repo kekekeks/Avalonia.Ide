@@ -10,7 +10,8 @@ namespace Avalonia.Ide.CompletionEngine
         Class,
         Property,
         Namespace,
-        Enum
+        Enum,
+        MarkupExtension
     }
 
     public class Completion

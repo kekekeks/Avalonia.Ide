@@ -210,7 +210,7 @@ namespace Avalonia.Ide.CompletionEngine
                 else
                 {
                     completions.AddRange(_helper.FilterPropertyNames(state.TagName, state.AttributeName)
-                        .Select(x => new Completion(x, x + "=\"\"", x, x.Length + 2)));
+                        .Select(x => new Completion(x, x + "=\"\"", x, CompletionKind.Property, x.Length + 2)));
 
                     var targetType = _helper.LookupType(state.TagName);
                     
@@ -262,13 +262,13 @@ namespace Avalonia.Ide.CompletionEngine
                         else
                         {
                             if ("clr-namespace:".StartsWith(state.AttributeValue))
-                                completions.Add(new Completion("clr-namespace:"));
+                                completions.Add(new Completion("clr-namespace:", CompletionKind.Namespace));
                             completions.AddRange(
                                 metadata.Namespaces.Keys.Where(
                                     v =>
                                         v.StartsWith(state.AttributeValue) &&
                                         !v.StartsWith("clr-namespace"))
-                                    .Select(v => new Completion(v)));
+                                    .Select(v => new Completion(v, CompletionKind.Namespace)));
                         }
                     }
                 }
@@ -286,7 +286,7 @@ namespace Avalonia.Ide.CompletionEngine
             foreach (var val in values)
             {
                 if (val.StartsWith(entered, StringComparison.OrdinalIgnoreCase))
-                    completions.Add(new Completion(val));
+                    completions.Add(new Completion(val,CompletionKind.Enum));
             }
             return completions;
         }
@@ -303,14 +303,14 @@ namespace Avalonia.Ide.CompletionEngine
             if (ext.State == MarkupExtensionParser.ParserStateType.StartElement)
                 completions.AddRange(_helper.FilterTypeNames(ext.ElementName, markupExtensionsOnly: true)
                     .Select(t => t.EndsWith("Extension") ? t.Substring(0, t.Length - "Extension".Length) : t)
-                    .Select(t => new Completion(t, CompletionKind.Property)));
+                    .Select(t => new Completion(t, CompletionKind.MarkupExtension)));
             if (ext.State == MarkupExtensionParser.ParserStateType.StartAttribute ||
                 ext.State == MarkupExtensionParser.ParserStateType.InsideElement)
             {
                 if (ext.State == MarkupExtensionParser.ParserStateType.InsideElement)
                     forcedStart = data.Length;
                 completions.AddRange(_helper.FilterPropertyNames(transformedName, ext.AttributeName ?? "")
-                    .Select(x => new Completion(x, x + "=", x)));
+                    .Select(x => new Completion(x, x + "=", x, CompletionKind.MarkupExtension)));
 
                 var attribName = ext.AttributeName ?? "";
                 var t = _helper.LookupType(transformedName);
@@ -334,7 +334,7 @@ namespace Avalonia.Ide.CompletionEngine
                             var type = split[0];
                             var prop = split[1];
                             var props = _helper.FilterPropertyNames(type, prop, staticGettersOnly: true, hintValues: true);
-                            completions.AddRange(props.Select(x => new Completion(x, $"{type}.{x}", x)));
+                            completions.AddRange(props.Select(x => new Completion(x, $"{type}.{x}", x, CompletionKind.MarkupExtension)));
                         }
                     }
                     else
@@ -342,11 +342,11 @@ namespace Avalonia.Ide.CompletionEngine
                         var types = _helper.FilterTypeNames(attribName,
                             staticGettersOnly: t.SupportCtorArgument == MetadataTypeCtorArgument.Object);
 
-                        completions.AddRange(types.Select(x => new Completion(x, x, x)));
+                        completions.AddRange(types.Select(x => new Completion(x, x, x, CompletionKind.Class)));
 
                         if (property?.Type?.HasHintValues == true)
                         {
-                            completions.Add(new Completion(property.Type.Name, property.Type.Name + ".", property.Type.Name));
+                            completions.Add(new Completion(property.Type.Name, property.Type.Name + ".", property.Type.Name, CompletionKind.Class));
                         }
                     }
                 }
