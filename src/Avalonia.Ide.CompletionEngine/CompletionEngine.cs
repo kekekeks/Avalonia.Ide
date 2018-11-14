@@ -6,7 +6,7 @@ using System.Xml;
 
 namespace Avalonia.Ide.CompletionEngine
 {
-    public class CompletionEngine 
+    public class CompletionEngine
     {
         class MetadataHelper
         {
@@ -15,13 +15,14 @@ namespace Avalonia.Ide.CompletionEngine
             public Dictionary<string, string> Aliases { get; private set; }
 
             Dictionary<string, MetadataType> _types;
+            private string _currentAssemblyName;
 
-            public void SetMetadata(Metadata metadata, string xml)
+            public void SetMetadata(Metadata metadata, string xml, string currentAssemblyName = null)
             {
                 var aliases = GetNamespaceAliases(xml);
-                
+
                 //Check if metadata and aliases can be reused
-                if (_metadata == metadata && Aliases != null && _types != null)
+                if (_metadata == metadata && Aliases != null && _types != null && currentAssemblyName == _currentAssemblyName)
                 {
                     if (aliases.Count == Aliases.Count)
                     {
@@ -42,12 +43,21 @@ namespace Avalonia.Ide.CompletionEngine
                 Aliases = aliases;
                 _metadata = metadata;
                 _types = null;
+                _currentAssemblyName = currentAssemblyName;
+
                 var types = new Dictionary<string, MetadataType>();
                 foreach (var alias in Aliases)
                 {
                     Dictionary<string, MetadataType> ns;
-                    if (!metadata.Namespaces.TryGetValue(alias.Value, out ns))
+
+                    string aliasValue = alias.Value ?? "";
+
+                    if (!string.IsNullOrEmpty(_currentAssemblyName) && aliasValue.StartsWith("clr-namespace:") && !aliasValue.Contains(";assembly="))
+                        aliasValue = $"{aliasValue};assembly={_currentAssemblyName}";
+
+                    if (!metadata.Namespaces.TryGetValue(aliasValue, out ns))
                         continue;
+
                     var prefix = alias.Key.Length == 0 ? "" : (alias.Key + ":");
                     foreach (var type in ns.Values)
                         types[prefix + type.Name] = type;
@@ -57,7 +67,7 @@ namespace Avalonia.Ide.CompletionEngine
             }
 
 
-            public IEnumerable<string> FilterTypeNames(string prefix, bool withAttachedPropertiesOnly = false, bool markupExtensionsOnly = false)
+            public IEnumerable<string> FilterTypeNames(string prefix, bool withAttachedPropertiesOnly = false, bool markupExtensionsOnly = false, bool staticGettersOnly = false)
             {
                 prefix = prefix ?? "";
                 var e = _types
@@ -66,6 +76,12 @@ namespace Avalonia.Ide.CompletionEngine
                     e = e.Where(t => t.Value.HasAttachedProperties);
                 if (markupExtensionsOnly)
                     e = e.Where(t => t.Value.IsMarkupExtension);
+                if (staticGettersOnly)
+                    e = e.Where(t => t.Value.HasStaticGetProperties);
+
+                if (!markupExtensionsOnly && !staticGettersOnly && !withAttachedPropertiesOnly)
+                    e = e.Where(t => t.Value.HasSetProperties);
+
                 return e.Select(s => s.Key);
             }
 
@@ -76,19 +92,29 @@ namespace Avalonia.Ide.CompletionEngine
                 return rv;
             }
 
-            public IEnumerable<string> FilterPropertyNames(string typeName, string propName, bool attachedOnly = false)
+            public IEnumerable<string> FilterPropertyNames(string typeName, string propName, bool attachedOnly = false,
+                bool staticGettersOnly = false, bool hintValues = false)
             {
                 var t = LookupType(typeName);
                 propName = propName ?? "";
-                if(t == null)
+                if (t == null)
                     return new string[0];
+
+                if (hintValues && t.HasHintValues)
+                    return t.HintValues.Where(v => v.StartsWith(propName, StringComparison.OrdinalIgnoreCase));
+
                 var e = t.Properties.Where(p => p.Name.StartsWith(propName, StringComparison.OrdinalIgnoreCase));
                 if (attachedOnly)
                     e = e.Where(p => p.IsAttached);
+                if (staticGettersOnly)
+                    e = e.Where(p => p.IsStatic && p.HasGetter);
+                if (!attachedOnly && !staticGettersOnly)
+                    e = e.Where(p => !p.IsStatic && p.HasSetter);
+
                 return e.Select(p => p.Name);
             }
 
-            public MetadataProperty LookupProperty(string typeName, string propName) 
+            public MetadataProperty LookupProperty(string typeName, string propName)
                 => LookupType(typeName)?.Properties?.FirstOrDefault(p => p.Name == propName);
         }
 
@@ -100,35 +126,44 @@ namespace Avalonia.Ide.CompletionEngine
             try
             {
                 var xmlRdr = XmlReader.Create(new StringReader(xml));
-                while (xmlRdr.NodeType != XmlNodeType.Element)
+                bool result = true;
+                while (result && xmlRdr.NodeType != XmlNodeType.Element)
                 {
-                    xmlRdr.Read();
+                    try
+                    {
+                        result = xmlRdr.Read();
+                    }
+                    catch
+                    {
+                        if (xmlRdr.NodeType != XmlNodeType.Element) result = false;
+                    }
                 }
 
-                for (var c = 0; c < xmlRdr.AttributeCount; c++)
+                if (result)
                 {
-                    xmlRdr.MoveToAttribute(c);
-                    var ns = xmlRdr.Name;
-                    if (ns != "xmlns" && !ns.StartsWith("xmlns:"))
-                        continue;
-                    ns = ns == "xmlns" ? "" : ns.Substring(6);
-                    rv[ns] = xmlRdr.Value;
+                    for (var c = 0; c < xmlRdr.AttributeCount; c++)
+                    {
+                        xmlRdr.MoveToAttribute(c);
+                        var ns = xmlRdr.Name;
+                        if (ns != "xmlns" && !ns.StartsWith("xmlns:"))
+                            continue;
+                        ns = ns == "xmlns" ? "" : ns.Substring(6);
+                        rv[ns] = xmlRdr.Value;
+                    }
                 }
-
-                
             }
-            catch 
+            catch
             {
                 //
             }
             if (!rv.ContainsKey(""))
-                    rv[""] = Utils.AvaloniaNamespace;
+                rv[""] = Utils.AvaloniaNamespace;
             return rv;
         }
 
-        public CompletionSet GetCompletions(Metadata metadata, string text, int pos)
+        public CompletionSet GetCompletions(Metadata metadata, string text, int pos, string currentAssemblyName = null)
         {
-            _helper.SetMetadata(metadata, text);
+            _helper.SetMetadata(metadata, text, currentAssemblyName);
 
             if (_helper.Metadata == null)
                 return null;
@@ -168,14 +203,18 @@ namespace Avalonia.Ide.CompletionEngine
                 {
                     var dotPos = state.AttributeName.IndexOf('.');
                     curStart += dotPos + 1;
-                    var split = state.AttributeName.Split(new[] {'.'}, 2);
+                    var split = state.AttributeName.Split(new[] { '.' }, 2);
                     completions.AddRange(_helper.FilterPropertyNames(split[0], split[1], true)
                         .Select(x => new Completion(x, x + "=\"\"", x, CompletionKind.Property, x.Length + 2)));
                 }
                 else
                 {
                     completions.AddRange(_helper.FilterPropertyNames(state.TagName, state.AttributeName)
-                        .Select(x => new Completion(x, x + "=\"\"", x, CompletionKind.Property, x.Length + 2)));
+                        .Select(x => new Completion(x, x + "=\"\"", x, x.Length + 2)));
+
+                    var targetType = _helper.LookupType(state.TagName);
+                    
+                    if(targetType?.IsAvaloniaObjectType == true) 
                     completions.AddRange(
                         _helper.FilterTypeNames(state.AttributeName, true)
                             .Select(v => new Completion(v, v + ".", v, CompletionKind.Property)));
@@ -197,13 +236,23 @@ namespace Avalonia.Ide.CompletionEngine
                 if (state.AttributeValue.StartsWith("{"))
                 {
                     curStart = state.CurrentValueStart.Value +
-                               BuildCompletionsForMarkupExtension(completions,
+                               BuildCompletionsForMarkupExtension(prop, completions,
                                    text.Substring(state.CurrentValueStart.Value));
                 }
                 else
                 {
-                    if (prop?.Type?.IsEnum == true)
-                        completions.AddRange(GetEnumCompletions(text.Substring(state.CurrentValueStart.Value), prop.Type.EnumValues));
+                    if (prop?.Type?.HasHintValues == true)
+                    {
+                        var search = text.Substring(state.CurrentValueStart.Value);
+                        if (prop.Type.IsCompositeValue)
+                        {
+                            var last = search.Split(' ', ',').LastOrDefault();
+                            curStart = curStart + search.Length - last?.Length ?? 0;
+                            search = last;
+                        }
+
+                        completions.AddRange(GetHintCompletions(search, prop.Type.HintValues));
+                    }
                     else if (state.AttributeName == "xmlns" || state.AttributeName.Contains("xmlns:"))
                     {
                         if (state.AttributeValue.StartsWith("clr-namespace:"))
@@ -212,36 +261,37 @@ namespace Avalonia.Ide.CompletionEngine
                                     .Select(v => new Completion(v.Substring("clr-namespace:".Length), v, v, CompletionKind.Namespace)));
                         else
                         {
-                            completions.Add(new Completion("clr-namespace:", CompletionKind.Namespace));
+                            if ("clr-namespace:".StartsWith(state.AttributeValue))
+                                completions.Add(new Completion("clr-namespace:"));
                             completions.AddRange(
                                 metadata.Namespaces.Keys.Where(
                                     v =>
                                         v.StartsWith(state.AttributeValue) &&
-                                        !"clr-namespace".StartsWith(state.AttributeValue))
-                                    .Select(v => new Completion(v, CompletionKind.Class)));
+                                        !v.StartsWith("clr-namespace"))
+                                    .Select(v => new Completion(v)));
                         }
                     }
                 }
             }
 
             if (completions.Count != 0)
-                return new CompletionSet() {Completions = completions, StartPosition = curStart};
+                return new CompletionSet() { Completions = completions, StartPosition = curStart };
             return null;
         }
-        
-            
-        List<Completion> GetEnumCompletions(string entered, string[] enumValues)
+
+
+        List<Completion> GetHintCompletions(string entered, string[] values)
         {
-            var enumCompletions = new List<Completion>();
-            foreach (var val in enumValues)
+            var completions = new List<Completion>();
+            foreach (var val in values)
             {
                 if (val.StartsWith(entered, StringComparison.OrdinalIgnoreCase))
-                    enumCompletions.Add(new Completion(val, CompletionKind.Enum));
+                    completions.Add(new Completion(val));
             }
-            return enumCompletions;
+            return completions;
         }
 
-        int BuildCompletionsForMarkupExtension(List<Completion> completions, string data)
+        int BuildCompletionsForMarkupExtension(MetadataProperty property, List<Completion> completions, string data)
         {
             int? forcedStart = null;
             var ext = MarkupExtensionParser.Parse(data);
@@ -260,16 +310,55 @@ namespace Avalonia.Ide.CompletionEngine
                 if (ext.State == MarkupExtensionParser.ParserStateType.InsideElement)
                     forcedStart = data.Length;
                 completions.AddRange(_helper.FilterPropertyNames(transformedName, ext.AttributeName ?? "")
-                    .Select(x => new Completion(x, x + "=", x, CompletionKind.Property)));
+                    .Select(x => new Completion(x, x + "=", x)));
+
+                var attribName = ext.AttributeName ?? "";
+                var t = _helper.LookupType(transformedName);
+
+                bool ctorArgument = ext.AttributesCount == 0;
+                //skip ctor hints when some property is already set
+                if (t != null && t.IsMarkupExtension && t.SupportCtorArgument != MetadataTypeCtorArgument.None && ctorArgument)
+                {
+                    if (t.SupportCtorArgument == MetadataTypeCtorArgument.HintValues)
+                    {
+                        if (t.HasHintValues)
+                        {
+                            completions.AddRange(GetHintCompletions(attribName, t.HintValues));
+                        }
+                    }
+                    else if (attribName.Contains("."))
+                    {
+                        if (t.SupportCtorArgument != MetadataTypeCtorArgument.Type)
+                        {
+                            var split = attribName.Split('.');
+                            var type = split[0];
+                            var prop = split[1];
+                            var props = _helper.FilterPropertyNames(type, prop, staticGettersOnly: true, hintValues: true);
+                            completions.AddRange(props.Select(x => new Completion(x, $"{type}.{x}", x)));
+                        }
+                    }
+                    else
+                    {
+                        var types = _helper.FilterTypeNames(attribName,
+                            staticGettersOnly: t.SupportCtorArgument == MetadataTypeCtorArgument.Object);
+
+                        completions.AddRange(types.Select(x => new Completion(x, x, x)));
+
+                        if (property?.Type?.HasHintValues == true)
+                        {
+                            completions.Add(new Completion(property.Type.Name, property.Type.Name + ".", property.Type.Name));
+                        }
+                    }
+                }
             }
-            if (ext.State == MarkupExtensionParser.ParserStateType.AttributeValue 
+            if (ext.State == MarkupExtensionParser.ParserStateType.AttributeValue
                 || ext.State == MarkupExtensionParser.ParserStateType.BeforeAttributeValue)
             {
                 var prop = _helper.LookupProperty(transformedName, ext.AttributeName);
-                if (prop?.Type?.IsEnum == true)
+                if (prop?.Type?.HasHintValues == true)
                 {
                     var enumStart = data.Substring(ext.CurrentValueStart);
-                    var enumCompletions = GetEnumCompletions(enumStart, prop.Type.EnumValues);
+                    var enumCompletions = GetHintCompletions(enumStart, prop.Type.HintValues);
                     completions.AddRange(enumCompletions);
                 }
             }
@@ -279,7 +368,7 @@ namespace Avalonia.Ide.CompletionEngine
 
         public static bool ShouldTriggerCompletionListOn(char typedChar)
         {
-            return char.IsLetterOrDigit(typedChar) || typedChar == '<' 
+            return char.IsLetterOrDigit(typedChar) || typedChar == '<'
                 || typedChar == ' ' || typedChar == '.' || typedChar == ':';
 
         }

@@ -1,11 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26403.7
+VisualStudioVersion = 15.0.27130.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{042CECB7-80C5-4A1C-AF22-A5AF4115ED88}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Avalonia.Ide.CompletionEngine", "src\Avalonia.Ide.CompletionEngine\Avalonia.Ide.CompletionEngine.csproj", "{C7C7139F-612D-44F3-AB47-56737A0E8D3C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Avalonia.Ide.CompletionEngine", "src\Avalonia.Ide.CompletionEngine\Avalonia.Ide.CompletionEngine.csproj", "{C7C7139F-612D-44F3-AB47-56737A0E8D3C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Avalonia.Ide.CompletionEngine.DnlibMetadataProvider", "src\Avalonia.Ide.CompletionEngine.DnlibMetadataProvider\Avalonia.Ide.CompletionEngine.DnlibMetadataProvider.csproj", "{C54E5FB7-D2F3-4FD1-A20A-3CA465CED8D0}"
 EndProject
@@ -13,9 +13,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{1335
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Editor.Wpf", "samples\Editor.Wpf\Editor.Wpf.csproj", "{1AEF8360-F2EA-4275-BE31-E09DB5AA9C58}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Avalonia.Ide.CompletionEngine.SrmMetadataProvider", "src\Avalonia.Ide.CompletionEngine.SrmMetadataProvider\Avalonia.Ide.CompletionEngine.SrmMetadataProvider.csproj", "{FD142639-0F1C-4712-BA69-07415A491D56}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Avalonia.Ide.CompletionEngine.SrmMetadataProvider", "src\Avalonia.Ide.CompletionEngine.SrmMetadataProvider\Avalonia.Ide.CompletionEngine.SrmMetadataProvider.csproj", "{FD142639-0F1C-4712-BA69-07415A491D56}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Editor.Avalonia", "samples\Editor.Avalonia\Editor.Avalonia.csproj", "{45FBDBE8-1827-43F9-92A4-39052F7BADA0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Editor.Avalonia", "samples\Editor.Avalonia\Editor.Avalonia.csproj", "{45FBDBE8-1827-43F9-92A4-39052F7BADA0}"
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Editor.Shared", "samples\Editor.Shared\Editor.Shared.shproj", "{411FBE58-FA4A-4918-BFB2-707D7558D297}"
 EndProject
@@ -28,6 +28,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Avalonia.Ide.LanguageServer.MSBuild", "src\Avalonia.Ide.LanguageServer.MSBuild\Avalonia.Ide.LanguageServer.MSBuild.csproj", "{6DAD5C3D-483E-4FCA-962B-FE678C412860}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "pngcs", "src\external\pngcs\pngcs.csproj", "{B2621E3F-82E1-404C-838D-EFDCB8680779}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Avalonia.Ide.WpfDesigner", "src\Avalonia.Ide.WpfDesigner\Avalonia.Ide.WpfDesigner.csproj", "{EC42600F-049B-43FF-AED1-8314D61B2749}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
@@ -151,6 +153,18 @@ Global
 		{B2621E3F-82E1-404C-838D-EFDCB8680779}.Release|x64.Build.0 = Release|x64
 		{B2621E3F-82E1-404C-838D-EFDCB8680779}.Release|x86.ActiveCfg = Release|x86
 		{B2621E3F-82E1-404C-838D-EFDCB8680779}.Release|x86.Build.0 = Release|x86
+		{EC42600F-049B-43FF-AED1-8314D61B2749}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EC42600F-049B-43FF-AED1-8314D61B2749}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EC42600F-049B-43FF-AED1-8314D61B2749}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{EC42600F-049B-43FF-AED1-8314D61B2749}.Debug|x64.Build.0 = Debug|Any CPU
+		{EC42600F-049B-43FF-AED1-8314D61B2749}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{EC42600F-049B-43FF-AED1-8314D61B2749}.Debug|x86.Build.0 = Debug|Any CPU
+		{EC42600F-049B-43FF-AED1-8314D61B2749}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EC42600F-049B-43FF-AED1-8314D61B2749}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EC42600F-049B-43FF-AED1-8314D61B2749}.Release|x64.ActiveCfg = Release|Any CPU
+		{EC42600F-049B-43FF-AED1-8314D61B2749}.Release|x64.Build.0 = Release|Any CPU
+		{EC42600F-049B-43FF-AED1-8314D61B2749}.Release|x86.ActiveCfg = Release|Any CPU
+		{EC42600F-049B-43FF-AED1-8314D61B2749}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -167,5 +181,9 @@ Global
 		{1E65ECBB-2A24-4858-BD54-5B16156C590D} = {042CECB7-80C5-4A1C-AF22-A5AF4115ED88}
 		{6DAD5C3D-483E-4FCA-962B-FE678C412860} = {042CECB7-80C5-4A1C-AF22-A5AF4115ED88}
 		{B2621E3F-82E1-404C-838D-EFDCB8680779} = {B44ED41E-2FA1-469C-87F0-90172FAA6146}
+		{EC42600F-049B-43FF-AED1-8314D61B2749} = {042CECB7-80C5-4A1C-AF22-A5AF4115ED88}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {95BF2E74-047C-4986-940E-12884B41C4CC}
 	EndGlobalSection
 EndGlobal

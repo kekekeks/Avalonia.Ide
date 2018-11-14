@@ -22,6 +22,9 @@ namespace Avalonia.Ide.CompletionEngine.DnlibMetadataProvider
 
         public IEnumerable<ICustomAttributeInformation> CustomAttributes
             => _asm.CustomAttributes.Select(a => new CustomAttributeWrapper(a));
+
+        public IEnumerable<string> ManifestResourceNames 
+            => _asm.ManifestModule.Resources.Select(r => r.Name.ToString());
     }
 
     class TypeWrapper : ITypeInformation
@@ -32,7 +35,7 @@ namespace Avalonia.Ide.CompletionEngine.DnlibMetadataProvider
 
         TypeWrapper(TypeDef type)
         {
-            if(type == null)
+            if (type == null)
                 throw new ArgumentNullException();
             _type = type;
         }
@@ -90,19 +93,28 @@ namespace Avalonia.Ide.CompletionEngine.DnlibMetadataProvider
         {
             Name = prop.Name;
             var setMethod = prop.SetMethod;
+            var getMethod = prop.GetMethod;
+
+            IsStatic = setMethod?.IsStatic ?? getMethod?.IsStatic ?? false;
+
             if (setMethod != null)
             {
                 HasPublicSetter = true;
-                IsStatic = setMethod.IsStatic;
+
                 TypeFullName = setMethod.Parameters[setMethod.IsStatic ? 0 : 1].Type.FullName;
+            }
+
+            if (getMethod != null)
+            {
+                HasPublicGetter = true;
             }
         }
 
         public bool IsStatic { get; }
         public bool HasPublicSetter { get; }
+        public bool HasPublicGetter { get; }
         public string TypeFullName { get; }
         public string Name { get; }
-
     }
 
     class MethodWrapper : IMethodInformation
@@ -114,7 +126,7 @@ namespace Avalonia.Ide.CompletionEngine.DnlibMetadataProvider
         {
             _method = method;
             _parameters = new Lazy<IList<IParameterInformation>>(() =>
-                _method.Parameters.Select(p => (IParameterInformation) new ParameterWrapper(p)).ToList() as
+                _method.Parameters.Select(p => (IParameterInformation)new ParameterWrapper(p)).ToList() as
                     IList<IParameterInformation>);
         }
 

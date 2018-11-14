@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -31,7 +32,7 @@ namespace Editor.Wpf
             var metadatapath = args.Length > 1 ? args[1] : GetPath();
 
             base.OnStartup(e);
-            new MainWindow() {DataContext = new MainWindowModel(new MetadataReader(new SrmMetadataProvider()).GetForTargetAssembly(metadatapath), null)}
+            new MainWindow() {DataContext = new MainWindowModel(new MetadataReader(new SrmMetadataProvider()).GetForTargetAssembly(metadatapath), null, Path.GetFileNameWithoutExtension(metadatapath)) }
                 .ShowDialog();
         }
     }

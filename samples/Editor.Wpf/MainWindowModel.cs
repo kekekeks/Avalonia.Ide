@@ -16,6 +16,8 @@ namespace Editor.Wpf
         private string _text;
         private CompletionSet _completionSet;
         CompletionEngine _engine = new CompletionEngine();
+        private string _currentAssemblyName;
+
         public Metadata Metadata { get; }
 
         public string Text
@@ -40,14 +42,23 @@ namespace Editor.Wpf
 
         public void UpdateCompletions(int position)
         {
-            CompletionSet = _engine.GetCompletions(Metadata, Text, position);
+            CompletionSet = _engine.GetCompletions(Metadata, Text, position, _currentAssemblyName);
         }
 
-        public MainWindowModel(Metadata metadata, string text)
+        public MainWindowModel(Metadata metadata, string text, string currentAssemblyName)
         {
+            _currentAssemblyName = currentAssemblyName;
             Metadata = metadata;
             Text = text ??
-                   "<UserControl xmlns='https://github.com/avaloniaui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'>\r\n    <Button></Button>\r\n</UserControl>"
+@"<UserControl xmlns='https://github.com/avaloniaui' 
+               xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'>
+<UserControl.Styles>
+    <Style Selector='Button'>
+        <Setter Property='Background' Value='Red' />
+    </Style>
+</UserControl.Styles>
+      <Button></Button>
+</UserControl>"
                        .Replace("'", "\"");
         }
 

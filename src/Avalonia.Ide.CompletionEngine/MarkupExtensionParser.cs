@@ -92,6 +92,8 @@ namespace Avalonia.Ide.CompletionEngine
             }
         }
 
+        public int AttributesCount { get; private set; }
+
         ParserState _state;
         Stack<ParserState> _stack = new Stack<ParserState>();
 
@@ -104,6 +106,7 @@ namespace Avalonia.Ide.CompletionEngine
 
         private void Parse()
         {
+            AttributesCount = 0;
             for (int c = 0; c < _data.Length; c++)
             {
                 var st = _state.State;
@@ -113,6 +116,7 @@ namespace Avalonia.Ide.CompletionEngine
                 if (ch == ',')
                 {
                     _state.State = ParserStateType.InsideElement;
+                    AttributesCount++;
                 }
                 else if (ch == '{')
                 {
@@ -120,6 +124,7 @@ namespace Avalonia.Ide.CompletionEngine
                         _stack.Push(_state);
                     _state.Reset(ParserStateType.StartElement);
                     _state.ElementNameStart = c + 1;
+                    AttributesCount = 0;
                 }
                 else if (ch == '}')
                 {
@@ -150,14 +155,21 @@ namespace Avalonia.Ide.CompletionEngine
                 }
                 else if (st == ParserStateType.StartAttribute)
                 {
-                    _state.AttributeNameEnd = c - 1;
                     if (ch == '=')
                     {
+                        _state.AttributeNameEnd = c - 1;
                         _state.State = ParserStateType.BeforeAttributeValue;
                         _state.AttributeValueStart = c + 1;
                     }
                     else if (char.IsWhiteSpace(ch))
+                    {
+                        _state.AttributeNameEnd = c - 1;
                         _state.State = ParserStateType.AfterAttribute;
+                    }
+                    else
+                    {
+                        _state.AttributeNameEnd = c;
+                    }
                 }
                 else if (st == ParserStateType.AfterAttribute)
                 {
