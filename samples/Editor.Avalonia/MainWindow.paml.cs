@@ -30,6 +30,7 @@ namespace Editor.Avalonia
 
             _editor.TextArea.TextEntering +=OnTextEntering;
             _editor.TextArea.TextEntered += OnTextEntered;
+            this.DataContextChanged += HandleDataContextChanged;
         }
 
         class CompletionData : ICompletionData
@@ -117,6 +118,7 @@ namespace Editor.Avalonia
         {
             if (e.Text.Length > 0 && _completionWindow != null)
             {
+                
                 var typedChar = e.Text[0];
                 if (char.IsWhiteSpace(typedChar) || char.IsPunctuation(typedChar))
                     _completionWindow.CompletionList.RequestInsertion(e);
@@ -125,9 +127,8 @@ namespace Editor.Avalonia
             }
         }
 
-        protected override void OnDataContextChanged()
+        void HandleDataContextChanged(object sender, EventArgs eventArgs)
         {
-            base.OnDataContextChanged();
             _editor.Text = Model?.Text ?? "";
         }
 
