@@ -24,11 +24,12 @@ namespace Avalonia.Ide.CompletionEngine
             {
                 Name = type.Name,
                 IsStatic = type.IsStatic,
-                IsMarkupExtension = MetadataConverter.IsMarkupExtension(type),
+                IsMarkupExtension = IsMarkupExtension(type),
+                IsEnum = type.IsEnum,
                 HasHintValues = type.IsEnum
 
             };
-            if (mt.HasHintValues)
+            if (mt.IsEnum)
                 mt.HintValues = type.EnumValues.ToArray();
             return mt;
         }
