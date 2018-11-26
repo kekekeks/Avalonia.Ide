@@ -9,8 +9,4 @@
   <ItemGroup>
     <ProjectReference Include="..\Avalonia.Ide.CompletionEngine\Avalonia.Ide.CompletionEngine.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Properties" />
-  </ItemGroup>
-
 </Project>
