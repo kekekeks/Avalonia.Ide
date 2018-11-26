@@ -105,8 +105,6 @@ namespace Avalonia.Ide.CompletionEngine
                     e = e.Where(p => p.IsAttached);
                 if (staticGettersOnly)
                     e = e.Where(p => p.IsStatic && p.HasGetter);
-                if (!attachedOnly && !staticGettersOnly)
-                    e = e.Where(p => !p.IsStatic && p.HasSetter);
 
                 return e.Select(p => p.Name);
             }

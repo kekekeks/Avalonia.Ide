@@ -31,6 +31,8 @@ namespace Avalonia.Ide.CompletionEngine
             RecommendedCursorOffset = recommendedCursorOffset;
         }
 
+        public override string ToString() => DisplayText;
+
         public Completion(string insertText, CompletionKind kind) : this(insertText, insertText, insertText, kind)
         {
 

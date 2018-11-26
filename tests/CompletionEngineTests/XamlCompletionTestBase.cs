@@ -4,7 +4,6 @@ using System.Reflection;
 using Avalonia.Ide.CompletionEngine;
 using Avalonia.Ide.CompletionEngine.AssemblyMetadata;
 using Avalonia.Ide.CompletionEngine.DnlibMetadataProvider;
-using Avalonia.Ide.CompletionEngine.SrmMetadataProvider;
 using Xunit;
 
 namespace CompletionEngineTests
@@ -46,7 +45,7 @@ namespace CompletionEngineTests
             if (comp == null)
                 throw new Exception("No completions found");
             Assert.True(xaml.Length == comp.StartPosition, "Invalid completion start position");
-            Assert.True(comp.Completions.Any(c => c.InsertText == completion));
+            Assert.Equal(1, comp.Completions.Count(c => c.InsertText == completion));
         }
     }
 }

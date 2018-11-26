@@ -46,7 +46,14 @@ namespace Avalonia.Ide.CompletionEngine.DnlibMetadataProvider
         public ITypeInformation GetBaseType() => FromDef(_type.GetBaseType().ResolveTypeDef());
 
         public IEnumerable<IMethodInformation> Methods => _type.Methods.Select(m => new MethodWrapper(m));
-        public IEnumerable<IPropertyInformation> Properties => _type.Properties.Select(p => new PropertyWrapper(p));
+
+        public IEnumerable<IPropertyInformation> Properties => _type.Properties
+            //Filter indexer properties
+            .Where(p =>
+                (p.GetMethod == null || p.GetMethod.Parameters.Count == (p.GetMethod.IsStatic ? 0 : 1))
+                && (p.SetMethod == null || p.SetMethod.Parameters.Count == (p.SetMethod.IsStatic ? 1 : 2)))
+
+            .Select(p => new PropertyWrapper(p));
         public bool IsEnum => _type.IsEnum;
         public bool IsStatic => _type.IsAbstract && _type.IsSealed;
         public bool IsInterface => _type.IsInterface;

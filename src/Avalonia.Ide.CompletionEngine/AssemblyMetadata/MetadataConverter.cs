@@ -77,19 +77,14 @@ namespace Avalonia.Ide.CompletionEngine
                 int level = 0;
                 while (typeDef != null)
                 {
-                    foreach (var prop in typeDef.GetAllProperties())
+                    foreach (var prop in typeDef.Properties)
                     {
                         if (!prop.HasPublicGetter && !prop.HasPublicSetter)
                             continue;
 
-                        var p = new MetadataProperty
-                        {
-                            Name = prop.Name,
-                            Type = types.GetValueOrDefault(prop.TypeFullName),
-                            IsStatic = prop.IsStatic,
-                            HasGetter = prop.HasPublicGetter,
-                            HasSetter = prop.HasPublicSetter
-                        };
+                        var p = new MetadataProperty(prop.Name, types.GetValueOrDefault(prop.TypeFullName),
+                            types.GetValueOrDefault(typeDef.FullName), false, prop.IsStatic, prop.HasPublicGetter,
+                            prop.HasPublicSetter);
 
                         type.Properties.Add(p);
                     }
@@ -102,12 +97,11 @@ namespace Avalonia.Ide.CompletionEngine
                             if (methodDef.Name.StartsWith("Set") && methodDef.IsStatic && methodDef.IsPublic
                                 && methodDef.Parameters.Count == 2)
                             {
-                                type.Properties.Add(new MetadataProperty()
-                                {
-                                    Name = methodDef.Name.Substring(3),
-                                    IsAttached = true,
-                                    Type = types.GetValueOrDefault(methodDef.Parameters[1].TypeFullName)
-                                });
+                                var name = methodDef.Name.Substring(3);
+                                type.Properties.Add(new MetadataProperty(name,
+                                    types.GetValueOrDefault(methodDef.Parameters[1].TypeFullName),
+                                    types.GetValueOrDefault(typeDef.FullName),
+                                    true, false, true, true));
                             }
                         }
                     }
