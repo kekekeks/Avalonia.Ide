@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Avalonia.Ide.CompletionEngine
 {
@@ -163,6 +165,18 @@ namespace Avalonia.Ide.CompletionEngine
                     State = ParserState.InsideElement;
                 }
             }
+        }
+        
+        public string GetParentTagName(int level = 0)
+        {
+            if (NestingLevel - level - 2 < 0)
+                return null;
+            var start = _containingTagStart.Skip(level + 1).FirstOrDefault();
+            var m = Regex.Match(_data.Substring(start), @"^<[^\s/>]+");
+            if (m.Success)
+                return m.Value.Substring(1);
+            return null;
+
         }
 
         public static XmlParser Parse(string data)

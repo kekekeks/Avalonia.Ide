@@ -89,23 +89,33 @@ namespace Avalonia.Ide.CompletionEngine
                 return rv;
             }
 
-            public IEnumerable<string> FilterPropertyNames(string typeName, string propName, bool attachedOnly = false,
-                bool staticGettersOnly = false, bool hintValues = false)
+            public IEnumerable<string> GetHintValues(string typeName, string propName)
+            {
+                var t = LookupType(typeName);
+                propName = propName ?? "";
+                if (t == null)
+                    return new string[0];
+                return t.HintValues.Where(v => v.StartsWith(propName, StringComparison.OrdinalIgnoreCase));
+            }
+            
+            public IEnumerable<string> FilterPropertyNames(string typeName, string propName, 
+                bool? attached,
+                bool staticGetter = false)
             {
                 var t = LookupType(typeName);
                 propName = propName ?? "";
                 if (t == null)
                     return new string[0];
 
-                if (hintValues && t.HasHintValues)
-                    return t.HintValues.Where(v => v.StartsWith(propName, StringComparison.OrdinalIgnoreCase));
-
                 var e = t.Properties.Where(p => p.Name.StartsWith(propName, StringComparison.OrdinalIgnoreCase));
-                if (attachedOnly)
-                    e = e.Where(p => p.IsAttached);
-                if (staticGettersOnly)
-                    e = e.Where(p => p.IsStatic && p.HasGetter);
 
+                if (attached.HasValue)
+                    e = e.Where(p => p.IsAttached == attached);
+                if (staticGetter)
+                    e = e.Where(p => p.IsStatic && p.HasGetter);
+                else
+                    e = e.Where(p => !p.IsStatic);
+                
                 return e.Select(p => p.Name);
             }
 
@@ -182,7 +192,10 @@ namespace Avalonia.Ide.CompletionEngine
                     var typeName = tagName.Substring(0, dotPos);
                     var compName = tagName.Substring(dotPos + 1);
                     curStart = curStart + dotPos + 1;
-                    completions.AddRange(_helper.FilterPropertyNames(typeName, compName).Select(p => new Completion(p, CompletionKind.Enum)));
+                    var sameType = state.GetParentTagName() == typeName;
+
+                    completions.AddRange(_helper.FilterPropertyNames(typeName, compName, sameType ? (bool?) null : true)
+                        .Select(p => new Completion(p, CompletionKind.Enum)));
                 }
                 else
                     completions.AddRange(_helper.FilterTypeNames(tagName).Select(x => new Completion(x, CompletionKind.Class)));
@@ -204,7 +217,7 @@ namespace Avalonia.Ide.CompletionEngine
                 }
                 else
                 {
-                    completions.AddRange(_helper.FilterPropertyNames(state.TagName, state.AttributeName)
+                    completions.AddRange(_helper.FilterPropertyNames(state.TagName, state.AttributeName, false)
                         .Select(x => new Completion(x, x + "=\"\"", x, CompletionKind.Property, x.Length + 2)));
 
                     var targetType = _helper.LookupType(state.TagName);
@@ -304,7 +317,7 @@ namespace Avalonia.Ide.CompletionEngine
             {
                 if (ext.State == MarkupExtensionParser.ParserStateType.InsideElement)
                     forcedStart = data.Length;
-                completions.AddRange(_helper.FilterPropertyNames(transformedName, ext.AttributeName ?? "")
+                completions.AddRange(_helper.FilterPropertyNames(transformedName, ext.AttributeName ?? "", false)
                     .Select(x => new Completion(x, x + "=", x, CompletionKind.MarkupExtension)));
 
                 var attribName = ext.AttributeName ?? "";
@@ -328,8 +341,12 @@ namespace Avalonia.Ide.CompletionEngine
                             var split = attribName.Split('.');
                             var type = split[0];
                             var prop = split[1];
-                            var props = _helper.FilterPropertyNames(type, prop, staticGettersOnly: true, hintValues: true);
-                            completions.AddRange(props.Select(x => new Completion(x, $"{type}.{x}", x, CompletionKind.MarkupExtension)));
+                            IEnumerable<string> results;
+                            if (t.SupportCtorArgument == MetadataTypeCtorArgument.HintValues)
+                                results = _helper.GetHintValues(type, prop);
+                            else
+                                results= _helper.FilterPropertyNames(type, prop, null, staticGetter: true);
+                            completions.AddRange(results.Select(x => new Completion(x, $"{type}.{x}", x, CompletionKind.MarkupExtension)));
                         }
                     }
                     else

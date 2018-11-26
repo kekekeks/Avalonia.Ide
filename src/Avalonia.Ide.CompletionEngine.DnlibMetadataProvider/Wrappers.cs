@@ -52,7 +52,8 @@ namespace Avalonia.Ide.CompletionEngine.DnlibMetadataProvider
             .Where(p =>
                 (p.GetMethod == null || p.GetMethod.Parameters.Count == (p.GetMethod.IsStatic ? 0 : 1))
                 && (p.SetMethod == null || p.SetMethod.Parameters.Count == (p.SetMethod.IsStatic ? 1 : 2)))
-
+            // Filter property overrides
+            .Where(p => !p.Name.Contains("."))
             .Select(p => new PropertyWrapper(p));
         public bool IsEnum => _type.IsEnum;
         public bool IsStatic => _type.IsAbstract && _type.IsSealed;
