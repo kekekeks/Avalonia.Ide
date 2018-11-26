@@ -53,7 +53,7 @@ namespace Editor.Avalonia
             if (e.Text.Length > 0 && Model.CompletionSet != null && Model.CompletionSet.Completions.Count != 0)
             {
                 var typedChar = e.Text[0];
-                if (char.IsWhiteSpace(typedChar) || char.IsPunctuation(typedChar))
+                if (char.IsWhiteSpace(typedChar) || (char.IsPunctuation(typedChar) && typedChar != '/'))
                 {
                     var completion = Model.CompletionSet.Completions[
                         Math.Min(_listBox.SelectedIndex, Model.CompletionSet.Completions.Count - 1)];

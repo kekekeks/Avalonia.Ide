@@ -186,13 +186,24 @@ namespace Avalonia.Ide.CompletionEngine
             if (state.State == XmlParser.ParserState.StartElement)
             {
                 var tagName = state.TagName;
-                if (tagName.Contains("."))
+                if (tagName.StartsWith("/"))
+                {
+                    if (text.Length < 2)
+                        return null;
+                    var closingState = XmlParser.Parse(text.Substring(0, text.Length - 2));
+
+                    var name = closingState.GetParentTagName(0);
+                    if (name == null)
+                        return null;
+                    completions.Add(new Completion("/" + name + ">", CompletionKind.Class));
+                }
+                else if (tagName.Contains("."))
                 {
                     var dotPos = tagName.IndexOf(".");
                     var typeName = tagName.Substring(0, dotPos);
                     var compName = tagName.Substring(dotPos + 1);
                     curStart = curStart + dotPos + 1;
-                    var sameType = state.GetParentTagName() == typeName;
+                    var sameType = state.GetParentTagName(1) == typeName;
 
                     completions.AddRange(_helper.FilterPropertyNames(typeName, compName, sameType ? (bool?) null : true)
                         .Select(p => new Completion(p, CompletionKind.Enum)));
@@ -380,7 +391,7 @@ namespace Avalonia.Ide.CompletionEngine
 
         public static bool ShouldTriggerCompletionListOn(char typedChar)
         {
-            return char.IsLetterOrDigit(typedChar) || typedChar == '<'
+            return char.IsLetterOrDigit(typedChar) || typedChar == '/' || typedChar == '<'
                 || typedChar == ' ' || typedChar == '.' || typedChar == ':';
 
         }

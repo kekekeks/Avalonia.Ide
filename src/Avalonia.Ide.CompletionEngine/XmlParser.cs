@@ -167,11 +167,11 @@ namespace Avalonia.Ide.CompletionEngine
             }
         }
         
-        public string GetParentTagName(int level = 0)
+        public string GetParentTagName(int level)
         {
-            if (NestingLevel - level - 2 < 0)
+            if (NestingLevel - level - 1 < 0)
                 return null;
-            var start = _containingTagStart.Skip(level + 1).FirstOrDefault();
+            var start = _containingTagStart.Skip(level).FirstOrDefault();
             var m = Regex.Match(_data.Substring(start), @"^<[^\s/>]+");
             if (m.Success)
                 return m.Value.Substring(1);
