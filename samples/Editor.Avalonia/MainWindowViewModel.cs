@@ -41,10 +41,11 @@ namespace Editor.Avalonia
 
         public void UpdateCompletions(int position)
         {
-            CompletionSet = _engine.GetCompletions(Metadata, Text, position, _currentAssemblyName);
-            if (CompletionSet != null)
-                CompletionSet.Completions = CompletionSet.Completions.OrderBy(c => c.InsertText.Length)
+            var s = _engine.GetCompletions(Metadata, Text, position, _currentAssemblyName);
+            if (s != null)
+                s.Completions = s.Completions.OrderBy(c => c.DisplayText.Length)
                     .ThenBy(c => c.InsertText).ToList();
+            CompletionSet = s;
         }
 
         public MainWindowModel(Metadata metadata, string text, string currentAssemblyName)
