@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using Avalonia.Ide.CompletionEngine;
 using Avalonia.Ide.CompletionEngine.AssemblyMetadata;
 
-namespace Editor
+namespace Editor.Avalonia
 {
     public class MainWindowModel : INotifyPropertyChanged
     {
@@ -42,6 +42,9 @@ namespace Editor
         public void UpdateCompletions(int position)
         {
             CompletionSet = _engine.GetCompletions(Metadata, Text, position, _currentAssemblyName);
+            if (CompletionSet != null)
+                CompletionSet.Completions = CompletionSet.Completions.OrderBy(c => c.InsertText.Length)
+                    .ThenBy(c => c.InsertText).ToList();
         }
 
         public MainWindowModel(Metadata metadata, string text, string currentAssemblyName)

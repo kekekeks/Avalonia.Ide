@@ -11,8 +11,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{1335
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Editor.Avalonia", "samples\Editor.Avalonia\Editor.Avalonia.csproj", "{45FBDBE8-1827-43F9-92A4-39052F7BADA0}"
 EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Editor.Shared", "samples\Editor.Shared\Editor.Shared.shproj", "{411FBE58-FA4A-4918-BFB2-707D7558D297}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "external", "external", "{B44ED41E-2FA1-469C-87F0-90172FAA6146}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "lsp", "src\external\lsp\lsp.csproj", "{06B3AFF1-DAA1-4897-ADEE-B2CC4F6F8FFC}"

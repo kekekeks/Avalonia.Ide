@@ -20,127 +20,112 @@ namespace Editor.Avalonia
     class MainWindow : Window
     {
         private readonly TextEditor _editor;
-        private CustomCompletionWindow _completionWindow;
+        private ListBox _listBox;
+        private MainWindowModel Model => (MainWindowModel) DataContext;
 
         public MainWindow()
         {
             AvaloniaXamlLoader.Load(this);
             _editor = this.FindControl<TextEditor>("Editor");
-            _editor.SyntaxHighlighting = HighlightingManager.Instance.GetDefinition("XML");
-
-            _editor.TextArea.TextEntering +=OnTextEntering;
+            _listBox = this.FindControl<ListBox>("ListBox");
+            _editor.TextArea.TextEntering += OnTextEntering;
             _editor.TextArea.TextEntered += OnTextEntered;
-            this.DataContextChanged += HandleDataContextChanged;
+            DataContextChanged += HandleDataContextChanged;
         }
 
-        class CompletionData : ICompletionData
+        static MainWindow()
         {
-            private readonly Completion _completion;
-            private readonly int _startPosition;
-
-            public CompletionData(Completion completion, int startPosition)
-            {
-                _completion = completion;
-                _startPosition = startPosition;
-            }
-
-            public void Complete(TextArea textArea, ISegment completionSegment, EventArgs insertionRequestEventArgs)
-            {
-                textArea.Document.Replace(_startPosition, completionSegment.EndOffset - _startPosition,
-                    _completion.InsertText);
-                if (_completion.RecommendedCursorOffset.HasValue)
-                    textArea.Caret.Offset = _startPosition + _completion.RecommendedCursorOffset.Value;
-                else
-                    textArea.Caret.Offset = _startPosition + _completion.InsertText.Length;
-            }
-
-            public IBitmap Image => null;
-            public string Text => _completion.DisplayText;
-
-            public object Content => _completion.DisplayText;
-
-            public object Description => _completion.Description;
-
-            public double Priority => 1;
+            KeyDownEvent.AddClassHandler<MainWindow>(w => w.HandleKeyDown, RoutingStrategies.Tunnel);
         }
 
-        class CustomCompletionWindow : CompletionWindow
-        {
-            public event Action ReallyClosed;
-            public CustomCompletionWindow(TextArea textArea) : base(textArea)
-            {
-            }
-
-            protected override void OnClosed()
-            {
-                base.OnClosed();
-                ReallyClosed?.Invoke();
-            }
-        }
+        private void HandleDataContextChanged(object sender, EventArgs e) => _editor.TextArea.Document.Text = Model?.Text ?? "";
 
         private void OnTextEntered(object sender, TextInputEventArgs e)
         {
-            if(_completionWindow != null)
-                return;
-            if(!BuildCompletionData())
-                return;
-
-            // Open code completion after the user has pressed dot:
-            _completionWindow = new CustomCompletionWindow(_editor.TextArea);
-            AugmentCompletionData();
-            _completionWindow.Show();
-            _completionWindow.ReallyClosed += delegate
-            {
-                _completionWindow = null;
-            };
+            if (CompletionEngine.ShouldTriggerCompletionListOn(e.Text[0]))
+                UpdateCompletionList();
+            else
+                HideCompletionList();
         }
 
-        bool BuildCompletionData()
-        {
-            Model.Text = _editor.Text;
-            Model.UpdateCompletions(_editor.SelectionStart);
-            return Model.CompletionSet != null && Model.CompletionSet.Completions.Count > 0;
-        }
-
-        void AugmentCompletionData()
-        {
-            IList<ICompletionData> data = _completionWindow.CompletionList.CompletionData;
-            data.Clear();
-            Model.Text = _editor.Text;
-            Model.UpdateCompletions(_editor.SelectionStart);
-            foreach (var c in Model.CompletionSet.Completions)
-                data.Add(new CompletionData(c, Model.CompletionSet.StartPosition));
-            _completionWindow.StartOffset = Model.CompletionSet.StartPosition;
-        }
-
-        
         private void OnTextEntering(object sender, TextInputEventArgs e)
         {
-            if (e.Text.Length > 0 && _completionWindow != null)
+            if (e.Text.Length > 0 && Model.CompletionSet != null && Model.CompletionSet.Completions.Count != 0)
             {
-                
                 var typedChar = e.Text[0];
                 if (char.IsWhiteSpace(typedChar) || char.IsPunctuation(typedChar))
-                    _completionWindow.CompletionList.RequestInsertion(e);
-                else
-                    AugmentCompletionData();
+                {
+                    var completion = Model.CompletionSet.Completions[
+                        Math.Min(_listBox.SelectedIndex, Model.CompletionSet.Completions.Count - 1)];
+                    Complete(completion);
+                }
             }
         }
 
-        void HandleDataContextChanged(object sender, EventArgs eventArgs)
+        void Complete(Completion completion)
         {
-            _editor.Text = Model?.Text ?? "";
-        }
+            var set = Model.CompletionSet;
+            var textArea = _editor.TextArea;
+            var startPosition = set.StartPosition;
+            textArea.Document.Replace(startPosition, textArea.Caret.Offset - startPosition,
+                completion.InsertText);
+            if (completion.RecommendedCursorOffset.HasValue)
+                textArea.Caret.Offset = startPosition + completion.RecommendedCursorOffset.Value;
+            else
+                textArea.Caret.Offset = startPosition + completion.InsertText.Length;
 
-        private MainWindowModel Model => (MainWindowModel)DataContext;
+        }
 
         void UpdateCompletionList()
         {
-            /*
-            Model.UpdateCompletions(_textBox.CaretIndex);
+            Model.Text = _editor.TextArea.Document.Text;
+            Model.UpdateCompletions(_editor.TextArea.Caret.Offset);
             if (Model.CompletionSet?.Completions?.Count > 0)
-                _listBox.SelectedIndex = 0;*/
+                _listBox.SelectedIndex = 0;
         }
 
+        void HideCompletionList()
+        {
+            Model.CompletionSet = null;
+        }
+        
+        private void HandleKeyDown(KeyEventArgs e)
+        {
+            if (e.Key == Key.Space && (e.Modifiers & InputModifiers.Control) != 0)
+            {
+                e.Handled = true;
+                UpdateCompletionList();
+            }
+            else if (Model.CompletionSet?.Completions?.Count > 0)
+            {
+                var itemCount = Model.CompletionSet.Completions.Count;
+                if (e.Key == Key.Down)
+                {
+                    var nextIndex = _listBox.SelectedIndex + 1;
+                    nextIndex = itemCount == nextIndex ? 0 : nextIndex;
+                    _listBox.SelectedIndex = nextIndex;
+                    _listBox.ScrollIntoView(_listBox.SelectedItems[0]);
+                    e.Handled = true;
+                }
+                else if (e.Key == Key.Up)
+                {
+                    var nextIndex = _listBox.SelectedIndex - 1;
+                    nextIndex = nextIndex >= 0 ? nextIndex : itemCount - 1;
+                    _listBox.SelectedIndex = nextIndex;
+                    _listBox.ScrollIntoView(_listBox.SelectedItems[0]);
+                    e.Handled = true;
+                }
+                else if (e.Key == Key.Return)
+                {
+                    var completion = (Completion)_listBox.SelectedItems[0];
+                    Complete(completion);
+                    Dispatcher.UIThread.InvokeAsync(new Action(UpdateCompletionList));
+                    e.Handled = true;
+                }
+                else
+                    Model.CompletionSet = null;
+            }
+            
+        }
     }
 }

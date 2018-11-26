@@ -18,5 +18,4 @@
     <ProjectReference Include="..\..\src\Avalonia.Ide.CompletionEngine\Avalonia.Ide.CompletionEngine.csproj" />
     <ProjectReference Include="..\..\src\external\AvaloniaEdit\src\AvaloniaEdit\AvaloniaEdit.csproj" />
   </ItemGroup>
-  <Import Project="..\Editor.Shared\Editor.Shared.projitems" Label="Shared" />
 </Project>

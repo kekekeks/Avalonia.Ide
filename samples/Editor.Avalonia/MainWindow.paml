@@ -1,8 +1,9 @@
 ﻿<Window xmlns="https://github.com/avaloniaui"
         xmlns:AvalonEdit="clr-namespace:AvaloniaEdit;assembly=AvaloniaEdit"
-        MinWidth="500" MinHeight="300" Design.Width="500" 
+        MinWidth="500" MinHeight="600" Design.Width="500" 
         Title="Editor">
-    <DockPanel>
-        <AvalonEdit:TextEditor Name="Editor" FontSize="18" />
-    </DockPanel>
+    <Grid RowDefinitions="*,0.5*">
+        <AvalonEdit:TextEditor Grid.Row="0" Name="Editor" FontSize="18" />
+        <ListBox Grid.Row="1" Name="ListBox" Items="{Binding CompletionSet.Completions}"/>
+    </Grid>
 </Window>
