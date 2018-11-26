@@ -100,13 +100,14 @@ namespace Avalonia.Ide.CompletionEngine.DnlibMetadataProvider
             if (setMethod != null)
             {
                 HasPublicSetter = true;
-
                 TypeFullName = setMethod.Parameters[setMethod.IsStatic ? 0 : 1].Type.FullName;
             }
 
             if (getMethod != null)
             {
                 HasPublicGetter = true;
+                if(TypeFullName == null)
+                    TypeFullName = getMethod.ReturnType.FullName;
             }
         }
 

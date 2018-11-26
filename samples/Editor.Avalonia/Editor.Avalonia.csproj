@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
     <EmbeddedResource Include="**\*.xaml;Assets\*" Exclude="bin\**;obj\**;**\*.xproj;packages\**;@(EmbeddedResource)" />
@@ -14,7 +14,7 @@
     <PackageReference Include="System.Reactive.Core" Version="4.1.2" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Avalonia.Ide.CompletionEngine.SrmMetadataProvider\Avalonia.Ide.CompletionEngine.SrmMetadataProvider.csproj" />
+    <ProjectReference Include="..\..\src\Avalonia.Ide.CompletionEngine.DnlibMetadataProvider\Avalonia.Ide.CompletionEngine.DnlibMetadataProvider.csproj" />
     <ProjectReference Include="..\..\src\Avalonia.Ide.CompletionEngine\Avalonia.Ide.CompletionEngine.csproj" />
     <ProjectReference Include="..\..\src\external\AvaloniaEdit\src\AvaloniaEdit\AvaloniaEdit.csproj" />
   </ItemGroup>

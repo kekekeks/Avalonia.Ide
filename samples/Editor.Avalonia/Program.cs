@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Ide.CompletionEngine.AssemblyMetadata;
-using Avalonia.Ide.CompletionEngine.SrmMetadataProvider;
+using Avalonia.Ide.CompletionEngine.DnlibMetadataProvider;
 using Avalonia.Threading;
 using Editor;
 using Editor.Avalonia;
@@ -46,7 +46,7 @@ class Program
         }
         if (path == "--self")
             path = typeof(Program).GetTypeInfo().Assembly.GetModules()[0].FullyQualifiedName;
-        return new MainWindowModel(new MetadataReader(new SrmMetadataProvider()).GetForTargetAssembly(path),
+        return new MainWindowModel(new MetadataReader(new DnlibMetadataProvider()).GetForTargetAssembly(path),
             null, Path.GetFileNameWithoutExtension(path));
     }
 }

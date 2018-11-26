@@ -77,7 +77,7 @@ namespace Avalonia.Ide.CompletionEngine
                 int level = 0;
                 while (typeDef != null)
                 {
-                    foreach (var prop in typeDef.Properties)
+                    foreach (var prop in typeDef.GetAllProperties())
                     {
                         if (!prop.HasPublicGetter && !prop.HasPublicSetter)
                             continue;

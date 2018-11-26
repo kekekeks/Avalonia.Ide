@@ -79,9 +79,6 @@ namespace Avalonia.Ide.CompletionEngine
                 if (staticGettersOnly)
                     e = e.Where(t => t.Value.HasStaticGetProperties);
 
-                if (!markupExtensionsOnly && !staticGettersOnly && !withAttachedPropertiesOnly)
-                    e = e.Where(t => t.Value.HasSetProperties);
-
                 return e.Select(s => s.Key);
             }
 
