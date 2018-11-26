@@ -6,4 +6,4 @@
 	url = https://github.com/AvaloniaUI/pngcs.git
 [submodule "src/external/AvaloniaEdit"]
 	path = src/external/AvaloniaEdit
-	url = git@github.com:AvaloniaUI/AvaloniaEdit.git
+	url = https://github.com/AvaloniaUI/AvaloniaEdit.git
