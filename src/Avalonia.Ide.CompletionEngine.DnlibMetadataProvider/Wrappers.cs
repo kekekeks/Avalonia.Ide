@@ -135,7 +135,7 @@ namespace Avalonia.Ide.CompletionEngine.DnlibMetadataProvider
         {
             _method = method;
             _parameters = new Lazy<IList<IParameterInformation>>(() =>
-                _method.Parameters.Select(p => (IParameterInformation)new ParameterWrapper(p)).ToList() as
+                _method.Parameters.Skip(_method.IsStatic ? 0 : 1).Select(p => (IParameterInformation)new ParameterWrapper(p)).ToList() as
                     IList<IParameterInformation>);
         }
 
