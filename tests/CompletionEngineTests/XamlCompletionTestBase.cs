@@ -44,7 +44,7 @@ namespace CompletionEngineTests
             if (comp == null)
                 throw new Exception("No completions found");
 
-            Assert.True(xaml.Length == comp.StartPosition, $"Invalid completion start position typed:{typed} expected: {completion}");
+            Assert.True(xaml.Length == comp.StartPosition, $"Invalid completion start position typed: {typed} expected: {completion}");
 
             Assert.Contains(comp.Completions, c => c.InsertText == completion);
 
