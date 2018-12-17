@@ -183,6 +183,7 @@ namespace Avalonia.Ide.CompletionEngine
                     HintValues = new[] { "True", "False" }
                 },
                 new MetadataType(){ Name = typeof(System.Uri).FullName },
+                new MetadataType(){ Name = typeof(System.Type).FullName },
                 new MetadataType(){ Name = "Avalonia.Media.IBrush" },
                 new MetadataType(){ Name = "Avalonia.Media.Imaging.IBitmap" }
             };

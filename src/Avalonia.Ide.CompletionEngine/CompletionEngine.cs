@@ -264,6 +264,10 @@ namespace Avalonia.Ide.CompletionEngine
 
                         completions.AddRange(GetHintCompletions(prop.Type, search));
                     }
+                    else if(prop?.Type?.Name == typeof(Type).FullName)
+                    {
+                        completions.AddRange(_helper.FilterTypeNames(state.AttributeValue).Select(x => new Completion(x, x, x, CompletionKind.Class)));
+                    }
                     else if (state.AttributeName == "xmlns" || state.AttributeName.Contains("xmlns:"))
                     {
                         if (state.AttributeValue.StartsWith("clr-namespace:"))
