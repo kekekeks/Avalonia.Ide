@@ -24,11 +24,12 @@ namespace Avalonia.Ide.CompletionEngine
             {
                 Name = type.Name,
                 IsStatic = type.IsStatic,
-                IsMarkupExtension = MetadataConverter.IsMarkupExtension(type),
+                IsMarkupExtension = IsMarkupExtension(type),
+                IsEnum = type.IsEnum,
                 HasHintValues = type.IsEnum
 
             };
-            if (mt.HasHintValues)
+            if (mt.IsEnum)
                 mt.HintValues = type.EnumValues.ToArray();
             return mt;
         }
@@ -182,6 +183,7 @@ namespace Avalonia.Ide.CompletionEngine
                     HintValues = new[] { "True", "False" }
                 },
                 new MetadataType(){ Name = typeof(System.Uri).FullName },
+                new MetadataType(){ Name = typeof(System.Type).FullName },
                 new MetadataType(){ Name = "Avalonia.Media.IBrush" },
                 new MetadataType(){ Name = "Avalonia.Media.Imaging.IBitmap" }
             };

@@ -9,6 +9,8 @@ namespace Avalonia.Ide.CompletionEngine
         None,
         Class,
         Property,
+        AttachedProperty,
+        StaticProperty,
         Namespace,
         Enum,
         MarkupExtension
