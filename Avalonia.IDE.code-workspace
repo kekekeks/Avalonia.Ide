@@ -1,0 +1,23 @@
+{
+	"folders": [
+		{
+			"path": "./vscode-extension"
+		},
+		{
+			"path": "./src/Avalonia.Ide.LanguageServer"
+		}
+	],
+	"settings": {},
+	"launch": {
+		"configurations": [],
+		"compounds": [
+			{
+				"name": "Launch Server & Extension",
+				"configurations": [
+					"LanguageServer",
+					"Extension"
+				]
+			}
+		]
+	}
+}
