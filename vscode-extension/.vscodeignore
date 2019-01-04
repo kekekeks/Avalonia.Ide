@@ -4,5 +4,6 @@ out/test/**
 out/**/*.map
 src/**
 .gitignore
-tsconfig.json
-vsc-extension-quickstart.md
+package-lock.json
+*.tgz
+lsp_binaries/*.deps.json
