@@ -1,17 +1,10 @@
-'use strict';
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-
-
 import * as net from 'net';
-
-import * as path from 'path';
-
-import { workspace, Disposable, ExtensionContext } from 'vscode';
-import { LanguageClient, LanguageClientOptions, SettingMonitor, ServerOptions, TransportKind, InitializeParams, StreamInfo,
+import {normalize, join} from 'path';
+import { LanguageClient, LanguageClientOptions, ServerOptions, StreamInfo,
      NotificationType, RequestType } from 'vscode-languageclient';
 import { Trace } from 'vscode-jsonrpc';
+import { ChildProcess, spawn } from 'child_process';
 
 interface IAvaloniaServerInfo
 {
@@ -23,11 +16,13 @@ const avaloniaServerInfoRequest: RequestType<any, any, any, any> = new RequestTy
 
 export let serverInfo : Promise<IAvaloniaServerInfo>;
 
+let serverProcess: ChildProcess;
+
 function connectToTcp() :  ServerOptions
 {
     const serverOptions: ServerOptions = function() {
         console.log("Connection initiated");
-		return new Promise((resolve, reject) => {
+		return new Promise((resolve, _reject) => {
             console.log("Connecting");
 			var client = new net.Socket();
 			client.connect(26001, "127.0.0.1", function() {
@@ -44,19 +39,20 @@ function connectToTcp() :  ServerOptions
     return serverOptions;
 }
 
-function startServer() : ServerOptions
+function startServer() : void
 {
-    //TODO
-    let serverExe = "/home/kekekeks/bin/vscode-lsp-proxy";
-    let serverOptions: ServerOptions = {
-        run: { command: serverExe, args: [''] },
-        debug: { command: serverExe, args: [''] },
-    }
-    return serverOptions;
+    // NOTE: binary must be in extensions folder "vscode-extension" , which will be compressed by 'vsce package'
+    let serverBin = normalize(join(__dirname, "..","bin/vscode-lsp-proxy.dll"));
+
+    //if (process.platform === "win32")
+    // NOTE: dotnetcore (target version of dll) required, running dll via "dotnet" will work on all platforms
+    serverProcess = spawn("dotnet", [serverBin], { stdio: ["pipe", "pipe", "pipe"], shell: false});
 }
 
 export function activate(context: vscode.ExtensionContext) 
 {
+    startServer();
+
     let clientOptions: LanguageClientOptions = {
         documentSelector: [
             {
@@ -66,12 +62,11 @@ export function activate(context: vscode.ExtensionContext)
         synchronize: {
             // Synchronize the setting section 'languageServerExample' to the server
             configurationSection: 'avaloniaXaml',
-            fileEvents: workspace.createFileSystemWatcher('**/*.xaml')
+            fileEvents: vscode.workspace.createFileSystemWatcher('**/*.xaml')
         },
     }
 
     let opts = connectToTcp();
-    
     
     const client = new LanguageClient('avaloniaXaml', 'Avalonia', opts, clientOptions);
 
@@ -90,6 +85,9 @@ export function activate(context: vscode.ExtensionContext)
     context.subscriptions.push(disposable);
 }
 
-// this method is called when your extension is deactivated
 export function deactivate() {
+    if (serverProcess !== undefined) {
+        // NOTE: need to close gracefully: - send message, wait, optionally kill
+        serverProcess.kill();
+    }
 }
