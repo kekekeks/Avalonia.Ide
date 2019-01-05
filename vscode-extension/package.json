@@ -60,7 +60,6 @@
         "typescript": "^3.2.2",
         "vscode": "^1.1.26",
         "vsce": "1.54.0",
-        "ncp": "2.0.0",
         "tslint": "5.12.0",
         "jsdoctest": "1.7.1",
         "mocha": "5.2.0"

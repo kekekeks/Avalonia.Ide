@@ -22,7 +22,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/Avalonia.Ide.LanguageServer.csproj"
+                "${workspaceFolder}/languageserver/languageserver.csproj"
             ],
             "problemMatcher": "$msCompile"
         }
