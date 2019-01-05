@@ -23,6 +23,18 @@
             "sourceMaps": true,
             "outFiles": [ "${workspaceRoot}/out/test/**/*.js" ],
             "preLaunchTask": "npm: watch"
+        },
+        {
+            "name": "LanguageServer",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/languageserver/bin/Debug/netcoreapp2.1/languageserver.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/languageserver",
+            "console": "internalConsole",
+            "stopAtEntry": false,
+            "internalConsoleOptions": "openOnSessionStart"
         }
     ]
 }

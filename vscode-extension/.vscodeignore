@@ -5,7 +5,3 @@ out/**/*.map
 src/**
 .gitignore
 package-lock.json
-*.tgz
-lsp_binaries/*.deps.json
-lsp_binaries/*.dev.json
-lsp_binaries/*.pdb

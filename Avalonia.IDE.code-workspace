@@ -2,9 +2,6 @@
 	"folders": [
 		{
 			"path": "./vscode-extension"
-		},
-		{
-			"path": "./src/Avalonia.Ide.LanguageServer"
 		}
 	],
 	"settings": {},

@@ -1,6 +1,5 @@
 out
 node_modules
-lsp_binaries
 .vscode-test/
 *.vsix
 *.tgz

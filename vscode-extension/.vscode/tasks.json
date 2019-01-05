@@ -15,6 +15,16 @@
                 "kind": "build",
                 "isDefault": true
             }
+        },
+        {
+            "label": "build",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/Avalonia.Ide.LanguageServer.csproj"
+            ],
+            "problemMatcher": "$msCompile"
         }
     ]
 }
