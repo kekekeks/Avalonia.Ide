@@ -72,6 +72,9 @@ namespace Avalonia.Ide.LanguageServer.MSBuild.Requests
         
         [DataMember]
         public List<string> EmbeddedResources { get; set; }
+        
+        [DataMember]
+        public List<string> AvaloniaResources { get; set; }
 
         [DataMember]
         public List<string> MetaDataReferences { get; set; }

@@ -2,8 +2,13 @@
     <Target Name="AvaloniaGetEmbeddedResources" Returns="@(EmbeddedResource)" DependsOnTargets="Compile">
         
     </Target>
+    
     <Target Name="AvaloniaGetCscCommandLine" Returns="@(CscCommandLineArgs)" DependsOnTargets="Compile">
         
+    </Target>
+
+    <Target Name="AvaloniaGetAvaloniaResources" Returns="@(AvaloniaResource)" DependsOnTargets="Compile">
+
     </Target>
     <PropertyGroup>
         <ProvideCommandLineArgs>true</ProvideCommandLineArgs>
@@ -11,5 +16,4 @@
     <ItemGroup Condition="'$(AvaloniaForceCoreCompile)' == 'true'">
         <CustomAdditionalCompileInputs Include="$(AvaloniaRandom)"/>
     </ItemGroup>
-
 </Project>

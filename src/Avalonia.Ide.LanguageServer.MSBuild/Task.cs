@@ -89,7 +89,9 @@ namespace Avalonia.Ide.LanguageServer.MSBuild
             var result = new ProjectInfoResponse
             {
                 TargetPath = outputs["GetTargetPath"][0].ItemSpec,
-                EmbeddedResources = outputs["AvaloniaGetEmbeddedResources"].Select(x => x.ItemSpec).ToList()
+                EmbeddedResources = outputs["AvaloniaGetEmbeddedResources"].Select(x => x.ItemSpec).ToList(),
+                AvaloniaResources = outputs["AvaloniaGetAvaloniaResources"].Select(x => x.ItemSpec).ToList(),
+                
             };
 
             if (outputs.ContainsKey("ResolveAssemblyReferences"))
