@@ -1,6 +1,5 @@
 using System;
 using System.Linq;
-using System.Reflection;
 using Avalonia.Ide.CompletionEngine;
 using Avalonia.Ide.CompletionEngine.AssemblyMetadata;
 using Avalonia.Ide.CompletionEngine.DnlibMetadataProvider;
@@ -30,7 +29,7 @@ namespace CompletionEngineTests
                     c.Kind, c.RecommendedCursorOffset - Prologue.Length)).ToList()
             };
         }
-        
+
         protected CompletionSet GetCompletionsFor(string xaml)
         {
             xaml = Prologue + xaml;
@@ -44,8 +43,12 @@ namespace CompletionEngineTests
             var comp = GetCompletionsFor(xaml + typed);
             if (comp == null)
                 throw new Exception("No completions found");
-            Assert.True(xaml.Length == comp.StartPosition, "Invalid completion start position");
-            Assert.Equal(1, comp.Completions.Count(c => c.InsertText == completion));
+
+            Assert.True(xaml.Length == comp.StartPosition, $"Invalid completion start position typed: {typed} expected: {completion}");
+
+            Assert.Contains(comp.Completions, c => c.InsertText == completion);
+
+            Assert.Single(comp.Completions, c => c.InsertText == completion);
         }
     }
 }

@@ -4,6 +4,15 @@
         Title="Editor">
     <Grid RowDefinitions="*,0.5*">
         <AvalonEdit:TextEditor Grid.Row="0" Name="Editor" FontSize="18" />
-        <ListBox Grid.Row="1" Name="ListBox" Items="{Binding CompletionSet.Completions}"/>
+      <ListBox Grid.Row="1" Name="ListBox" Items="{Binding CompletionSet.Completions}">
+        <ListBox.ItemTemplate>
+          <DataTemplate>
+            <Grid ColumnDefinitions="*,200">
+              <TextBlock Text="{Binding}" />
+              <TextBlock Grid.Column="1" Text="{Binding Kind, StringFormat='Kind: \{0\}' }" />
+            </Grid>
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
     </Grid>
 </Window>
