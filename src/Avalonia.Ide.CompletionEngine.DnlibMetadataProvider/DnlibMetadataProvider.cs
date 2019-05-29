@@ -42,7 +42,7 @@ namespace Avalonia.Ide.CompletionEngine.DnlibMetadataProvider
             {
                 try
                 {
-                    var def = AssemblyDef.Load(asm);
+                    var def = AssemblyDef.Load(File.ReadAllBytes(asm));
                     def.Modules[0].Context = modCtx;
                     asmResolver.AddToCache(def);
                     assemblies.Add(def);
