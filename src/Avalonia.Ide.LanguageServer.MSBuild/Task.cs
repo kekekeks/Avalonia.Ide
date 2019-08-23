@@ -82,7 +82,7 @@ namespace Avalonia.Ide.LanguageServer.MSBuild
                 ["AvaloniaForceCoreCompile"] = "true"
             };
             var outputs = new Dictionary<string, ITaskItem[]>();
-            if (!BuildEngine.BuildProjectFile(req.FullPath, new[] { "ResolveAssemblyReferences", "GetTargetPath", "AvaloniaGetCscCommandLine", "AvaloniaGetEmbeddedResources",  },
+            if (!BuildEngine.BuildProjectFile(req.FullPath, new[] { "ResolveAssemblyReferences", "GetTargetPath", "AvaloniaGetCscCommandLine", "AvaloniaGetEmbeddedResources",  "AvaloniaGetAvaloniaResources"},
                 props, outputs))
                 throw new Exception("Build failed");
 
