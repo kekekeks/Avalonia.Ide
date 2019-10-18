@@ -1,7 +1,7 @@
-﻿using System;
+﻿using Avalonia.Ide.CompletionEngine.AssemblyMetadata;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using Avalonia.Ide.CompletionEngine.AssemblyMetadata;
 
 namespace Avalonia.Ide.CompletionEngine
 {
@@ -36,7 +36,6 @@ namespace Avalonia.Ide.CompletionEngine
                 IsMarkupExtension = IsMarkupExtension(type),
                 IsEnum = type.IsEnum,
                 HasHintValues = type.IsEnum
-
             };
             if (mt.IsEnum)
                 mt.HintValues = type.EnumValues.ToArray();
@@ -60,7 +59,7 @@ namespace Avalonia.Ide.CompletionEngine
             {
                 var aliases = new Dictionary<string, string[]>();
 
-                ProcessWellKnowAliases(asm, aliases);
+                ProcessWellKnownAliases(asm, aliases);
                 ProcessCustomAttributes(asm, aliases);
 
                 foreach (var type in asm.Types.Where(x => !x.IsInterface && x.IsPublic))
@@ -174,7 +173,7 @@ namespace Avalonia.Ide.CompletionEngine
             }
         }
 
-        private static void ProcessWellKnowAliases(IAssemblyInformation asm, Dictionary<string, string[]> aliases)
+        private static void ProcessWellKnownAliases(IAssemblyInformation asm, Dictionary<string, string[]> aliases)
         {
             //look like we don't have xmlns for avalonia.layout TODO: add it in avalonia
             //may be don 't remove it for avalonia 0.7 or below for support completion for layout enums etc.
@@ -183,7 +182,7 @@ namespace Avalonia.Ide.CompletionEngine
 
         private static void PreProcessTypes(Dictionary<string, MetadataType> types, Metadata metadata)
         {
-            var toAdd = new[]
+            var toAdd = new List<MetadataType>
             {
                 new MetadataType()
                 {
@@ -194,11 +193,41 @@ namespace Avalonia.Ide.CompletionEngine
                 new MetadataType(){ Name = typeof(System.Uri).FullName },
                 new MetadataType(){ Name = typeof(System.Type).FullName },
                 new MetadataType(){ Name = "Avalonia.Media.IBrush" },
-                new MetadataType(){ Name = "Avalonia.Media.Imaging.IBitmap" }
+                new MetadataType(){ Name = "Avalonia.Media.Imaging.IBitmap" },
             };
 
             foreach (var t in toAdd)
                 types.Add(t.Name, t);
+
+            var portableXamlExtTypes = new[]
+            {
+                new MetadataType()
+                {
+                    Name = "StaticExtension",
+                    SupportCtorArgument = MetadataTypeCtorArgument.Object,
+                    HasSetProperties = true,
+                    IsMarkupExtension = true,
+                },
+                new MetadataType()
+                {
+                    Name = "TypeExtension",
+                    SupportCtorArgument = MetadataTypeCtorArgument.TypeAndObject,
+                    HasSetProperties = true,
+                    IsMarkupExtension = true,
+                },
+                new MetadataType()
+                {
+                    Name = "NullExtension",
+                    HasSetProperties = true,
+                    IsMarkupExtension = true,
+                },
+            };
+
+            //as in avalonia 0.9 Portablexaml is missing we need to hardcode some extensions
+            foreach (var t in portableXamlExtTypes)
+            {
+                metadata.AddType(Utils.Xaml2006Namespace, t);
+            }
         }
 
         private static void PostProcessTypes(Dictionary<string, MetadataType> types, Metadata metadata, IEnumerable<string> resourceUrls)

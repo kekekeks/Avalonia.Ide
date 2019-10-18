@@ -45,8 +45,7 @@ namespace Avalonia.Ide.CompletionEngine
         }
 
         public const string AvaloniaNamespace = "https://github.com/avaloniaui";
-
-       
+        public const string Xaml2006Namespace = "http://schemas.microsoft.com/winfx/2006/xaml";
 
         public static TValue GetOrCreate<TKey, TValue>(this Dictionary<TKey, TValue> dic, TKey key,
             Func<TKey, TValue> getter)
