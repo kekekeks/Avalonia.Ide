@@ -90,5 +90,11 @@ namespace CompletionEngineTests
         {
             AssertSingleCompletion("<Image Source=\"", "resm:", "resm:CompletionEngineTests.Test.bmp?assembly=CompletionEngineTests");
         }
+
+        [Fact]
+        public void StyleInclude_Source_Uris_Should_Be_Completed()
+        {
+            AssertSingleCompletion("<StyleInclude Source=\"", "avares:", "avares://CompletionEngineTests/Test.xaml");
+        }
     }
 }
