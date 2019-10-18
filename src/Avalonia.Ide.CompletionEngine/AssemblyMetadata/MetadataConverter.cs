@@ -274,6 +274,8 @@ namespace Avalonia.Ide.CompletionEngine
             {
                 metadata.AddType(Utils.Xaml2006Namespace, t);
             }
+
+            metadata.AddType(Utils.AvaloniaNamespace, new MetadataType() { Name = "xmlns", HasAttachedProperties = true });
         }
 
         private static void PostProcessTypes(Dictionary<string, MetadataType> types, Metadata metadata, IEnumerable<string> resourceUrls, List<AvaresInfo> avaResValues)
