@@ -108,5 +108,11 @@ namespace CompletionEngineTests
         {
             AssertSingleCompletion("<StyleInclude Source=\"", "/", "/Test.xaml");
         }
+
+        [Fact]
+        public void xClass_Value_Should_Be_Completed()
+        {
+            AssertSingleCompletion("<UserControl x:Class=\"", "", "CompletionEngineTests.TestUserControl");
+        }
     }
 }
