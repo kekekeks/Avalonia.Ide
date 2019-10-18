@@ -134,6 +134,14 @@ namespace CompletionEngineTests
         }
 
         [Fact]
+        public void xmlns_Directive_Should_Be_Completed()
+        {
+            var compl = GetCompletionsFor("<UserControl x").Completions;
+
+            Assert.Contains(compl, v => v.InsertText == "xmlns=\"\"");
+        }
+
+        [Fact]
         public void xClass_Value_Should_Be_Completed()
         {
             AssertSingleCompletion("<UserControl x:Class=\"", "", "CompletionEngineTests.TestUserControl");
