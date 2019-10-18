@@ -134,6 +134,18 @@ namespace CompletionEngineTests
         }
 
         [Fact]
+        public void xTypeArguments_Directive_Should_Be_Completed()
+        {
+            AssertSingleCompletion("<local:GenericBaseClass`1 ", "x:T", "x:TypeArguments=\"\"");
+        }
+
+        [Fact]
+        public void xTypeArguments_Directive_Should_Not_Be_Completed_On_NonGeneric_Type()
+        {
+           Assert.Null(GetCompletionsFor("<UserControl x:TypeArgum"));
+        }
+
+        [Fact]
         public void xmlns_Directive_Should_Be_Completed()
         {
             var compl = GetCompletionsFor("<UserControl x").Completions;
