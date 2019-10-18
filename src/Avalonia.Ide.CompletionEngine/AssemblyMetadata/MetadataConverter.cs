@@ -7,14 +7,23 @@ namespace Avalonia.Ide.CompletionEngine
 {
     public static class MetadataConverter
     {
-        internal static bool IsMarkupExtension(ITypeInformation def)
+        internal static bool IsMarkupExtension(ITypeInformation type)
         {
+            var def = type;
+
             while (def != null)
             {
                 if (def.Name == "MarkupExtension")
                     return true;
                 def = def.GetBaseType();
             }
+
+            //in avalonia 0.9 there is no required base class, but convention only
+            if (type.FullName.EndsWith("Extension") && type.Methods.Any(m => m.Name == "ProvideValue"))
+            {
+                return true;
+            }
+
             return false;
         }
 
