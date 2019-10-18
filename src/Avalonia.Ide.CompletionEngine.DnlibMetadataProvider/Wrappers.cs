@@ -25,6 +25,8 @@ namespace Avalonia.Ide.CompletionEngine.DnlibMetadataProvider
 
         public IEnumerable<string> ManifestResourceNames 
             => _asm.ManifestModule.Resources.Select(r => r.Name.ToString());
+
+        public override string ToString() => Name;
     }
 
     class TypeWrapper : ITypeInformation
@@ -67,6 +69,7 @@ namespace Avalonia.Ide.CompletionEngine.DnlibMetadataProvider
                 return _type.Fields.Where(f => f.IsStatic).Select(f => f.Name.String).ToArray();
             }
         }
+        public override string ToString() => Name;
     }
 
     class CustomAttributeWrapper : ICustomAttributeInformation
@@ -124,6 +127,7 @@ namespace Avalonia.Ide.CompletionEngine.DnlibMetadataProvider
         public bool HasPublicGetter { get; }
         public string TypeFullName { get; }
         public string Name { get; }
+        public override string ToString() => Name;
     }
 
     class MethodWrapper : IMethodInformation
@@ -143,6 +147,7 @@ namespace Avalonia.Ide.CompletionEngine.DnlibMetadataProvider
         public bool IsPublic => _method.IsPublic;
         public string Name => _method.Name;
         public IList<IParameterInformation> Parameters => _parameters.Value;
+        public override string ToString() => Name;
     }
 
     class ParameterWrapper : IParameterInformation
