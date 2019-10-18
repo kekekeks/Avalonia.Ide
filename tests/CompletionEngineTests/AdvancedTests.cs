@@ -67,7 +67,7 @@ namespace CompletionEngineTests
         [Fact]
         public void StyleSelector_Some_WellKnown_Keywords_Should_Be_Completed()
         {
-            var compl =  GetCompletionsFor("<Style Selector=\"").Completions;
+            var compl = GetCompletionsFor("<Style Selector=\"").Completions;
 
             Assert.Contains(compl, v => v.InsertText == ">");
             Assert.Contains(compl, v => v.InsertText == ".");
@@ -107,6 +107,30 @@ namespace CompletionEngineTests
         public void StyleInclude_Source_RelativeUris_Should_Be_Completed()
         {
             AssertSingleCompletion("<StyleInclude Source=\"", "/", "/Test.xaml");
+        }
+
+        [Fact]
+        public void xClass_Directive_Should_Be_Completed()
+        {
+            var compl = GetCompletionsFor("<UserControl x:Cla").Completions;
+
+            Assert.Contains(compl, v => v.InsertText == "x:Class=\"\"");
+        }
+
+        [Fact]
+        public void xName_Directive_Should_Be_Completed()
+        {
+            var compl = GetCompletionsFor("<UserControl x:N").Completions;
+
+            Assert.Contains(compl, v => v.InsertText == "x:Name=\"\"");
+        }
+
+        [Fact]
+        public void xKey_Directive_Should_Be_Completed()
+        {
+            var compl = GetCompletionsFor("<UserControl x:K").Completions;
+
+            Assert.Contains(compl, v => v.InsertText == "x:Key=\"\"");
         }
 
         [Fact]
