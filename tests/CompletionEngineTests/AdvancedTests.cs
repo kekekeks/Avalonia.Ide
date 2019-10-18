@@ -92,9 +92,21 @@ namespace CompletionEngineTests
         }
 
         [Fact]
+        public void Image_Source_RelativeUris_Should_Be_Completed()
+        {
+            AssertSingleCompletion("<Image Source=\"", "resm:", "resm:CompletionEngineTests.Test.bmp");
+        }
+
+        [Fact]
         public void StyleInclude_Source_Uris_Should_Be_Completed()
         {
             AssertSingleCompletion("<StyleInclude Source=\"", "avares:", "avares://CompletionEngineTests/Test.xaml");
+        }
+
+        [Fact]
+        public void StyleInclude_Source_RelativeUris_Should_Be_Completed()
+        {
+            AssertSingleCompletion("<StyleInclude Source=\"", "/", "/Test.xaml");
         }
     }
 }

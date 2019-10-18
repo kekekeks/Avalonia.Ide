@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Reflection;
 using Avalonia.Ide.CompletionEngine;
 using Avalonia.Ide.CompletionEngine.AssemblyMetadata;
 using Avalonia.Ide.CompletionEngine.DnlibMetadataProvider;
@@ -34,7 +35,7 @@ namespace CompletionEngineTests
         {
             xaml = Prologue + xaml;
             var engine = new CompletionEngine();
-            var set = engine.GetCompletions(Metadata, xaml, xaml.Length);
+            var set = engine.GetCompletions(Metadata, xaml, xaml.Length, Assembly.GetCallingAssembly().GetName().Name);
             return TransformCompletionSet(set);
         }
 
