@@ -248,7 +248,7 @@ namespace Avalonia.Ide.CompletionEngine
                 {
                     curStart = state.CurrentValueStart.Value +
                                BuildCompletionsForMarkupExtension(prop, completions,
-                                   text.Substring(state.CurrentValueStart.Value));
+                                   text.Substring(state.CurrentValueStart.Value), currentAssemblyName);
                 }
                 else
                 {
@@ -262,9 +262,9 @@ namespace Avalonia.Ide.CompletionEngine
                             search = last;
                         }
 
-                        completions.AddRange(GetHintCompletions(prop.Type, search));
+                        completions.AddRange(GetHintCompletions(prop.Type, search, currentAssemblyName));
                     }
-                    else if(prop?.Type?.Name == typeof(Type).FullName)
+                    else if (prop?.Type?.Name == typeof(Type).FullName)
                     {
                         completions.AddRange(_helper.FilterTypeNames(state.AttributeValue).Select(x => new Completion(x, x, x, CompletionKind.Class)));
                     }
@@ -294,23 +294,35 @@ namespace Avalonia.Ide.CompletionEngine
             return null;
         }
 
-        public IEnumerable<string> FilterHintValues(MetadataType type, string entered)
+        public IEnumerable<string> FilterHintValues(MetadataType type, string entered, string currentAssemblyName)
         {
             entered = entered ?? "";
-            if (type == null)
-                return new string[0];
 
-            return type.HintValues.Where(v => v.StartsWith(entered, StringComparison.OrdinalIgnoreCase));
+            if (type == null)
+                yield break;
+
+            if (!string.IsNullOrEmpty(currentAssemblyName) && type.CurrentAssemblyHintValuesFunc != null)
+            {
+                foreach (var v in type.CurrentAssemblyHintValuesFunc(currentAssemblyName).Where(v => v.StartsWith(entered, StringComparison.OrdinalIgnoreCase)))
+                {
+                    yield return v;
+                }
+            }
+
+            foreach (var v in type.HintValues.Where(v => v.StartsWith(entered, StringComparison.OrdinalIgnoreCase)))
+            {
+                yield return v;
+            }
         }
 
-        List<Completion> GetHintCompletions(MetadataType type, string entered)
+        List<Completion> GetHintCompletions(MetadataType type, string entered, string currentAssemblyName = null)
         {
             var kind = GetCompletionKindForHintValues(type);
 
-            return FilterHintValues(type, entered).Select(val => new Completion(val, kind)).ToList();
+            return FilterHintValues(type, entered, currentAssemblyName).Select(val => new Completion(val, kind)).ToList();
         }
 
-        int BuildCompletionsForMarkupExtension(MetadataProperty property, List<Completion> completions, string data)
+        int BuildCompletionsForMarkupExtension(MetadataProperty property, List<Completion> completions, string data, string currentAssemblyName)
         {
             int? forcedStart = null;
             var ext = MarkupExtensionParser.Parse(data);
@@ -357,7 +369,7 @@ namespace Avalonia.Ide.CompletionEngine
                             var mType = _helper.LookupType(type);
                             if (mType != null && t.SupportCtorArgument == MetadataTypeCtorArgument.HintValues)
                             {
-                                var hints = FilterHintValues(mType, prop);
+                                var hints = FilterHintValues(mType, prop, currentAssemblyName);
                                 completions.AddRange(hints.Select(x => new Completion(x, $"{type}.{x}", x, GetCompletionKindForHintValues(mType))));
                             }
 

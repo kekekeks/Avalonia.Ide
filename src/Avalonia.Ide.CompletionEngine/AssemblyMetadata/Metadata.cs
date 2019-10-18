@@ -22,6 +22,7 @@ namespace Avalonia.Ide.CompletionEngine
         public bool IsStatic { get; set; }
         public bool HasHintValues { get; set; }
         public string[] HintValues { get; set; }
+        public Func<string, IEnumerable<string>> CurrentAssemblyHintValuesFunc { get; set; }
         public string Name { get; set; }
         public List<MetadataProperty> Properties { get; set; } = new List<MetadataProperty>();
         public bool HasAttachedProperties { get; set; }

@@ -264,12 +264,14 @@ namespace Avalonia.Ide.CompletionEngine
         {
             bool rhasext(string resource, string ext) => resource.StartsWith("resm:") ? resource.Contains(ext + "?assembly=") : resource.EndsWith(ext);
 
+            var allresourceUrls = avaResValues.Select(v => v.GlobalUrl).Concat(resourceUrls).ToArray();
+
             var resType = new MetadataType()
             {
                 Name = "avares://,resm:",
                 IsStatic = true,
                 HasHintValues = true,
-                HintValues = avaResValues.Select(v => v.GlobalUrl).Concat(resourceUrls).ToArray()
+                HintValues = allresourceUrls
             };
 
             types.Add(resType.Name, resType);
@@ -281,6 +283,33 @@ namespace Avalonia.Ide.CompletionEngine
                 HasHintValues = true,
                 HintValues = resType.HintValues.Where(r => rhasext(r, ".xaml") || rhasext(r, ".paml")).ToArray()
             };
+
+            IEnumerable<string> filterLocalRes(MetadataType type, string currentAssemblyName)
+            {
+                var localResPrefix = $"avares://{currentAssemblyName}";
+                var resmSuffix = $"?assembly={currentAssemblyName}";
+
+                foreach (var hint in type.HintValues ?? Array.Empty<string>())
+                {
+                    if (hint.StartsWith("avares://"))
+                    {
+                        if (hint.StartsWith(localResPrefix))
+                        {
+                            yield return hint.Substring(localResPrefix.Length);
+                        }
+                    }
+                    else if (hint.StartsWith("resm:"))
+                    {
+                        if (hint.EndsWith(resmSuffix))
+                        {
+                            yield return hint.Substring(0, hint.Length - resmSuffix.Length);
+                        }
+                    }
+                }
+            }
+
+            resType.CurrentAssemblyHintValuesFunc = a => filterLocalRes(xamlResType, a);
+            xamlResType.CurrentAssemblyHintValuesFunc = a => filterLocalRes(xamlResType, a);
 
             types.Add(xamlResType.Name, xamlResType);
             metadata.AddType(Utils.AvaloniaNamespace, xamlResType);
@@ -396,13 +425,15 @@ namespace Avalonia.Ide.CompletionEngine
             if (types.TryGetValue("Avalonia.Media.Imaging.IBitmap", out MetadataType ibitmapType))
             {
                 ibitmapType.HasHintValues = true;
-                ibitmapType.HintValues = resourceUrls.Where(r => isbitmaptype(r)).ToArray();
+                ibitmapType.HintValues = allresourceUrls.Where(r => isbitmaptype(r)).ToArray();
+                ibitmapType.CurrentAssemblyHintValuesFunc = a => filterLocalRes(ibitmapType, a);
             }
 
             if (types.TryGetValue("Avalonia.Controls.WindowIcon", out MetadataType winIcon))
             {
                 winIcon.HasHintValues = true;
-                winIcon.HintValues = resourceUrls.Where(r => rhasext(r, ".ico")).ToArray();
+                winIcon.HintValues = allresourceUrls.Where(r => rhasext(r, ".ico")).ToArray();
+                winIcon.CurrentAssemblyHintValuesFunc = a => filterLocalRes(winIcon, a);
             }
 
             if (types.TryGetValue("Avalonia.Markup.Xaml.Styling.StyleInclude", out MetadataType styleIncludeType))
@@ -424,7 +455,8 @@ namespace Avalonia.Ide.CompletionEngine
             if (types.TryGetValue(typeof(Uri).FullName, out MetadataType uriType))
             {
                 uriType.HasHintValues = true;
-                uriType.HintValues = resourceUrls.ToArray();
+                uriType.HintValues = allresourceUrls.ToArray();
+                uriType.CurrentAssemblyHintValuesFunc = a => filterLocalRes(uriType, a);
             }
         }
     }
