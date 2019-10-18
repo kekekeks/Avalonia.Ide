@@ -286,6 +286,19 @@ namespace Avalonia.Ide.CompletionEngine
                                     .Select(v => new Completion(v, CompletionKind.Namespace)));
                         }
                     }
+                    else if (state.AttributeName.EndsWith(":Class"))
+                    {
+
+                        if (_helper.Aliases.TryGetValue(state.AttributeName.Replace(":Class", ""), out var ns) && ns == Utils.Xaml2006Namespace)
+                        {
+                            var asmKey = $";assembly={currentAssemblyName}";
+                            var fullClassNames = _helper.Metadata.Namespaces.Where(v => v.Key.EndsWith(asmKey)).SelectMany(v => v.Value.Values).Select(v => v.FullName);
+                            completions.AddRange(
+                                   fullClassNames
+                                    .Where(v => v.StartsWith(state.AttributeValue))
+                                    .Select(v => new Completion(v, CompletionKind.Class)));
+                        }
+                    }
                 }
             }
 

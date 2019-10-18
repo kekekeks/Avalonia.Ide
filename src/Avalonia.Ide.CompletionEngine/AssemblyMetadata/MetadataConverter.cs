@@ -32,6 +32,7 @@ namespace Avalonia.Ide.CompletionEngine
             var mt = new MetadataType
             {
                 Name = type.Name,
+                FullName = type.FullName,
                 IsStatic = type.IsStatic,
                 IsMarkupExtension = IsMarkupExtension(type),
                 IsEnum = type.IsEnum,

@@ -24,6 +24,7 @@ namespace Avalonia.Ide.CompletionEngine
         public string[] HintValues { get; set; }
         public Func<string, IEnumerable<string>> CurrentAssemblyHintValuesFunc { get; set; }
         public string Name { get; set; }
+        public string FullName { get; set; } = "";
         public List<MetadataProperty> Properties { get; set; } = new List<MetadataProperty>();
         public bool HasAttachedProperties { get; set; }
         public bool HasStaticGetProperties { get; set; }
