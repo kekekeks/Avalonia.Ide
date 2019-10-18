@@ -252,6 +252,21 @@ namespace Avalonia.Ide.CompletionEngine
                     HasSetProperties = true,
                     IsMarkupExtension = true,
                 },
+                new MetadataType()
+                {
+                    Name = "Class",
+                    HasAttachedProperties = true
+                },
+                new MetadataType()
+                {
+                    Name = "Name",
+                    HasAttachedProperties = true
+                },
+                new MetadataType()
+                {
+                    Name = "Key",
+                    HasAttachedProperties = true
+                },
             };
 
             //as in avalonia 0.9 Portablexaml is missing we need to hardcode some extensions

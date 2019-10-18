@@ -66,10 +66,10 @@ namespace Avalonia.Ide.CompletionEngine
 
             }
 
-
-            public IEnumerable<string> FilterTypeNames(string prefix, bool withAttachedPropertiesOnly = false, bool markupExtensionsOnly = false, bool staticGettersOnly = false)
+            public IEnumerable<KeyValuePair<string, MetadataType>> FilterTypes(string prefix, bool withAttachedPropertiesOnly = false, bool markupExtensionsOnly = false, bool staticGettersOnly = false)
             {
                 prefix = prefix ?? "";
+
                 var e = _types
                     .Where(t => t.Key.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
                 if (withAttachedPropertiesOnly)
@@ -79,7 +79,12 @@ namespace Avalonia.Ide.CompletionEngine
                 if (staticGettersOnly)
                     e = e.Where(t => t.Value.HasStaticGetProperties);
 
-                return e.Select(s => s.Key);
+                return e;
+            }
+
+            public IEnumerable<string> FilterTypeNames(string prefix, bool withAttachedPropertiesOnly = false, bool markupExtensionsOnly = false, bool staticGettersOnly = false)
+            {
+                return FilterTypes(prefix, withAttachedPropertiesOnly, markupExtensionsOnly, staticGettersOnly).Select(s => s.Key);
             }
 
             public MetadataType LookupType(string name)
@@ -227,8 +232,11 @@ namespace Avalonia.Ide.CompletionEngine
 
                     if (targetType?.IsAvaloniaObjectType == true)
                         completions.AddRange(
-                            _helper.FilterTypeNames(state.AttributeName, true)
-                                .Select(v => new Completion(v, v + ".", v, CompletionKind.Class)));
+                            _helper.FilterTypes(state.AttributeName, true)
+                                .Select(v => new Completion(v.Key,
+                                v.Key + (v.Value.Properties.Count > 0 ? "." : "=\"\""),
+                                v.Key, CompletionKind.Class,
+                                v.Value.Properties.Count > 0 ? -1 : v.Key.Length + 2)));
                 }
             }
             else if (state.State == XmlParser.ParserState.AttributeValue)
@@ -292,7 +300,9 @@ namespace Avalonia.Ide.CompletionEngine
                         if (_helper.Aliases.TryGetValue(state.AttributeName.Replace(":Class", ""), out var ns) && ns == Utils.Xaml2006Namespace)
                         {
                             var asmKey = $";assembly={currentAssemblyName}";
-                            var fullClassNames = _helper.Metadata.Namespaces.Where(v => v.Key.EndsWith(asmKey)).SelectMany(v => v.Value.Values).Select(v => v.FullName);
+                            var fullClassNames = _helper.Metadata.Namespaces.Where(v => v.Key.EndsWith(asmKey))
+                                                                            .SelectMany(v => v.Value.Values.Where(t => t.IsAvaloniaObjectType))
+                                                                            .Select(v => v.FullName);
                             completions.AddRange(
                                    fullClassNames
                                     .Where(v => v.StartsWith(state.AttributeValue))
