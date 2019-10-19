@@ -256,17 +256,23 @@ namespace Avalonia.Ide.CompletionEngine
                 new MetadataType()
                 {
                     Name = "Class",
-                    HasAttachedProperties = true
+                    IsXamlDirective = true
                 },
                 new MetadataType()
                 {
                     Name = "Name",
-                    HasAttachedProperties = true
+                    IsXamlDirective = true
                 },
                 new MetadataType()
                 {
                     Name = "Key",
-                    HasAttachedProperties = true
+                    IsXamlDirective = true
+                },
+                new MetadataType()
+                {
+                    Name = "TypeArguments",
+                    IsXamlDirective = true,
+                    IsValidForXamlContextFunc = (a, t, p) => t?.IsGeneric == true
                 },
             };
 
@@ -276,7 +282,7 @@ namespace Avalonia.Ide.CompletionEngine
                 metadata.AddType(Utils.Xaml2006Namespace, t);
             }
 
-            metadata.AddType(Utils.AvaloniaNamespace, new MetadataType() { Name = "xmlns", HasAttachedProperties = true });
+            metadata.AddType("", new MetadataType() { Name = "xmlns", IsXamlDirective = true });
         }
 
         private static void PostProcessTypes(Dictionary<string, MetadataType> types, Metadata metadata, IEnumerable<string> resourceUrls, List<AvaresInfo> avaResValues)
@@ -337,9 +343,9 @@ namespace Avalonia.Ide.CompletionEngine
                 }
             }
 
-            resType.CurrentAssemblyHintValuesFunc = a => filterLocalRes(xamlResType, a);
-            xamlResType.CurrentAssemblyHintValuesFunc = a => filterLocalRes(xamlResType, a);
-            styleResType.CurrentAssemblyHintValuesFunc = a => filterLocalRes(styleResType, a);
+            resType.XamlContextHintValuesFunc = (a, t, p) => filterLocalRes(xamlResType, a);
+            xamlResType.XamlContextHintValuesFunc = (a, t, p) => filterLocalRes(xamlResType, a);
+            styleResType.XamlContextHintValuesFunc = (a, t, p) => filterLocalRes(styleResType, a);
 
             types.Add(xamlResType.Name, xamlResType);
 
@@ -455,14 +461,14 @@ namespace Avalonia.Ide.CompletionEngine
             {
                 ibitmapType.HasHintValues = true;
                 ibitmapType.HintValues = allresourceUrls.Where(r => isbitmaptype(r)).ToArray();
-                ibitmapType.CurrentAssemblyHintValuesFunc = a => filterLocalRes(ibitmapType, a);
+                ibitmapType.XamlContextHintValuesFunc = (a, t, p) => filterLocalRes(ibitmapType, a);
             }
 
             if (types.TryGetValue("Avalonia.Controls.WindowIcon", out MetadataType winIcon))
             {
                 winIcon.HasHintValues = true;
                 winIcon.HintValues = allresourceUrls.Where(r => rhasext(r, ".ico")).ToArray();
-                winIcon.CurrentAssemblyHintValuesFunc = a => filterLocalRes(winIcon, a);
+                winIcon.XamlContextHintValuesFunc = (a, t, p) => filterLocalRes(winIcon, a);
             }
 
             if (types.TryGetValue("Avalonia.Markup.Xaml.Styling.StyleInclude", out MetadataType styleIncludeType))
@@ -485,14 +491,7 @@ namespace Avalonia.Ide.CompletionEngine
             {
                 uriType.HasHintValues = true;
                 uriType.HintValues = allresourceUrls.ToArray();
-                uriType.CurrentAssemblyHintValuesFunc = a => filterLocalRes(uriType, a);
-            }
-
-            if (types.TryGetValue("System.Type", out MetadataType typeType))
-            {
-                var prop = new MetadataProperty("x:TypeArguments", typeType, null, false, false, false, true);
-                foreach (var t in types.Where(t => t.Value.IsGeneric))
-                    t.Value.Properties.Add(prop);
+                uriType.XamlContextHintValuesFunc = (a, t, p) => filterLocalRes(uriType, a);
             }
         }
     }
