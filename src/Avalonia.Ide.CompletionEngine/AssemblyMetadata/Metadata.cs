@@ -32,6 +32,7 @@ namespace Avalonia.Ide.CompletionEngine
         public bool IsAvaloniaObjectType { get; set; }
         public MetadataTypeCtorArgument SupportCtorArgument { get; set; }
         public bool IsCompositeValue { get; set; }
+        public bool IsGeneric { get; set; }
     }
 
     public enum MetadataTypeCtorArgument

@@ -36,7 +36,8 @@ namespace Avalonia.Ide.CompletionEngine
                 IsStatic = type.IsStatic,
                 IsMarkupExtension = IsMarkupExtension(type),
                 IsEnum = type.IsEnum,
-                HasHintValues = type.IsEnum
+                HasHintValues = type.IsEnum,
+                IsGeneric = type.IsGeneric,
             };
             if (mt.IsEnum)
                 mt.HintValues = type.EnumValues.ToArray();
@@ -475,6 +476,13 @@ namespace Avalonia.Ide.CompletionEngine
                 uriType.HasHintValues = true;
                 uriType.HintValues = allresourceUrls.ToArray();
                 uriType.CurrentAssemblyHintValuesFunc = a => filterLocalRes(uriType, a);
+            }
+
+            if (types.TryGetValue("System.Type", out MetadataType typeType))
+            {
+                var prop = new MetadataProperty("x:TypeArguments", typeType, null, false, false, false, true);
+                foreach (var t in types.Where(t => t.Value.IsGeneric))                
+                    t.Value.Properties.Add(prop);                
             }
         }
     }

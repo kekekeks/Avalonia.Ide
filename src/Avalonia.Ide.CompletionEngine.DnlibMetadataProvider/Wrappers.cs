@@ -61,7 +61,7 @@ namespace Avalonia.Ide.CompletionEngine.DnlibMetadataProvider
         public bool IsStatic => _type.IsAbstract && _type.IsSealed;
         public bool IsInterface => _type.IsInterface;
         public bool IsPublic => _type.IsPublic;
-
+        public bool IsGeneric => _type.HasGenericParameters;
         public IEnumerable<string> EnumValues
         {
             get

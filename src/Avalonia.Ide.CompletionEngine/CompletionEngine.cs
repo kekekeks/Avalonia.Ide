@@ -62,6 +62,18 @@ namespace Avalonia.Ide.CompletionEngine
                     foreach (var type in ns.Values)
                         types[prefix + type.Name] = type;
                 }
+
+                //update alias namespace of x:TypeArguments
+                var genericType = types.Values.FirstOrDefault(t => t.IsGeneric);
+                if (genericType != null)
+                {
+                    var typedArgs = genericType.Properties.FirstOrDefault(p => p.DeclaringType == null && p.Name.EndsWith("TypeArguments"));
+                    var x = aliases.FirstOrDefault(v => v.Value == Utils.Xaml2006Namespace).Key;
+                    if (typedArgs != null && x != null)
+                    {
+                        typedArgs.Name = $"{x}:TypeArguments";
+                    }
+                }
                 _types = types;
 
             }
