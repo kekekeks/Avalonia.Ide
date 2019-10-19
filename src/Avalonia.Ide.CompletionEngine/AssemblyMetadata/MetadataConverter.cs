@@ -268,12 +268,6 @@ namespace Avalonia.Ide.CompletionEngine
                     Name = "Key",
                     IsXamlDirective = true
                 },
-                new MetadataType()
-                {
-                    Name = "TypeArguments",
-                    IsXamlDirective = true,
-                    IsValidForXamlContextFunc = (a, t, p) => t?.IsGeneric == true
-                },
             };
 
             //as in avalonia 0.9 Portablexaml is missing we need to hardcode some extensions
@@ -492,6 +486,19 @@ namespace Avalonia.Ide.CompletionEngine
                 uriType.HasHintValues = true;
                 uriType.HintValues = allresourceUrls.ToArray();
                 uriType.XamlContextHintValuesFunc = (a, t, p) => filterLocalRes(uriType, a);
+            }
+
+            if (types.TryGetValue(typeof(Type).FullName, out MetadataType typeType))
+            {
+                var typeArguments = new MetadataType()
+                {
+                    Name = "TypeArguments",
+                    IsXamlDirective = true,
+                    IsValidForXamlContextFunc = (a, t, p) => t?.IsGeneric == true,
+                    Properties = { new MetadataProperty("", typeType, null, false, false, false, true) }
+                };
+
+                metadata.AddType(Utils.Xaml2006Namespace, typeArguments);
             }
         }
     }

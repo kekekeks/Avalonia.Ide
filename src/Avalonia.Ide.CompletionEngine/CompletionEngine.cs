@@ -269,6 +269,8 @@ namespace Avalonia.Ide.CompletionEngine
                 }
                 else
                 {
+                    prop = prop ?? _helper.LookupType(state.AttributeName)?.Properties.FirstOrDefault(p => p.Name == "");
+
                     if (prop?.Type?.HasHintValues == true)
                     {
                         var search = text.Substring(state.CurrentValueStart.Value);
