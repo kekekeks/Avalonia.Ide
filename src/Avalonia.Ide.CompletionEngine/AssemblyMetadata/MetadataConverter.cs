@@ -47,7 +47,7 @@ namespace Avalonia.Ide.CompletionEngine
         private class AvaresInfo
         {
             public IAssemblyInformation Assembly;
-            public string ResultTypeName;
+            public string ReturnTypeFullName;
             public string LocalUrl;
             public string GlobalUrl;
             public override string ToString() => GlobalUrl;
@@ -97,7 +97,7 @@ namespace Avalonia.Ide.CompletionEngine
                             Assembly = asm,
                             LocalUrl = localUrl,
                             GlobalUrl = $"avares://{asm.Name}{localUrl}",
-                            // ResultTypeName = res.re
+                            ReturnTypeFullName = res.ReturnTypeFullName ?? ""
                         };
 
                         avaresValues.Add(avres);
@@ -294,7 +294,6 @@ namespace Avalonia.Ide.CompletionEngine
             };
 
             types.Add(resType.Name, resType);
-            metadata.AddType(Utils.AvaloniaNamespace, resType);
 
             var xamlResType = new MetadataType()
             {
@@ -302,6 +301,17 @@ namespace Avalonia.Ide.CompletionEngine
                 HasHintValues = true,
                 HintValues = resType.HintValues.Where(r => rhasext(r, ".xaml") || rhasext(r, ".paml")).ToArray()
             };
+
+            var styleResType = new MetadataType()
+            {
+                Name = "Style avares://*.xaml,resm:*.xaml",
+                HasHintValues = true,
+                HintValues = avaResValues.Where(v => v.ReturnTypeFullName.StartsWith("Avalonia.Styling.Style")).Select(v => v.GlobalUrl)
+                                        .Concat(resourceUrls.Where(r => rhasext(r, ".xaml") || rhasext(r, ".paml")))
+                                        .ToArray()
+            };
+
+            types.Add(styleResType.Name, styleResType);
 
             IEnumerable<string> filterLocalRes(MetadataType type, string currentAssemblyName)
             {
@@ -329,9 +339,9 @@ namespace Avalonia.Ide.CompletionEngine
 
             resType.CurrentAssemblyHintValuesFunc = a => filterLocalRes(xamlResType, a);
             xamlResType.CurrentAssemblyHintValuesFunc = a => filterLocalRes(xamlResType, a);
+            styleResType.CurrentAssemblyHintValuesFunc = a => filterLocalRes(styleResType, a);
 
             types.Add(xamlResType.Name, xamlResType);
-            metadata.AddType(Utils.AvaloniaNamespace, xamlResType);
 
             MetadataType avProperty;
 
@@ -460,7 +470,7 @@ namespace Avalonia.Ide.CompletionEngine
                 var source = styleIncludeType.Properties.FirstOrDefault(p => p.Name == "Source");
 
                 if (source != null)
-                    source.Type = xamlResType;
+                    source.Type = styleResType;
             }
 
             if (types.TryGetValue("Avalonia.Markup.Xaml.Styling.StyleIncludeExtension", out MetadataType styleIncludeExtType))
@@ -481,8 +491,8 @@ namespace Avalonia.Ide.CompletionEngine
             if (types.TryGetValue("System.Type", out MetadataType typeType))
             {
                 var prop = new MetadataProperty("x:TypeArguments", typeType, null, false, false, false, true);
-                foreach (var t in types.Where(t => t.Value.IsGeneric))                
-                    t.Value.Properties.Add(prop);                
+                foreach (var t in types.Where(t => t.Value.IsGeneric))
+                    t.Value.Properties.Add(prop);
             }
         }
     }

@@ -147,6 +147,7 @@ namespace Avalonia.Ide.CompletionEngine.DnlibMetadataProvider
         public bool IsPublic => _method.IsPublic;
         public string Name => _method.Name;
         public IList<IParameterInformation> Parameters => _parameters.Value;
+        public string ReturnTypeFullName => _method.ReturnType?.FullName;
         public override string ToString() => Name;
     }
 

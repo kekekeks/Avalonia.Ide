@@ -43,6 +43,7 @@ namespace Avalonia.Ide.CompletionEngine.AssemblyMetadata
         bool IsPublic { get; }
         string Name { get; }
         IList<IParameterInformation> Parameters { get;}
+        string ReturnTypeFullName { get; }
     }
 
     public interface IParameterInformation
