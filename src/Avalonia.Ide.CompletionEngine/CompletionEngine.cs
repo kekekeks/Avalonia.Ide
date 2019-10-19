@@ -46,7 +46,7 @@ namespace Avalonia.Ide.CompletionEngine
                 _currentAssemblyName = currentAssemblyName;
 
                 var types = new Dictionary<string, MetadataType>();
-                foreach (var alias in Aliases)
+                foreach (var alias in Aliases.Concat(new[] { new KeyValuePair<string, string>("", "") }))
                 {
                     Dictionary<string, MetadataType> ns;
 
@@ -62,16 +62,17 @@ namespace Avalonia.Ide.CompletionEngine
                     foreach (var type in ns.Values)
                         types[prefix + type.Name] = type;
                 }
+
                 _types = types;
 
             }
 
-
-            public IEnumerable<string> FilterTypeNames(string prefix, bool withAttachedPropertiesOnly = false, bool markupExtensionsOnly = false, bool staticGettersOnly = false)
+            public IEnumerable<KeyValuePair<string, MetadataType>> FilterTypes(string prefix, bool withAttachedPropertiesOnly = false, bool markupExtensionsOnly = false, bool staticGettersOnly = false, bool xamlDirectiveOnly = false)
             {
                 prefix = prefix ?? "";
+
                 var e = _types
-                    .Where(t => t.Key.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
+                    .Where(t => t.Value.IsXamlDirective == xamlDirectiveOnly && t.Key.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
                 if (withAttachedPropertiesOnly)
                     e = e.Where(t => t.Value.HasAttachedProperties);
                 if (markupExtensionsOnly)
@@ -79,7 +80,12 @@ namespace Avalonia.Ide.CompletionEngine
                 if (staticGettersOnly)
                     e = e.Where(t => t.Value.HasStaticGetProperties);
 
-                return e.Select(s => s.Key);
+                return e;
+            }
+
+            public IEnumerable<string> FilterTypeNames(string prefix, bool withAttachedPropertiesOnly = false, bool markupExtensionsOnly = false, bool staticGettersOnly = false, bool xamlDirectiveOnly = false)
+            {
+                return FilterTypes(prefix, withAttachedPropertiesOnly, markupExtensionsOnly, staticGettersOnly, xamlDirectiveOnly).Select(s => s.Key);
             }
 
             public MetadataType LookupType(string name)
@@ -224,10 +230,14 @@ namespace Avalonia.Ide.CompletionEngine
                         .Select(x => new Completion(x, x + "=\"\"", x, CompletionKind.Property, x.Length + 2)));
 
                     var targetType = _helper.LookupType(state.TagName);
+                    completions.AddRange(
+                        _helper.FilterTypes(state.AttributeName, xamlDirectiveOnly: true)
+                            .Where(t => t.Value.IsValidForXamlContextFunc?.Invoke(currentAssemblyName, targetType, null) ?? true)
+                            .Select(v => new Completion(v.Key, v.Key + "=\"\"", v.Key, CompletionKind.Class, v.Key.Length + 2)));
 
                     if (targetType?.IsAvaloniaObjectType == true)
                         completions.AddRange(
-                            _helper.FilterTypeNames(state.AttributeName, true)
+                            _helper.FilterTypeNames(state.AttributeName, withAttachedPropertiesOnly: true)
                                 .Select(v => new Completion(v, v + ".", v, CompletionKind.Class)));
                 }
             }
@@ -248,10 +258,12 @@ namespace Avalonia.Ide.CompletionEngine
                 {
                     curStart = state.CurrentValueStart.Value +
                                BuildCompletionsForMarkupExtension(prop, completions,
-                                   text.Substring(state.CurrentValueStart.Value));
+                                   text.Substring(state.CurrentValueStart.Value), currentAssemblyName);
                 }
                 else
                 {
+                    prop = prop ?? _helper.LookupType(state.AttributeName)?.Properties.FirstOrDefault(p => p.Name == "");
+
                     if (prop?.Type?.HasHintValues == true)
                     {
                         var search = text.Substring(state.CurrentValueStart.Value);
@@ -262,9 +274,9 @@ namespace Avalonia.Ide.CompletionEngine
                             search = last;
                         }
 
-                        completions.AddRange(GetHintCompletions(prop.Type, search));
+                        completions.AddRange(GetHintCompletions(prop.Type, search, currentAssemblyName));
                     }
-                    else if(prop?.Type?.Name == typeof(Type).FullName)
+                    else if (prop?.Type?.Name == typeof(Type).FullName)
                     {
                         completions.AddRange(_helper.FilterTypeNames(state.AttributeValue).Select(x => new Completion(x, x, x, CompletionKind.Class)));
                     }
@@ -286,6 +298,21 @@ namespace Avalonia.Ide.CompletionEngine
                                     .Select(v => new Completion(v, CompletionKind.Namespace)));
                         }
                     }
+                    else if (state.AttributeName.EndsWith(":Class"))
+                    {
+
+                        if (_helper.Aliases.TryGetValue(state.AttributeName.Replace(":Class", ""), out var ns) && ns == Utils.Xaml2006Namespace)
+                        {
+                            var asmKey = $";assembly={currentAssemblyName}";
+                            var fullClassNames = _helper.Metadata.Namespaces.Where(v => v.Key.EndsWith(asmKey))
+                                                                            .SelectMany(v => v.Value.Values.Where(t => t.IsAvaloniaObjectType))
+                                                                            .Select(v => v.FullName);
+                            completions.AddRange(
+                                   fullClassNames
+                                    .Where(v => v.StartsWith(state.AttributeValue))
+                                    .Select(v => new Completion(v, CompletionKind.Class)));
+                        }
+                    }
                 }
             }
 
@@ -294,23 +321,35 @@ namespace Avalonia.Ide.CompletionEngine
             return null;
         }
 
-        public IEnumerable<string> FilterHintValues(MetadataType type, string entered)
+        public IEnumerable<string> FilterHintValues(MetadataType type, string entered, string currentAssemblyName)
         {
             entered = entered ?? "";
-            if (type == null)
-                return new string[0];
 
-            return type.HintValues.Where(v => v.StartsWith(entered, StringComparison.OrdinalIgnoreCase));
+            if (type == null)
+                yield break;
+
+            if (!string.IsNullOrEmpty(currentAssemblyName) && type.XamlContextHintValuesFunc != null)
+            {
+                foreach (var v in type.XamlContextHintValuesFunc(currentAssemblyName, type, null).Where(v => v.StartsWith(entered, StringComparison.OrdinalIgnoreCase)))
+                {
+                    yield return v;
+                }
+            }
+
+            foreach (var v in type.HintValues.Where(v => v.StartsWith(entered, StringComparison.OrdinalIgnoreCase)))
+            {
+                yield return v;
+            }
         }
 
-        List<Completion> GetHintCompletions(MetadataType type, string entered)
+        List<Completion> GetHintCompletions(MetadataType type, string entered, string currentAssemblyName = null)
         {
             var kind = GetCompletionKindForHintValues(type);
 
-            return FilterHintValues(type, entered).Select(val => new Completion(val, kind)).ToList();
+            return FilterHintValues(type, entered, currentAssemblyName).Select(val => new Completion(val, kind)).ToList();
         }
 
-        int BuildCompletionsForMarkupExtension(MetadataProperty property, List<Completion> completions, string data)
+        int BuildCompletionsForMarkupExtension(MetadataProperty property, List<Completion> completions, string data, string currentAssemblyName)
         {
             int? forcedStart = null;
             var ext = MarkupExtensionParser.Parse(data);
@@ -357,7 +396,7 @@ namespace Avalonia.Ide.CompletionEngine
                             var mType = _helper.LookupType(type);
                             if (mType != null && t.SupportCtorArgument == MetadataTypeCtorArgument.HintValues)
                             {
-                                var hints = FilterHintValues(mType, prop);
+                                var hints = FilterHintValues(mType, prop, currentAssemblyName);
                                 completions.AddRange(hints.Select(x => new Completion(x, $"{type}.{x}", x, GetCompletionKindForHintValues(mType))));
                             }
 

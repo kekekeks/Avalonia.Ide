@@ -33,7 +33,7 @@ namespace Avalonia.Ide.CompletionEngine.AssemblyMetadata
         bool IsStatic { get; }
         bool IsInterface { get; }
         bool IsPublic { get; }
-        //.Fields.Where(f => f.IsStatic).Select(f => f.Name.String).ToArray();
+        bool IsGeneric { get; }
         IEnumerable<string> EnumValues { get; }
     }
 
@@ -43,6 +43,7 @@ namespace Avalonia.Ide.CompletionEngine.AssemblyMetadata
         bool IsPublic { get; }
         string Name { get; }
         IList<IParameterInformation> Parameters { get;}
+        string ReturnTypeFullName { get; }
     }
 
     public interface IParameterInformation

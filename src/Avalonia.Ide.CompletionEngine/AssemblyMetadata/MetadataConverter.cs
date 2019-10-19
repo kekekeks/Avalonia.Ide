@@ -1,20 +1,29 @@
-﻿using System;
+﻿using Avalonia.Ide.CompletionEngine.AssemblyMetadata;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using Avalonia.Ide.CompletionEngine.AssemblyMetadata;
 
 namespace Avalonia.Ide.CompletionEngine
 {
     public static class MetadataConverter
     {
-        internal static bool IsMarkupExtension(ITypeInformation def)
+        internal static bool IsMarkupExtension(ITypeInformation type)
         {
+            var def = type;
+
             while (def != null)
             {
                 if (def.Name == "MarkupExtension")
                     return true;
                 def = def.GetBaseType();
             }
+
+            //in avalonia 0.9 there is no required base class, but convention only
+            if (type.FullName.EndsWith("Extension") && type.Methods.Any(m => m.Name == "ProvideValue"))
+            {
+                return true;
+            }
+
             return false;
         }
 
@@ -23,15 +32,25 @@ namespace Avalonia.Ide.CompletionEngine
             var mt = new MetadataType
             {
                 Name = type.Name,
+                FullName = type.FullName,
                 IsStatic = type.IsStatic,
                 IsMarkupExtension = IsMarkupExtension(type),
                 IsEnum = type.IsEnum,
-                HasHintValues = type.IsEnum
-
+                HasHintValues = type.IsEnum,
+                IsGeneric = type.IsGeneric,
             };
             if (mt.IsEnum)
                 mt.HintValues = type.EnumValues.ToArray();
             return mt;
+        }
+
+        private class AvaresInfo
+        {
+            public IAssemblyInformation Assembly;
+            public string ReturnTypeFullName;
+            public string LocalUrl;
+            public string GlobalUrl;
+            public override string ToString() => GlobalUrl;
         }
 
         public static Metadata ConvertMetadata(IMetadataReaderSession provider)
@@ -40,6 +59,7 @@ namespace Avalonia.Ide.CompletionEngine
             var typeDefs = new Dictionary<MetadataType, ITypeInformation>();
             var metadata = new Metadata();
             var resourceUrls = new List<string>();
+            var avaresValues = new List<AvaresInfo>();
 
             var ignoredResExt = new[] { ".resources", ".rd.xml" };
 
@@ -51,7 +71,7 @@ namespace Avalonia.Ide.CompletionEngine
             {
                 var aliases = new Dictionary<string, string[]>();
 
-                ProcessWellKnowAliases(asm, aliases);
+                ProcessWellKnownAliases(asm, aliases);
                 ProcessCustomAttributes(asm, aliases);
 
                 foreach (var type in asm.Types.Where(x => !x.IsInterface && x.IsPublic))
@@ -62,6 +82,26 @@ namespace Avalonia.Ide.CompletionEngine
                     string[] nsAliases = null;
                     if (aliases.TryGetValue(type.Namespace, out nsAliases))
                         foreach (var alias in nsAliases) metadata.AddType(alias, mt);
+                }
+
+                const string avaresToken = "Build:"; //or "Populate:" should work both ways
+
+                foreach (var resType in asm.Types.Where(t => t.FullName == "CompiledAvaloniaXaml.!AvaloniaResources" || t.Name == "CompiledAvaloniaXaml.!AvaloniaResources"))
+                {
+                    foreach (var res in resType.Methods.Where(m => m.Name.StartsWith(avaresToken)))
+                    {
+                        var localUrl = res.Name.Replace(avaresToken, "");
+
+                        var avres = new AvaresInfo
+                        {
+                            Assembly = asm,
+                            LocalUrl = localUrl,
+                            GlobalUrl = $"avares://{asm.Name}{localUrl}",
+                            ReturnTypeFullName = res.ReturnTypeFullName ?? ""
+                        };
+
+                        avaresValues.Add(avres);
+                    }
                 }
 
                 resourceUrls.AddRange(asm.ManifestResourceNames.Where(r => !skipRes(r)).Select(r => $"resm:{r}?assembly={asm.Name}"));
@@ -142,7 +182,7 @@ namespace Avalonia.Ide.CompletionEngine
                 }
             }
 
-            PostProcessTypes(types, metadata, resourceUrls);
+            PostProcessTypes(types, metadata, resourceUrls, avaresValues);
 
             return metadata;
         }
@@ -165,7 +205,7 @@ namespace Avalonia.Ide.CompletionEngine
             }
         }
 
-        private static void ProcessWellKnowAliases(IAssemblyInformation asm, Dictionary<string, string[]> aliases)
+        private static void ProcessWellKnownAliases(IAssemblyInformation asm, Dictionary<string, string[]> aliases)
         {
             //look like we don't have xmlns for avalonia.layout TODO: add it in avalonia
             //may be don 't remove it for avalonia 0.7 or below for support completion for layout enums etc.
@@ -174,7 +214,7 @@ namespace Avalonia.Ide.CompletionEngine
 
         private static void PreProcessTypes(Dictionary<string, MetadataType> types, Metadata metadata)
         {
-            var toAdd = new[]
+            var toAdd = new List<MetadataType>
             {
                 new MetadataType()
                 {
@@ -185,37 +225,123 @@ namespace Avalonia.Ide.CompletionEngine
                 new MetadataType(){ Name = typeof(System.Uri).FullName },
                 new MetadataType(){ Name = typeof(System.Type).FullName },
                 new MetadataType(){ Name = "Avalonia.Media.IBrush" },
-                new MetadataType(){ Name = "Avalonia.Media.Imaging.IBitmap" }
+                new MetadataType(){ Name = "Avalonia.Media.Imaging.IBitmap" },
             };
 
             foreach (var t in toAdd)
                 types.Add(t.Name, t);
+
+            var portableXamlExtTypes = new[]
+            {
+                new MetadataType()
+                {
+                    Name = "StaticExtension",
+                    SupportCtorArgument = MetadataTypeCtorArgument.Object,
+                    HasSetProperties = true,
+                    IsMarkupExtension = true,
+                },
+                new MetadataType()
+                {
+                    Name = "TypeExtension",
+                    SupportCtorArgument = MetadataTypeCtorArgument.TypeAndObject,
+                    HasSetProperties = true,
+                    IsMarkupExtension = true,
+                },
+                new MetadataType()
+                {
+                    Name = "NullExtension",
+                    HasSetProperties = true,
+                    IsMarkupExtension = true,
+                },
+                new MetadataType()
+                {
+                    Name = "Class",
+                    IsXamlDirective = true
+                },
+                new MetadataType()
+                {
+                    Name = "Name",
+                    IsXamlDirective = true
+                },
+                new MetadataType()
+                {
+                    Name = "Key",
+                    IsXamlDirective = true
+                },
+            };
+
+            //as in avalonia 0.9 Portablexaml is missing we need to hardcode some extensions
+            foreach (var t in portableXamlExtTypes)
+            {
+                metadata.AddType(Utils.Xaml2006Namespace, t);
+            }
+
+            metadata.AddType("", new MetadataType() { Name = "xmlns", IsXamlDirective = true });
         }
 
-        private static void PostProcessTypes(Dictionary<string, MetadataType> types, Metadata metadata, IEnumerable<string> resourceUrls)
+        private static void PostProcessTypes(Dictionary<string, MetadataType> types, Metadata metadata, IEnumerable<string> resourceUrls, List<AvaresInfo> avaResValues)
         {
-            bool rhasext(string resource, string ext) => resource.Contains(ext + "?assembly=");
+            bool rhasext(string resource, string ext) => resource.StartsWith("resm:") ? resource.Contains(ext + "?assembly=") : resource.EndsWith(ext);
 
-            var resmType = new MetadataType()
+            var allresourceUrls = avaResValues.Select(v => v.GlobalUrl).Concat(resourceUrls).ToArray();
+
+            var resType = new MetadataType()
             {
-                Name = "resm:",
+                Name = "avares://,resm:",
                 IsStatic = true,
                 HasHintValues = true,
-                HintValues = resourceUrls.ToArray()
+                HintValues = allresourceUrls
             };
 
-            types.Add(resmType.Name, resmType);
-            metadata.AddType(Utils.AvaloniaNamespace, resmType);
+            types.Add(resType.Name, resType);
 
-            var xamlResmType = new MetadataType()
+            var xamlResType = new MetadataType()
             {
-                Name = "resm:*.xaml",
+                Name = "avares://*.xaml,resm:*.xaml",
                 HasHintValues = true,
-                HintValues = resourceUrls.Where(r => rhasext(r, ".xaml") || rhasext(r, ".paml")).ToArray()
+                HintValues = resType.HintValues.Where(r => rhasext(r, ".xaml") || rhasext(r, ".paml")).ToArray()
             };
 
-            types.Add(xamlResmType.Name, xamlResmType);
-            metadata.AddType(Utils.AvaloniaNamespace, xamlResmType);
+            var styleResType = new MetadataType()
+            {
+                Name = "Style avares://*.xaml,resm:*.xaml",
+                HasHintValues = true,
+                HintValues = avaResValues.Where(v => v.ReturnTypeFullName.StartsWith("Avalonia.Styling.Style")).Select(v => v.GlobalUrl)
+                                        .Concat(resourceUrls.Where(r => rhasext(r, ".xaml") || rhasext(r, ".paml")))
+                                        .ToArray()
+            };
+
+            types.Add(styleResType.Name, styleResType);
+
+            IEnumerable<string> filterLocalRes(MetadataType type, string currentAssemblyName)
+            {
+                var localResPrefix = $"avares://{currentAssemblyName}";
+                var resmSuffix = $"?assembly={currentAssemblyName}";
+
+                foreach (var hint in type.HintValues ?? Array.Empty<string>())
+                {
+                    if (hint.StartsWith("avares://"))
+                    {
+                        if (hint.StartsWith(localResPrefix))
+                        {
+                            yield return hint.Substring(localResPrefix.Length);
+                        }
+                    }
+                    else if (hint.StartsWith("resm:"))
+                    {
+                        if (hint.EndsWith(resmSuffix))
+                        {
+                            yield return hint.Substring(0, hint.Length - resmSuffix.Length);
+                        }
+                    }
+                }
+            }
+
+            resType.XamlContextHintValuesFunc = (a, t, p) => filterLocalRes(xamlResType, a);
+            xamlResType.XamlContextHintValuesFunc = (a, t, p) => filterLocalRes(xamlResType, a);
+            styleResType.XamlContextHintValuesFunc = (a, t, p) => filterLocalRes(styleResType, a);
+
+            types.Add(xamlResType.Name, xamlResType);
 
             MetadataType avProperty;
 
@@ -328,13 +454,15 @@ namespace Avalonia.Ide.CompletionEngine
             if (types.TryGetValue("Avalonia.Media.Imaging.IBitmap", out MetadataType ibitmapType))
             {
                 ibitmapType.HasHintValues = true;
-                ibitmapType.HintValues = resourceUrls.Where(r => isbitmaptype(r)).ToArray();
+                ibitmapType.HintValues = allresourceUrls.Where(r => isbitmaptype(r)).ToArray();
+                ibitmapType.XamlContextHintValuesFunc = (a, t, p) => filterLocalRes(ibitmapType, a);
             }
 
             if (types.TryGetValue("Avalonia.Controls.WindowIcon", out MetadataType winIcon))
             {
                 winIcon.HasHintValues = true;
-                winIcon.HintValues = resourceUrls.Where(r => rhasext(r, ".ico")).ToArray();
+                winIcon.HintValues = allresourceUrls.Where(r => rhasext(r, ".ico")).ToArray();
+                winIcon.XamlContextHintValuesFunc = (a, t, p) => filterLocalRes(winIcon, a);
             }
 
             if (types.TryGetValue("Avalonia.Markup.Xaml.Styling.StyleInclude", out MetadataType styleIncludeType))
@@ -342,7 +470,7 @@ namespace Avalonia.Ide.CompletionEngine
                 var source = styleIncludeType.Properties.FirstOrDefault(p => p.Name == "Source");
 
                 if (source != null)
-                    source.Type = xamlResmType;
+                    source.Type = styleResType;
             }
 
             if (types.TryGetValue("Avalonia.Markup.Xaml.Styling.StyleIncludeExtension", out MetadataType styleIncludeExtType))
@@ -350,13 +478,27 @@ namespace Avalonia.Ide.CompletionEngine
                 var source = styleIncludeExtType.Properties.FirstOrDefault(p => p.Name == "Source");
 
                 if (source != null)
-                    source.Type = xamlResmType;
+                    source.Type = xamlResType;
             }
 
             if (types.TryGetValue(typeof(Uri).FullName, out MetadataType uriType))
             {
                 uriType.HasHintValues = true;
-                uriType.HintValues = resourceUrls.ToArray();
+                uriType.HintValues = allresourceUrls.ToArray();
+                uriType.XamlContextHintValuesFunc = (a, t, p) => filterLocalRes(uriType, a);
+            }
+
+            if (types.TryGetValue(typeof(Type).FullName, out MetadataType typeType))
+            {
+                var typeArguments = new MetadataType()
+                {
+                    Name = "TypeArguments",
+                    IsXamlDirective = true,
+                    IsValidForXamlContextFunc = (a, t, p) => t?.IsGeneric == true,
+                    Properties = { new MetadataProperty("", typeType, null, false, false, false, true) }
+                };
+
+                metadata.AddType(Utils.Xaml2006Namespace, typeArguments);
             }
         }
     }

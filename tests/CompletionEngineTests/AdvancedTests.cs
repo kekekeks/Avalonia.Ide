@@ -67,7 +67,7 @@ namespace CompletionEngineTests
         [Fact]
         public void StyleSelector_Some_WellKnown_Keywords_Should_Be_Completed()
         {
-            var compl =  GetCompletionsFor("<Style Selector=\"").Completions;
+            var compl = GetCompletionsFor("<Style Selector=\"").Completions;
 
             Assert.Contains(compl, v => v.InsertText == ">");
             Assert.Contains(compl, v => v.InsertText == ".");
@@ -89,6 +89,80 @@ namespace CompletionEngineTests
         public void Image_Source_Uris_Should_Be_Completed()
         {
             AssertSingleCompletion("<Image Source=\"", "resm:", "resm:CompletionEngineTests.Test.bmp?assembly=CompletionEngineTests");
+        }
+
+        [Fact]
+        public void Image_Source_RelativeUris_Should_Be_Completed()
+        {
+            AssertSingleCompletion("<Image Source=\"", "resm:", "resm:CompletionEngineTests.Test.bmp");
+        }
+
+        [Fact]
+        public void StyleInclude_Source_Uris_Should_Be_Completed()
+        {
+            AssertSingleCompletion("<StyleInclude Source=\"", "avares:", "avares://CompletionEngineTests/Test.xaml");
+        }
+
+        [Fact]
+        public void StyleInclude_Source_RelativeUris_Should_Be_Completed()
+        {
+            AssertSingleCompletion("<StyleInclude Source=\"", "/", "/Test.xaml");
+        }
+
+        [Fact]
+        public void xClass_Directive_Should_Be_Completed()
+        {
+            var compl = GetCompletionsFor("<UserControl x:Cla").Completions;
+
+            Assert.Contains(compl, v => v.InsertText == "x:Class=\"\"");
+        }
+
+        [Fact]
+        public void xName_Directive_Should_Be_Completed()
+        {
+            var compl = GetCompletionsFor("<UserControl x:N").Completions;
+
+            Assert.Contains(compl, v => v.InsertText == "x:Name=\"\"");
+        }
+
+        [Fact]
+        public void xKey_Directive_Should_Be_Completed()
+        {
+            var compl = GetCompletionsFor("<UserControl x:K").Completions;
+
+            Assert.Contains(compl, v => v.InsertText == "x:Key=\"\"");
+        }
+
+        [Fact]
+        public void xTypeArguments_Directive_Should_Be_Completed()
+        {
+            AssertSingleCompletion("<local:GenericBaseClass`1 ", "x:T", "x:TypeArguments=\"\"");
+        }
+
+        [Fact]
+        public void xTypeArguments_Value_Should_Be_Completed()
+        {
+            AssertSingleCompletion("<local:GenericBaseClass`1 x:TypeArguments=\"", "Tex", "TextBlock");
+        }
+
+        [Fact]
+        public void xTypeArguments_Directive_Should_Not_Be_Completed_On_NonGeneric_Type()
+        {
+           Assert.Null(GetCompletionsFor("<UserControl x:TypeArgum"));
+        }
+
+        [Fact]
+        public void xmlns_Directive_Should_Be_Completed()
+        {
+            var compl = GetCompletionsFor("<UserControl x").Completions;
+
+            Assert.Contains(compl, v => v.InsertText == "xmlns=\"\"");
+        }
+
+        [Fact]
+        public void xClass_Value_Should_Be_Completed()
+        {
+            AssertSingleCompletion("<UserControl x:Class=\"", "", "CompletionEngineTests.TestUserControl");
         }
     }
 }
