@@ -235,13 +235,6 @@ namespace Avalonia.Ide.CompletionEngine
                             .Where(t => t.Value.IsValidForXamlContextFunc?.Invoke(currentAssemblyName, targetType, null) ?? true)
                             .Select(v => new Completion(v.Key, v.Key + "=\"\"", v.Key, CompletionKind.Class, v.Key.Length + 2)));
 
-                    //if (targetType?.IsAvaloniaObjectType == true)
-                    //    completions.AddRange(
-                    //        _helper.FilterTypes(state.AttributeName, true)
-                    //            .Select(v => new Completion(v.Key,
-                    //            v.Key + (v.Value.Properties.Count > 0 ? "." : "=\"\""),
-                    //            v.Key, CompletionKind.Class,
-                    //            v.Value.Properties.Count > 0 ? -1 : v.Key.Length + 2)));
                     if (targetType?.IsAvaloniaObjectType == true)
                         completions.AddRange(
                             _helper.FilterTypeNames(state.AttributeName, withAttachedPropertiesOnly: true)
