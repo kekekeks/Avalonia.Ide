@@ -97,6 +97,7 @@ namespace Avalonia.Ide.CompletionEngine
 
             public IEnumerable<string> FilterPropertyNames(string typeName, string propName,
                 bool? attached,
+                bool hasSetter,
                 bool staticGetter = false)
             {
                 var t = LookupType(typeName);
@@ -104,7 +105,7 @@ namespace Avalonia.Ide.CompletionEngine
                 if (t == null)
                     return new string[0];
 
-                var e = t.Properties.Where(p => p.Name.StartsWith(propName, StringComparison.OrdinalIgnoreCase));
+                var e = t.Properties.Where(p => p.Name.StartsWith(propName, StringComparison.OrdinalIgnoreCase) && (hasSetter ? p.HasSetter : p.HasGetter));
 
                 if (attached.HasValue)
                     e = e.Where(p => p.IsAttached == attached);
@@ -203,7 +204,7 @@ namespace Avalonia.Ide.CompletionEngine
 
                     var sameType = state.GetParentTagName(1) == typeName;
 
-                    completions.AddRange(_helper.FilterPropertyNames(typeName, compName, sameType ? (bool?)null : true)
+                    completions.AddRange(_helper.FilterPropertyNames(typeName, compName, attached: sameType ? (bool?)null : true, hasSetter: false)
                         .Select(p => new Completion(p, sameType ? CompletionKind.Property : CompletionKind.AttachedProperty)));
                 }
                 else
@@ -212,7 +213,6 @@ namespace Avalonia.Ide.CompletionEngine
             else if (state.State == XmlParser.ParserState.InsideElement ||
                      state.State == XmlParser.ParserState.StartAttribute)
             {
-
                 if (state.State == XmlParser.ParserState.InsideElement)
                     curStart = pos; //Force completion to be started from current cursor position
 
@@ -221,12 +221,12 @@ namespace Avalonia.Ide.CompletionEngine
                     var dotPos = state.AttributeName.IndexOf('.');
                     curStart += dotPos + 1;
                     var split = state.AttributeName.Split(new[] { '.' }, 2);
-                    completions.AddRange(_helper.FilterPropertyNames(split[0], split[1], true)
+                    completions.AddRange(_helper.FilterPropertyNames(split[0], split[1], attached: true, hasSetter: true)
                         .Select(x => new Completion(x, x + "=\"\"", x, CompletionKind.AttachedProperty, x.Length + 2)));
                 }
                 else
                 {
-                    completions.AddRange(_helper.FilterPropertyNames(state.TagName, state.AttributeName, false)
+                    completions.AddRange(_helper.FilterPropertyNames(state.TagName, state.AttributeName, attached: false, hasSetter: true)
                         .Select(x => new Completion(x, x + "=\"\"", x, CompletionKind.Property, x.Length + 2)));
 
                     var targetType = _helper.LookupType(state.TagName);
@@ -368,7 +368,7 @@ namespace Avalonia.Ide.CompletionEngine
                 if (ext.State == MarkupExtensionParser.ParserStateType.InsideElement)
                     forcedStart = data.Length;
 
-                completions.AddRange(_helper.FilterPropertyNames(transformedName, ext.AttributeName ?? "", false)
+                completions.AddRange(_helper.FilterPropertyNames(transformedName, ext.AttributeName ?? "", attached: false, hasSetter: true)
                     .Select(x => new Completion(x, x + "=", x, CompletionKind.Property)));
 
                 var attribName = ext.AttributeName ?? "";
@@ -400,7 +400,7 @@ namespace Avalonia.Ide.CompletionEngine
                                 completions.AddRange(hints.Select(x => new Completion(x, $"{type}.{x}", x, GetCompletionKindForHintValues(mType))));
                             }
 
-                            var props = _helper.FilterPropertyNames(type, prop, false, staticGetter: true);
+                            var props = _helper.FilterPropertyNames(type, prop, attached: false, hasSetter: false, staticGetter: true);
                             completions.AddRange(props.Select(x => new Completion(x, $"{type}.{x}", x, CompletionKind.StaticProperty)));
                         }
                     }
