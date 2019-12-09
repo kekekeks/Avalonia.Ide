@@ -52,8 +52,8 @@ namespace Avalonia.Ide.CompletionEngine.DnlibMetadataProvider
         public IEnumerable<IPropertyInformation> Properties => _type.Properties
             //Filter indexer properties
             .Where(p =>
-                (p.GetMethod?.IsPublic == true && p.GetMethod.Parameters.Count == (p.GetMethod.IsStatic ? 0 : 1))
-                || (p.SetMethod?.IsPublic == true && p.SetMethod.Parameters.Count == (p.SetMethod.IsStatic ? 1 : 2)))
+                (p.GetMethod?.IsPublicOrInternal() == true && p.GetMethod.Parameters.Count == (p.GetMethod.IsStatic ? 0 : 1))
+                || (p.SetMethod?.IsPublicOrInternal() == true && p.SetMethod.Parameters.Count == (p.SetMethod.IsStatic ? 1 : 2)))
             // Filter property overrides
             .Where(p => !p.Name.Contains("."))
             .Select(p => new PropertyWrapper(p));
@@ -110,13 +110,13 @@ namespace Avalonia.Ide.CompletionEngine.DnlibMetadataProvider
 
             IsStatic = setMethod?.IsStatic ?? getMethod?.IsStatic ?? false;
 
-            if (setMethod?.IsPublic == true)
+            if (setMethod?.IsPublicOrInternal() == true)
             {
                 HasPublicSetter = true;
                 TypeFullName = setMethod.Parameters[setMethod.IsStatic ? 0 : 1].Type.FullName;
             }
 
-            if (getMethod?.IsPublic == true)
+            if (getMethod?.IsPublicOrInternal() == true)
             {
                 HasPublicGetter = true;
                 if (TypeFullName == null)
@@ -162,5 +162,11 @@ namespace Avalonia.Ide.CompletionEngine.DnlibMetadataProvider
             _param = param;
         }
         public string TypeFullName => _param.Type.FullName;
+    }
+
+    static class WrapperExtensions
+    {
+        public static bool IsPublicOrInternal(this MethodDef methodDef) 
+                            => methodDef?.IsPublic == true || methodDef?.IsAssembly == true;
     }
 }
