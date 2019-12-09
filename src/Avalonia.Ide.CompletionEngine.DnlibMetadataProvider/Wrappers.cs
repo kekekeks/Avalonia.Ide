@@ -70,6 +70,8 @@ namespace Avalonia.Ide.CompletionEngine.DnlibMetadataProvider
             }
         }
         public override string ToString() => Name;
+        public IEnumerable<ITypeInformation> NestedTypes =>
+            _type.HasNestedTypes ? _type.NestedTypes.Select(t => new TypeWrapper(t)) : Array.Empty<TypeWrapper>();
     }
 
     class CustomAttributeWrapper : ICustomAttributeInformation

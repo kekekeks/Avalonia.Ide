@@ -35,6 +35,7 @@ namespace Avalonia.Ide.CompletionEngine.AssemblyMetadata
         bool IsPublic { get; }
         bool IsGeneric { get; }
         IEnumerable<string> EnumValues { get; }
+        IEnumerable<ITypeInformation> NestedTypes { get; }
     }
 
     public interface IMethodInformation
