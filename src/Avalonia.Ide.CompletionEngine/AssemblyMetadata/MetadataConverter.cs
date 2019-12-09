@@ -74,7 +74,9 @@ namespace Avalonia.Ide.CompletionEngine
                 ProcessWellKnownAliases(asm, aliases);
                 ProcessCustomAttributes(asm, aliases);
 
-                foreach (var type in asm.Types.Where(x => !x.IsInterface && x.IsPublic))
+                var asmTypes = asm.Types.ToArray();
+
+                foreach (var type in asmTypes.Where(x => !x.IsInterface && x.IsPublic))
                 {
                     var mt = types[type.FullName] = ConvertTypeInfomation(type);
                     typeDefs[mt] = type;
@@ -86,7 +88,7 @@ namespace Avalonia.Ide.CompletionEngine
 
                 const string avaresToken = "Build:"; //or "Populate:" should work both ways
 
-                foreach (var resType in asm.Types.Where(t => t.FullName == "CompiledAvaloniaXaml.!AvaloniaResources" || t.Name == "CompiledAvaloniaXaml.!AvaloniaResources"))
+                foreach (var resType in asmTypes.Where(t => t.FullName == "CompiledAvaloniaXaml.!AvaloniaResources"))
                 {
                     foreach (var res in resType.Methods.Where(m => m.Name.StartsWith(avaresToken)))
                     {
@@ -101,6 +103,34 @@ namespace Avalonia.Ide.CompletionEngine
                         };
 
                         avaresValues.Add(avres);
+                    }
+
+                    //add x:Class avalonia resources, they're not in the CompiledAvaloniaXaml.!AvaloniaResources format
+                    //but they are in the NamespaceInfo:
+                    foreach (var nestedType in resType.NestedTypes.Where(t => t.Name.StartsWith("NamespaceInfo:")))
+                    {
+                        var localUrl = nestedType.Name.Replace("NamespaceInfo:", "");
+                        var globalUrl = $"avares://{asm.Name}{localUrl}";
+
+                        if (!avaresValues.Any(v => v.GlobalUrl == globalUrl))
+                        {
+                            var className = $"{asm.Name}{localUrl.Replace('/', '.').Replace(".xaml", "")}";
+                            var resultType = asmTypes.FirstOrDefault(t => t.FullName == className);
+                            if (resultType?.Methods?.Any(m => m.Name == "!XamlIlPopulate") ?? false)
+                            {
+                                //we set here base class like Style, Styles, UserControl so we can manage
+                                //resources in a common way later
+                                var avres = new AvaresInfo
+                                {
+                                    Assembly = asm,
+                                    LocalUrl = localUrl,
+                                    GlobalUrl = globalUrl,
+                                    ReturnTypeFullName = resultType.GetBaseType()?.FullName ?? ""
+                                };
+
+                                avaresValues.Add(avres);
+                            }
+                        }
                     }
                 }
 
@@ -306,7 +336,8 @@ namespace Avalonia.Ide.CompletionEngine
             {
                 Name = "Style avares://*.xaml,resm:*.xaml",
                 HasHintValues = true,
-                HintValues = avaResValues.Where(v => v.ReturnTypeFullName.StartsWith("Avalonia.Styling.Style")).Select(v => v.GlobalUrl)
+                HintValues = avaResValues.Where(v => v.ReturnTypeFullName.StartsWith("Avalonia.Styling.Style"))
+                                        .Select(v => v.GlobalUrl)
                                         .Concat(resourceUrls.Where(r => rhasext(r, ".xaml") || rhasext(r, ".paml")))
                                         .ToArray()
             };
