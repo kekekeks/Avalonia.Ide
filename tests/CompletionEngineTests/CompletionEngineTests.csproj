@@ -16,6 +16,7 @@
     <ItemGroup>
       <EmbeddedResource Include="Test.bmp" />
       <AvaloniaResource Include="Test.xaml" />
+      <AvaloniaResource Include="TestCompiledTheme.xaml" />
     </ItemGroup>
 
     <ItemGroup>

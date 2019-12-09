@@ -110,6 +110,18 @@ namespace CompletionEngineTests
         }
 
         [Fact]
+        public void StyleInclude_Source_Uris_Should_Be_Completed_CompiledStyles()
+        {
+            AssertSingleCompletion("<StyleInclude Source=\"", "avares:", "avares://CompletionEngineTests/TestCompiledTheme.xaml");
+        }
+
+        [Fact]
+        public void StyleInclude_Source_RelativeUris_Should_Be_CompiledStyles()
+        {
+            AssertSingleCompletion("<StyleInclude Source=\"", "/", "/TestCompiledTheme.xaml");
+        }
+
+        [Fact]
         public void xClass_Directive_Should_Be_Completed()
         {
             var compl = GetCompletionsFor("<UserControl x:Cla").Completions;
