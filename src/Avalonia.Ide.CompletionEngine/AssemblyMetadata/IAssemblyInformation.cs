@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 
 namespace Avalonia.Ide.CompletionEngine.AssemblyMetadata
 {
@@ -8,6 +9,7 @@ namespace Avalonia.Ide.CompletionEngine.AssemblyMetadata
         IEnumerable<ITypeInformation> Types { get; }
         IEnumerable<ICustomAttributeInformation> CustomAttributes { get; }
         IEnumerable<string> ManifestResourceNames { get; }
+        Stream GetManifestResourceStream(string name);
     }
 
     public interface ICustomAttributeInformation

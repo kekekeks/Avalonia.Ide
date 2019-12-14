@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Avalonia.Ide.CompletionEngine.AssemblyMetadata;
 using dnlib.DotNet;
@@ -25,6 +26,9 @@ namespace Avalonia.Ide.CompletionEngine.DnlibMetadataProvider
 
         public IEnumerable<string> ManifestResourceNames
             => _asm.ManifestModule.Resources.Select(r => r.Name.ToString());
+
+        public Stream GetManifestResourceStream(string name)
+            => _asm.ManifestModule.Resources.FindEmbeddedResource(name).CreateReader().AsStream();
 
         public override string ToString() => Name;
     }
@@ -166,7 +170,7 @@ namespace Avalonia.Ide.CompletionEngine.DnlibMetadataProvider
 
     static class WrapperExtensions
     {
-        public static bool IsPublicOrInternal(this MethodDef methodDef) 
+        public static bool IsPublicOrInternal(this MethodDef methodDef)
                             => methodDef?.IsPublic == true || methodDef?.IsAssembly == true;
     }
 }
