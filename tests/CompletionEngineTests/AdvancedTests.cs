@@ -86,15 +86,27 @@ namespace CompletionEngineTests
         }
 
         [Fact]
-        public void Image_Source_Uris_Should_Be_Completed()
+        public void Image_Source_resm_Uris_Should_Be_Completed()
         {
             AssertSingleCompletion("<Image Source=\"", "resm:", "resm:CompletionEngineTests.Test.bmp?assembly=CompletionEngineTests");
         }
 
         [Fact]
-        public void Image_Source_RelativeUris_Should_Be_Completed()
+        public void Image_Source_resm_RelativeUris_Should_Be_Completed()
         {
             AssertSingleCompletion("<Image Source=\"", "resm:", "resm:CompletionEngineTests.Test.bmp");
+        }
+
+        [Fact]
+        public void Image_Source_avares_Uris_Should_Be_Completed()
+        {
+            AssertSingleCompletion("<Image Source=\"", "avares:", "avares://CompletionEngineTests/Test.bmp");
+        }
+
+        [Fact]
+        public void Image_Source_avares_RelativeUris_Should_Be_Completed()
+        {
+            AssertSingleCompletion("<Image Source=\"", "/", "/Test.bmp");
         }
 
         [Fact]
