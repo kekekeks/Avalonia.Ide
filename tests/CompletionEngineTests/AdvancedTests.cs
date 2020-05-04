@@ -23,6 +23,18 @@ namespace CompletionEngineTests
         }
 
         [Fact]
+        public void Enum_Type_in_StaticExtension_Should_Be_Completed()
+        {
+            AssertSingleCompletion("<UserControl Tag=\"{x:Static ", "HorizontalAlignme", "HorizontalAlignment");
+        }
+
+        [Fact]
+        public void Enum_Value_in_StaticExtension_Should_Be_Completed()
+        {
+            AssertSingleCompletion("<UserControl HorizontalAlignment=\"{x:Static ", "HorizontalAlignment.L", "HorizontalAlignment.Left");
+        }
+
+        [Fact]
         public void Extension_With_CtorArgument_Static_Properties_Values_Should_Be_Completed()
         {
             AssertSingleCompletion("<UserControl Background=\"{x:Static ", "Brushes.Re", "Brushes.Red");

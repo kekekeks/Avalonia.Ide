@@ -101,6 +101,16 @@ namespace Avalonia.Ide.CompletionEngine
                 var ctors = typeDef?.Methods
                     .Where(m => m.IsPublic && !m.IsStatic && m.Name == ".ctor" && m.Parameters.Count == 1);
 
+                if (typeDef?.IsEnum ?? false)
+                {
+                    foreach (var value in typeDef.EnumValues)
+                    {
+                        var p = new MetadataProperty(value, type, type, false, true, true, false);
+
+                        type.Properties.Add(p);
+                    }
+                }
+
                 int level = 0;
                 while (typeDef != null)
                 {
