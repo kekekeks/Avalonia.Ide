@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -6,7 +7,7 @@ namespace Avalonia.Ide.CompletionEngine
 {
     public class XmlParser
     {
-        private readonly string _data;
+        private readonly ReadOnlyMemory<char> _data;
         
         public enum ParserState
         {
@@ -31,15 +32,15 @@ namespace Avalonia.Ide.CompletionEngine
         private Stack<int> _containingTagStart;
 
         public string TagName => State >= ParserState.StartElement
-            ? _data.Substring(_elementNameStart, (_elementNameEnd ?? (_data.Length - 1)) - _elementNameStart + 1)
+            ? _data.Span.Slice(_elementNameStart, (_elementNameEnd ?? (_data.Length - 1)) - _elementNameStart + 1).ToString()
             : null;
 
         public string AttributeName => State >= ParserState.StartAttribute
-            ? _data.Substring(_attributeNameStart, (_attributeNameEnd ?? (_data.Length - 1)) - _attributeNameStart + 1)
+            ? _data.Span.Slice(_attributeNameStart, (_attributeNameEnd ?? (_data.Length - 1)) - _attributeNameStart + 1).ToString()
             : null;
 
         public string AttributeValue =>
-            State == ParserState.AttributeValue ? _data.Substring(_attributeValueStart) : null;
+            State == ParserState.AttributeValue ? _data.Span.Slice(_attributeValueStart).ToString() : null;
 
         public int? CurrentValueStart =>
             State == ParserState.StartElement
@@ -56,11 +57,16 @@ namespace Avalonia.Ide.CompletionEngine
 
         public int NestingLevel => _containingTagStart.Count;
 
-        XmlParser(string data)
+        XmlParser(ReadOnlyMemory<char> data)
         {
             _data = data;
             _containingTagStart = new Stack<int>();
         }
+        XmlParser(string data) : this(data.AsMemory())
+        {
+
+        }
+
 
         private const string CommentStart = "!--";
         private const string CommentEnd = "-->";
@@ -76,7 +82,7 @@ namespace Avalonia.Ide.CompletionEngine
             // ReSharper disable once LoopCanBeConvertedToQuery
             for (var c = 0; c < checkFor.Length; c++)
             {
-                if (_data[c + startAt] != checkFor[c])
+                if (_data.Span[c + startAt] != checkFor[c])
                     return false;
             }
             return true;
@@ -86,7 +92,7 @@ namespace Avalonia.Ide.CompletionEngine
         {
             for (var i = 0; i < _data.Length; i++)
             {
-                var c = _data[i];
+                var c = _data.Span[i];
                 if (c == '<' && State == ParserState.None)
                 {
                     State = ParserState.StartElement;
@@ -122,8 +128,16 @@ namespace Avalonia.Ide.CompletionEngine
                    || State == ParserState.AfterAttributeValue)
                        && c == '/' && CheckPrev(i - 1, "<"))
                 {
-                    _containingTagStart.Pop();
-                    _containingTagStart.Pop();
+                    if(_containingTagStart.Count > 0)
+                    {
+                        _containingTagStart.Pop();
+                    }
+                    if (_containingTagStart.Count > 0)
+                    {
+                        _containingTagStart.Pop();
+                    }
+
+
                 }
                 else if ((State == ParserState.InsideElement
                     || State == ParserState.StartElement
@@ -172,7 +186,7 @@ namespace Avalonia.Ide.CompletionEngine
             if (NestingLevel - level - 1 < 0)
                 return null;
             var start = _containingTagStart.Skip(level).FirstOrDefault();
-            var m = Regex.Match(_data.Substring(start), @"^<[^\s/>]+");
+            var m = Regex.Match(_data.Span.Slice(start).ToString(), @"^<[^\s/>]+");
             if (m.Success)
                 return m.Value.Substring(1);
             return null;
@@ -180,6 +194,11 @@ namespace Avalonia.Ide.CompletionEngine
         }
 
         public static XmlParser Parse(string data)
+        {
+            return Parse(data.AsMemory());
+        }
+
+        public static XmlParser Parse(ReadOnlyMemory<char> data)
         {
             var rv = new XmlParser(data);
             rv.Parse();
