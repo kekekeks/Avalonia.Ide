@@ -136,8 +136,6 @@ namespace Avalonia.Ide.CompletionEngine
                     {
                         _containingTagStart.Pop();
                     }
-
-
                 }
                 else if ((State == ParserState.InsideElement
                     || State == ParserState.StartElement
@@ -145,7 +143,10 @@ namespace Avalonia.Ide.CompletionEngine
                         && c == '>' && CheckPrev(i - 1, "/"))
                 {
                     State = ParserState.None;
-                    _containingTagStart.Pop();
+                    if(_containingTagStart.Count > 0)
+                    {
+                        _containingTagStart.Pop();
+                    }
                 }
                 else if ((State == ParserState.InsideElement 
                     || State == ParserState.StartElement 
