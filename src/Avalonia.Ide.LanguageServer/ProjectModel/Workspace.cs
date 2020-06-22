@@ -39,7 +39,7 @@ namespace Avalonia.Ide.LanguageServer.ProjectModel
             var xaml = new List<string>();
             var dir = Path.GetDirectoryName(p.FullPath);
             foreach (var xf in resp.EmbeddedResources)
-                if (xf.EndsWith(".xaml") || xf.EndsWith(".paml"))
+                if (xf.EndsWith(".xaml") || xf.EndsWith(".paml") || xf.EndsWith(".axaml"))
                 {
                     var fullXamlPath = Path.Combine(dir, xf);
                     if (File.Exists(fullXamlPath))

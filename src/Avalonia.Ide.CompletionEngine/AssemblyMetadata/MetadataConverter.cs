@@ -410,7 +410,7 @@ namespace Avalonia.Ide.CompletionEngine
             {
                 Name = "avares://*.xaml,resm:*.xaml",
                 HasHintValues = true,
-                HintValues = resType.HintValues.Where(r => rhasext(r, ".xaml") || rhasext(r, ".paml")).ToArray()
+                HintValues = resType.HintValues.Where(r => rhasext(r, ".xaml") || rhasext(r, ".paml") || rhasext(r, ".axaml")).ToArray()
             };
 
             var styleResType = new MetadataType()
@@ -419,7 +419,7 @@ namespace Avalonia.Ide.CompletionEngine
                 HasHintValues = true,
                 HintValues = avaResValues.Where(v => v.ReturnTypeFullName.StartsWith("Avalonia.Styling.Style"))
                                         .Select(v => v.GlobalUrl)
-                                        .Concat(resourceUrls.Where(r => rhasext(r, ".xaml") || rhasext(r, ".paml")))
+                                        .Concat(resourceUrls.Where(r => rhasext(r, ".xaml") || rhasext(r, ".paml") || rhasext(r, ".axaml")))
                                         .ToArray()
             };
 
