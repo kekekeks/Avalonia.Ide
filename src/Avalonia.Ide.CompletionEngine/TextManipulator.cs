@@ -5,76 +5,120 @@ using System.Linq;
 namespace Avalonia.Ide.CompletionEngine
 {
     /// <summary>
-    /// Allows IDE to manipulate text typed by user, without completion session
-    /// I.E. close xml tags, rename end tag, itp.
+    /// Manipulates document as user types text
+    /// Closes xml tags, renames start and end tags at same time etc.
     /// </summary>
     public class TextManipulator
     {
-        private readonly Metadata _completionMetadata;
-        private readonly string _text;
+        private readonly ReadOnlyMemory<char> _text;
         private readonly int _position;
         private readonly XmlParser _state;
-        private readonly int _parserOffset = 0;
-        private ReadOnlyMemory<char> _remainingText;
 
-        public TextManipulator(Metadata completionMetadata, string text, int position)
+        public TextManipulator(string text, int position)
         {
-            _completionMetadata = completionMetadata;
-            _text = text;
             _position = position;
+            _text = text.AsMemory();
 
-            
-            var fullText = text.AsMemory();
-            var textToParse = fullText;
+            int parserStart = 0;
+            int parserEnd = 0;
 
             // To improve performance parse only last tag
-            if(text.Length > 0)
+            if (text.Length > 0)
             {
-                var parserStart = position;
-                if (parserStart >= text.Length)
+                // Findl last < tag
+                parserStart = position;
+                if (position >= text.Length)
                 {
                     parserStart = text.Length - 1;
                 }
                 parserStart = text.LastIndexOf('<', parserStart);
-                if(parserStart < 0)
+                if (parserStart < 0)
                 {
                     parserStart = 0;
                 }
 
-                int parserEnd;
-                if(text.Length > position)
+
+                if (text.Length > position)
                 {
                     parserEnd = position;
                 }
                 else
                 {
-                    parserEnd = position - 1;
+                    parserEnd = text.Length;
                 }
-
-                _parserOffset = parserStart;
-                textToParse = textToParse.Slice(parserStart, parserEnd - parserStart);
-
-                _remainingText = fullText.Slice(parserEnd);
             }
-            
 
-            _state = XmlParser.Parse(textToParse);
+
+            _state = XmlParser.Parse(_text, parserStart, parserEnd);
         }
 
         public IList<TextManipulation> ManipulateText(ITextChange textChange)
         {
-            IList<TextManipulation> maniplations = new List<TextManipulation>();
-            switch (_state.State)
+            List<TextManipulation> maniplations = new List<TextManipulation>();
+            if(_state.State == XmlParser.ParserState.StartElement
+                || (_state.State == XmlParser.ParserState.None && _text.Span[_state.ParserPos] == '>')
+                )
             {
-                case XmlParser.ParserState.StartElement:
-                case XmlParser.ParserState.AfterAttributeValue:
-                case XmlParser.ParserState.InsideElement:
+                SynchronizeStartAndEndTag(textChange, maniplations);
+            }
+
+        
+                if(_state.State == XmlParser.ParserState.StartElement
+                || _state.State == XmlParser.ParserState.AfterAttributeValue
+                || _state.State == XmlParser.ParserState.InsideElement)
+            {
+
                     TryCloseTag(textChange, maniplations);
-                    break;
-            
             }
 
             return maniplations.OrderByDescending(n => n.Start).ToList();
+        }
+
+        private void SynchronizeStartAndEndTag(ITextChange textChange, List<TextManipulation> maniplations)
+        {
+            string startTag = _state.TagName;
+            int? maybeTagStart = _state.CurrentValueStart;
+            if(maybeTagStart == null)
+            {
+                return;
+            }
+
+            int startPos = maybeTagStart.Value; // add 1 to take opening < into account
+            if (startTag.EndsWith("/"))
+            {
+                return; // start tag is self-closing
+            }
+            if (textChange.NewPosition < startPos || textChange.NewPosition > startPos + startTag.Length)
+            {
+                return; //we are not editing tag name
+            }
+
+            XmlParser searchEndTag = _state.Clone();
+            if (searchEndTag.SeekClosingTag())
+            {
+                string endTag = searchEndTag.TagName;
+                if(endTag[0] != '/')
+                {
+                    return;
+                }
+
+                maybeTagStart = searchEndTag.CurrentValueStart;
+                if(maybeTagStart == null)
+                {
+                    return;
+                }
+
+                int endPos = maybeTagStart.Value; // add 1 to take opening < into account
+
+                // reverse change to start tag
+                startTag = textChange.ReverseOn(startTag, startPos);
+
+                bool isTheSameTag = endTag.Length > 0 && endTag.Substring(1) == startTag;
+                if (isTheSameTag)
+                {
+                    maniplations.AddRange(textChange.AsManipulations(endPos - startPos));
+                }
+            }
         }
 
         private void TryCloseTag(ITextChange textChange, IList<TextManipulation> manipulations)
@@ -92,10 +136,11 @@ namespace Avalonia.Ide.CompletionEngine
 
         private bool IsTagAlreadyClosed()
         {
-            if (_remainingText.Length > 1)
+            if (_text.Length > _position + 1)
             {
-                var remainingSpan = _remainingText.Span;
-                for (int i = 1; i < _remainingText.Length; i++)
+                var remainingSpan = _text.Span;
+                // at i == 0 we have "/"
+                for (int i = _position + 1; i < _text.Length; i++)
                 {
                     var nextChar = remainingSpan[i];
                     if (!char.IsWhiteSpace(nextChar))

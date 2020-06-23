@@ -1,5 +1,9 @@
 ﻿namespace Avalonia.Ide.CompletionEngine
 {
+    /// <summary>
+    /// Represents edit to be applied to textbuffer
+    /// For simplicity sake two types of manipulations are offered only - Insertion and Deletion
+    /// </summary>
     public class TextManipulation
     {
         public static TextManipulation Insert(int postition, string text)
