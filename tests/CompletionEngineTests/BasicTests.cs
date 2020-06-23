@@ -1,3 +1,4 @@
+using System.Linq;
 using Xunit;
 
 namespace CompletionEngineTests
@@ -14,6 +15,21 @@ namespace CompletionEngineTests
         public void Property_Should_Be_Completed()
         {
             AssertSingleCompletion("<UserControl ", "HorizontalAlign", "HorizontalAlignment=\"\"");
+        }
+
+        [Fact]
+        public void Property_Completions_Should_Be_Unique()
+        {
+            var compl = GetCompletionsFor("<UserControl P");
+            Assert.All(compl.Completions.GroupBy(v => v.DisplayText), v => Assert.Single(v));
+        }
+
+        [Fact]
+        public void Get_Only_Property_Should_Not_Be_Completed()
+        {
+            var compl = GetCompletionsFor("<UserControl P");
+
+            Assert.All(compl.Completions, c => Assert.NotEqual("Parent", c.DisplayText));
         }
 
         [Fact]

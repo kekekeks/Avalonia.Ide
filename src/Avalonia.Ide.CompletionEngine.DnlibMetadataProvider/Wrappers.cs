@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Avalonia.Ide.CompletionEngine.AssemblyMetadata;
 using dnlib.DotNet;
@@ -23,8 +24,11 @@ namespace Avalonia.Ide.CompletionEngine.DnlibMetadataProvider
         public IEnumerable<ICustomAttributeInformation> CustomAttributes
             => _asm.CustomAttributes.Select(a => new CustomAttributeWrapper(a));
 
-        public IEnumerable<string> ManifestResourceNames 
+        public IEnumerable<string> ManifestResourceNames
             => _asm.ManifestModule.Resources.Select(r => r.Name.ToString());
+
+        public Stream GetManifestResourceStream(string name)
+            => _asm.ManifestModule.Resources.FindEmbeddedResource(name).CreateReader().AsStream();
 
         public override string ToString() => Name;
     }
@@ -52,8 +56,8 @@ namespace Avalonia.Ide.CompletionEngine.DnlibMetadataProvider
         public IEnumerable<IPropertyInformation> Properties => _type.Properties
             //Filter indexer properties
             .Where(p =>
-                (p.GetMethod == null || p.GetMethod.Parameters.Count == (p.GetMethod.IsStatic ? 0 : 1))
-                && (p.SetMethod == null || p.SetMethod.Parameters.Count == (p.SetMethod.IsStatic ? 1 : 2)))
+                (p.GetMethod?.IsPublicOrInternal() == true && p.GetMethod.Parameters.Count == (p.GetMethod.IsStatic ? 0 : 1))
+                || (p.SetMethod?.IsPublicOrInternal() == true && p.SetMethod.Parameters.Count == (p.SetMethod.IsStatic ? 1 : 2)))
             // Filter property overrides
             .Where(p => !p.Name.Contains("."))
             .Select(p => new PropertyWrapper(p));
@@ -70,6 +74,8 @@ namespace Avalonia.Ide.CompletionEngine.DnlibMetadataProvider
             }
         }
         public override string ToString() => Name;
+        public IEnumerable<ITypeInformation> NestedTypes =>
+            _type.HasNestedTypes ? _type.NestedTypes.Select(t => new TypeWrapper(t)) : Array.Empty<TypeWrapper>();
     }
 
     class CustomAttributeWrapper : ICustomAttributeInformation
@@ -108,16 +114,16 @@ namespace Avalonia.Ide.CompletionEngine.DnlibMetadataProvider
 
             IsStatic = setMethod?.IsStatic ?? getMethod?.IsStatic ?? false;
 
-            if (setMethod != null)
+            if (setMethod?.IsPublicOrInternal() == true)
             {
                 HasPublicSetter = true;
                 TypeFullName = setMethod.Parameters[setMethod.IsStatic ? 0 : 1].Type.FullName;
             }
 
-            if (getMethod != null)
+            if (getMethod?.IsPublicOrInternal() == true)
             {
                 HasPublicGetter = true;
-                if(TypeFullName == null)
+                if (TypeFullName == null)
                     TypeFullName = getMethod.ReturnType.FullName;
             }
         }
@@ -160,5 +166,11 @@ namespace Avalonia.Ide.CompletionEngine.DnlibMetadataProvider
             _param = param;
         }
         public string TypeFullName => _param.Type.FullName;
+    }
+
+    static class WrapperExtensions
+    {
+        public static bool IsPublicOrInternal(this MethodDef methodDef)
+                            => methodDef?.IsPublic == true || methodDef?.IsAssembly == true;
     }
 }

@@ -23,6 +23,18 @@ namespace CompletionEngineTests
         }
 
         [Fact]
+        public void Enum_Type_in_StaticExtension_Should_Be_Completed()
+        {
+            AssertSingleCompletion("<UserControl Tag=\"{x:Static ", "HorizontalAlignme", "HorizontalAlignment");
+        }
+
+        [Fact]
+        public void Enum_Value_in_StaticExtension_Should_Be_Completed()
+        {
+            AssertSingleCompletion("<UserControl HorizontalAlignment=\"{x:Static ", "HorizontalAlignment.L", "HorizontalAlignment.Left");
+        }
+
+        [Fact]
         public void Extension_With_CtorArgument_Static_Properties_Values_Should_Be_Completed()
         {
             AssertSingleCompletion("<UserControl Background=\"{x:Static ", "Brushes.Re", "Brushes.Red");
@@ -86,15 +98,27 @@ namespace CompletionEngineTests
         }
 
         [Fact]
-        public void Image_Source_Uris_Should_Be_Completed()
+        public void Image_Source_resm_Uris_Should_Be_Completed()
         {
             AssertSingleCompletion("<Image Source=\"", "resm:", "resm:CompletionEngineTests.Test.bmp?assembly=CompletionEngineTests");
         }
 
         [Fact]
-        public void Image_Source_RelativeUris_Should_Be_Completed()
+        public void Image_Source_resm_RelativeUris_Should_Be_Completed()
         {
             AssertSingleCompletion("<Image Source=\"", "resm:", "resm:CompletionEngineTests.Test.bmp");
+        }
+
+        [Fact]
+        public void Image_Source_avares_Uris_Should_Be_Completed()
+        {
+            AssertSingleCompletion("<Image Source=\"", "avares:", "avares://CompletionEngineTests/Test.bmp");
+        }
+
+        [Fact]
+        public void Image_Source_avares_RelativeUris_Should_Be_Completed()
+        {
+            AssertSingleCompletion("<Image Source=\"", "/", "/Test.bmp");
         }
 
         [Fact]
@@ -107,6 +131,18 @@ namespace CompletionEngineTests
         public void StyleInclude_Source_RelativeUris_Should_Be_Completed()
         {
             AssertSingleCompletion("<StyleInclude Source=\"", "/", "/Test.xaml");
+        }
+
+        [Fact]
+        public void StyleInclude_Source_Uris_Should_Be_Completed_CompiledStyles()
+        {
+            AssertSingleCompletion("<StyleInclude Source=\"", "avares:", "avares://CompletionEngineTests/TestCompiledTheme.xaml");
+        }
+
+        [Fact]
+        public void StyleInclude_Source_RelativeUris_Should_Be_CompiledStyles()
+        {
+            AssertSingleCompletion("<StyleInclude Source=\"", "/", "/TestCompiledTheme.xaml");
         }
 
         [Fact]

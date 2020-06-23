@@ -1,7 +1,9 @@
 ﻿using Avalonia.Ide.CompletionEngine.AssemblyMetadata;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Xml.Linq;
 
 namespace Avalonia.Ide.CompletionEngine
 {
@@ -61,7 +63,7 @@ namespace Avalonia.Ide.CompletionEngine
             var resourceUrls = new List<string>();
             var avaresValues = new List<AvaresInfo>();
 
-            var ignoredResExt = new[] { ".resources", ".rd.xml" };
+            var ignoredResExt = new[] { ".resources", ".rd.xml", "!AvaloniaResources" };
 
             bool skipRes(string res) => ignoredResExt.Any(r => res.EndsWith(r, StringComparison.OrdinalIgnoreCase));
 
@@ -74,7 +76,9 @@ namespace Avalonia.Ide.CompletionEngine
                 ProcessWellKnownAliases(asm, aliases);
                 ProcessCustomAttributes(asm, aliases);
 
-                foreach (var type in asm.Types.Where(x => !x.IsInterface && x.IsPublic))
+                var asmTypes = asm.Types.ToArray();
+
+                foreach (var type in asmTypes.Where(x => !x.IsInterface && x.IsPublic))
                 {
                     var mt = types[type.FullName] = ConvertTypeInfomation(type);
                     typeDefs[mt] = type;
@@ -84,25 +88,7 @@ namespace Avalonia.Ide.CompletionEngine
                         foreach (var alias in nsAliases) metadata.AddType(alias, mt);
                 }
 
-                const string avaresToken = "Build:"; //or "Populate:" should work both ways
-
-                foreach (var resType in asm.Types.Where(t => t.FullName == "CompiledAvaloniaXaml.!AvaloniaResources" || t.Name == "CompiledAvaloniaXaml.!AvaloniaResources"))
-                {
-                    foreach (var res in resType.Methods.Where(m => m.Name.StartsWith(avaresToken)))
-                    {
-                        var localUrl = res.Name.Replace(avaresToken, "");
-
-                        var avres = new AvaresInfo
-                        {
-                            Assembly = asm,
-                            LocalUrl = localUrl,
-                            GlobalUrl = $"avares://{asm.Name}{localUrl}",
-                            ReturnTypeFullName = res.ReturnTypeFullName ?? ""
-                        };
-
-                        avaresValues.Add(avres);
-                    }
-                }
+                ProcessAvaloniaResources(asm, asmTypes, avaresValues);
 
                 resourceUrls.AddRange(asm.ManifestResourceNames.Where(r => !skipRes(r)).Select(r => $"resm:{r}?assembly={asm.Name}"));
             }
@@ -114,6 +100,16 @@ namespace Avalonia.Ide.CompletionEngine
 
                 var ctors = typeDef?.Methods
                     .Where(m => m.IsPublic && !m.IsStatic && m.Name == ".ctor" && m.Parameters.Count == 1);
+
+                if (typeDef?.IsEnum ?? false)
+                {
+                    foreach (var value in typeDef.EnumValues)
+                    {
+                        var p = new MetadataProperty(value, type, type, false, true, true, false);
+
+                        type.Properties.Add(p);
+                    }
+                }
 
                 int level = 0;
                 while (typeDef != null)
@@ -185,6 +181,121 @@ namespace Avalonia.Ide.CompletionEngine
             PostProcessTypes(types, metadata, resourceUrls, avaresValues);
 
             return metadata;
+        }
+
+        private static void ProcessAvaloniaResources(IAssemblyInformation asm, ITypeInformation[] asmTypes, List<AvaresInfo> avaresValues)
+        {
+            const string avaresToken = "Build:"; //or "Populate:" should work both ways
+
+            void registeravares(string localUrl, string returnTypeFullName = "")
+            {
+                var globalUrl = $"avares://{asm.Name}{localUrl}";
+
+                if (!avaresValues.Any(v => v.GlobalUrl == globalUrl))
+                {
+                    var avres = new AvaresInfo
+                    {
+                        Assembly = asm,
+                        LocalUrl = localUrl,
+                        GlobalUrl = globalUrl,
+                        ReturnTypeFullName = returnTypeFullName
+                    };
+
+                    avaresValues.Add(avres);
+                }
+            }
+
+            var resType = asmTypes.FirstOrDefault(t => t.FullName == "CompiledAvaloniaXaml.!AvaloniaResources");
+            if (resType != null)
+            {
+                foreach (var res in resType.Methods.Where(m => m.Name.StartsWith(avaresToken)))
+                {
+                    registeravares(res.Name.Replace(avaresToken, ""), res.ReturnTypeFullName ?? "");
+                }
+            }
+
+            //try add avares Embedded resources like image,stream and x:Class
+            if (asm.ManifestResourceNames.Contains("!AvaloniaResources"))
+            {
+                try
+                {
+                    using (var avaresStream = asm.GetManifestResourceStream("!AvaloniaResources"))
+                    using (var r = new BinaryReader(avaresStream))
+                    {
+                        var ms = new MemoryStream(r.ReadBytes(r.ReadInt32()));
+                        var br = new BinaryReader(ms);
+
+                        int version = br.ReadInt32();
+                        if (version == 1)
+                        {
+                            var assetDoc = XDocument.Load(ms);
+                            var ns = assetDoc.Root.GetDefaultNamespace();
+                            var avaResEntries = assetDoc.Root.Element(ns.GetName("Entries")).Elements(ns.GetName("AvaloniaResourcesIndexEntry"))
+                                .Select(entry => new
+                                {
+                                    Path = entry.Element(ns.GetName("Path")).Value,
+                                    Offset = int.Parse(entry.Element(ns.GetName("Offset")).Value),
+                                    Size = int.Parse(entry.Element(ns.GetName("Size")).Value)
+                                }).ToArray();
+
+                            var xClassEntries = avaResEntries.FirstOrDefault(v => v.Path == "/!AvaloniaResourceXamlInfo");
+
+                            //get information about x:Class resources
+                            if (xClassEntries != null && xClassEntries.Size > 0)
+                            {
+                                try
+                                {
+                                    avaresStream.Seek(xClassEntries.Offset, SeekOrigin.Current);
+                                    var xClassDoc = XDocument.Load(new MemoryStream(r.ReadBytes(xClassEntries.Size)));
+                                    var xClassMappingNode = xClassDoc.Root.Element(xClassDoc.Root.GetDefaultNamespace().GetName("ClassToResourcePathIndex"));
+                                    if (xClassMappingNode != null)
+                                    {
+                                        const string arraysNs = "http://schemas.microsoft.com/2003/10/Serialization/Arrays";
+                                        var keyvalueofss = XName.Get("KeyValueOfstringstring", arraysNs);
+                                        var keyName = XName.Get("Key", arraysNs);
+                                        var valueName = XName.Get("Value", arraysNs);
+
+                                        var xClassMappings = xClassMappingNode.Elements(keyvalueofss)
+                                                        .Where(e => e.Elements(keyName).Any() && e.Elements(valueName).Any())
+                                                        .Select(e => new
+                                                        {
+                                                            Type = e.Element(keyName).Value,
+                                                            Path = e.Element(valueName).Value,
+                                                        }).ToArray();
+
+                                        foreach (var xcm in xClassMappings)
+                                        {
+                                            var resultType = asmTypes.FirstOrDefault(t => t.FullName == xcm.Type);
+                                            //if we need another check
+                                            //if (resultType?.Methods?.Any(m => m.Name == "!XamlIlPopulate") ?? false)
+                                            if (resultType != null)
+                                            {
+                                                //we set here base class like Style, Styles, UserControl so we can manage
+                                                //resources in a common way later
+                                                registeravares(xcm.Path, resultType.GetBaseType()?.FullName ?? "");
+                                            }
+                                        }
+                                    }
+                                }
+                                catch (Exception xClassEx)
+                                {
+                                    Console.WriteLine($"Failed fetch avalonia x:class resources in {asm.Name}, {xClassEx.Message}");
+                                }
+                            }
+
+                            //add other img/stream resources
+                            foreach (var entry in avaResEntries.Where(v => !v.Path.StartsWith("/!")))
+                            {
+                                registeravares(entry.Path);
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Failed fetch avalonia resources in {asm.Name}, {ex.Message}");
+                }
+            }
         }
 
         private static void ProcessCustomAttributes(IAssemblyInformation asm, Dictionary<string, string[]> aliases)
@@ -306,7 +417,8 @@ namespace Avalonia.Ide.CompletionEngine
             {
                 Name = "Style avares://*.xaml,resm:*.xaml",
                 HasHintValues = true,
-                HintValues = avaResValues.Where(v => v.ReturnTypeFullName.StartsWith("Avalonia.Styling.Style")).Select(v => v.GlobalUrl)
+                HintValues = avaResValues.Where(v => v.ReturnTypeFullName.StartsWith("Avalonia.Styling.Style"))
+                                        .Select(v => v.GlobalUrl)
                                         .Concat(resourceUrls.Where(r => rhasext(r, ".xaml") || rhasext(r, ".paml") || rhasext(r, ".axaml")))
                                         .ToArray()
             };
