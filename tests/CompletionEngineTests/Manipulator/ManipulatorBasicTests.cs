@@ -9,13 +9,11 @@ namespace CompletionEngineTests.Manipulator
 
     public class ManipulatorBasicTests : ManipulatorTestBase
     {
-
         [Fact]
         public void DoesNotInsertToUnclosedTag()
         {
             AssertInsertion("<Alpha$><Alpha>", "Beta", "<AlphaBeta><Alpha>");
         }
-
 
         [Fact]
         public void DoesNotInsertToAnotherTag()
@@ -94,6 +92,43 @@ namespace CompletionEngineTests.Manipulator
         public void ReplacesInClosingTagAtEnd()
         {
             AssertReplacement("<AlphaBeta$Omega$></AlphaBetaOmega>", "Gamma", "<AlphaBetaGamma></AlphaBetaGamma>");
+        }
+
+        [Fact]
+        public void DoNotInsertWhitespace()
+        {
+            AssertInsertion("<Alpha$></Alpha>", "A O", "<AlphaA O></Alpha>");
+        }
+
+        [Fact]
+        public void DoNotInsertClosingTag()
+        {
+            AssertInsertion("<Alpha$></Alpha>", "/", "<Alpha/></Alpha>");
+        }
+
+        [Fact]
+        public void DoNotCloseTag()
+        {
+            AssertInsertion("<Alpha$></Alpha>", ">", "<Alpha>></Alpha>");
+        }
+
+        [Fact]
+        public void DoNotRemoveTag()
+        {
+            AssertReplacement("$<$Alpha></Alpha>", "a", "aAlpha></Alpha>");
+            AssertReplacement("<Alpha$>$</Alpha>", "a", "<Alphaa</Alpha>");
+        }
+
+        [Theory]
+        [InlineData(".")]
+        [InlineData("_")]
+        [InlineData("-")]
+        [InlineData("a")]
+        [InlineData("Ą")]
+        [InlineData("1")]
+        public void InsertsSpecialCharacters(string s)
+        {
+            AssertInsertion("<Alpha$><Alpha>", s, "<Alpha" + s +"><Alpha>");
         }
     }
 }

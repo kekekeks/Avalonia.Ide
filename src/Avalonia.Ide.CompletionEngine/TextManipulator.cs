@@ -55,27 +55,34 @@ namespace Avalonia.Ide.CompletionEngine
         public IList<TextManipulation> ManipulateText(ITextChange textChange)
         {
             List<TextManipulation> maniplations = new List<TextManipulation>();
-            if(_state.State == XmlParser.ParserState.StartElement
+            if (_state.State == XmlParser.ParserState.StartElement
                 || (_state.State == XmlParser.ParserState.None && _text.Span[_state.ParserPos] == '>')
                 )
             {
                 SynchronizeStartAndEndTag(textChange, maniplations);
             }
 
-        
-                if(_state.State == XmlParser.ParserState.StartElement
-                || _state.State == XmlParser.ParserState.AfterAttributeValue
-                || _state.State == XmlParser.ParserState.InsideElement)
+
+            if (_state.State == XmlParser.ParserState.StartElement
+            || _state.State == XmlParser.ParserState.AfterAttributeValue
+            || _state.State == XmlParser.ParserState.InsideElement)
             {
 
-                    TryCloseTag(textChange, maniplations);
+                TryCloseTag(textChange, maniplations);
             }
 
             return maniplations.OrderByDescending(n => n.Start).ToList();
         }
 
+        private char[] XmlNameSpecialCharacters = new []{'-','_','.'};
+
         private void SynchronizeStartAndEndTag(ITextChange textChange, List<TextManipulation> maniplations)
         {
+            if(!textChange.NewText.All(n => char.IsLetterOrDigit(n) || XmlNameSpecialCharacters.Contains(n)))
+            {
+                return;
+            }
+
             string startTag = _state.ParseCurrentTagName();
             int? maybeTagStart = _state.CurrentValueStart;
             if(maybeTagStart == null)
@@ -123,7 +130,8 @@ namespace Avalonia.Ide.CompletionEngine
 
         private void TryCloseTag(ITextChange textChange, IList<TextManipulation> manipulations)
         {
-            if(textChange.NewText == "/" && !string.IsNullOrEmpty(_state.ParseCurrentTagName()))
+            var currentTag = _state.ParseCurrentTagName();
+            if (textChange.NewText == "/" && !string.IsNullOrEmpty(currentTag) && currentTag != "/")
             {
                 if (IsTagAlreadyClosed())
                 {
