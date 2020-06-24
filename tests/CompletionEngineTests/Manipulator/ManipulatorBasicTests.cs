@@ -10,13 +10,13 @@ namespace CompletionEngineTests.Manipulator
     public class ManipulatorBasicTests : ManipulatorTestBase
     {
         [Fact]
-        public void DoesNotInsertToUnclosedTag()
+        public void DoNotInsertToUnclosedTag()
         {
             AssertInsertion("<Alpha$><Alpha>", "Beta", "<AlphaBeta><Alpha>");
         }
 
         [Fact]
-        public void DoesNotInsertToAnotherTag()
+        public void DoNotInsertToAnotherTag()
         {
             AssertInsertion("<Alpha$><Gamma>", "Beta", "<AlphaBeta><Gamma>");
         }
@@ -98,12 +98,6 @@ namespace CompletionEngineTests.Manipulator
         public void DoNotInsertWhitespace()
         {
             AssertInsertion("<Alpha$></Alpha>", "A O", "<AlphaA O></Alpha>");
-        }
-
-        [Fact]
-        public void DoNotInsertClosingTag()
-        {
-            AssertInsertion("<Alpha$></Alpha>", "/", "<Alpha/></Alpha>");
         }
 
         [Fact]

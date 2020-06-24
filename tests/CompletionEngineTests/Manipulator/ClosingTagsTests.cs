@@ -11,9 +11,21 @@ namespace CompletionEngineTests.Manipulator
         }
 
         [Fact]
+        public void DoNotInsertEndingTwice()
+        {
+            AssertInsertion("<Tag$ >", "/", "<Tag/ >");
+        }
+
+        [Fact]
         public void CloseTagWithSlash()
         {
             AssertInsertion("<Tag$", "/", "<Tag/>");
+        }
+
+        [Fact]
+        public void CloseTagAdvancedInContainedTag()
+        {
+            AssertInsertion("<Grid><Tag Attribute=\"\"$></Tag></Grid>", "/", "<Grid><Tag Attribute=\"\"/></Grid>");
         }
 
         [Fact]
@@ -22,6 +34,17 @@ namespace CompletionEngineTests.Manipulator
             AssertInsertion("<Tag$></Tag>", "/", "<Tag/>");
         }
 
+        [Fact]
+        public void ConvertTagWithAttributesToSelfClosingWithSlash()
+        {
+            AssertInsertion("<Tag Attribute=\"value\"$></Tag>", "/", "<Tag Attribute=\"value\"/>");
+        }
+
+        [Fact]
+        public void DoNotConvertTagsWithNestedTag()
+        {
+            AssertInsertion("<Tag$><Foo/></Tag>", "/", "<Tag/><Foo/></Tag>");
+        }
 
         [Fact]
         public void DoNotCloseTagWithAngleBracket()

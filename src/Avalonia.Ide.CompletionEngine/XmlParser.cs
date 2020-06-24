@@ -214,27 +214,28 @@ namespace Avalonia.Ide.CompletionEngine
                 return "";
             }
 
-            var endTag = _elementNameStart;
-            if (_elementNameEnd== null)
+            if (_elementNameEnd != null)
             {
-                for (int i = _elementNameStart; i < span.Length; i++)
-                {
-                    char c = span[i];
-                    bool isClosingTag = i == _elementNameStart && c == '/';
-                    if (!isClosingTag)
-                    {
-                        if (char.IsWhiteSpace(c) || c == '/' || c == '>')
-                        {
-                            endTag = i;
-                            break;
-                        }
-                    }
-
-                    endTag = i + 1;
-                }
+                return span.Slice(_elementNameStart, _elementNameEnd.Value - _elementNameStart + 1).ToString();
             }
-            return span.Slice(_elementNameStart, endTag - _elementNameStart).ToString();
 
+            var endTag = _elementNameEnd;
+            for (int i = _elementNameStart; i < span.Length; i++)
+            {
+                char c = span[i];
+                bool isClosingTag = i == _elementNameStart && c == '/';
+                if (!isClosingTag)
+                {
+                    if (char.IsWhiteSpace(c) || c == '/' || c == '>')
+                    {
+                        endTag = i;
+                        break;
+                    }
+                }
+
+                endTag = i + 1;
+            }
+            return span.Slice(_elementNameStart, endTag.Value - _elementNameStart).ToString();
         }
 
         public static XmlParser Parse(string data)

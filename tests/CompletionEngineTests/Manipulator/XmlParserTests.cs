@@ -52,6 +52,13 @@ namespace CompletionEngineTests.Manipulator
         }
 
         [Fact]
+        public void Should_ReturnCorrectTagName()
+        {
+            var p = XmlParser.Parse("<Grid><Tag Attribute=\"\"/");
+            Assert.Equal("Tag", p.ParseCurrentTagName());
+        }
+
+        [Fact]
         public void Should_SeekEndTag_In_SimpleCase()
         {
             string data = "<Grid></Grid>";

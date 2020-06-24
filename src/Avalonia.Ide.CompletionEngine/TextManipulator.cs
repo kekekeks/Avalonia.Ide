@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace Avalonia.Ide.CompletionEngine
 {
@@ -68,7 +70,7 @@ namespace Avalonia.Ide.CompletionEngine
             || _state.State == XmlParser.ParserState.InsideElement)
             {
 
-                TryCloseTag(textChange, maniplations);
+                new CloseXmlTagManipulation(_state, _text, _position).TryCloseTag(textChange, maniplations);
             }
 
             return maniplations.OrderByDescending(n => n.Start).ToList();
@@ -128,41 +130,6 @@ namespace Avalonia.Ide.CompletionEngine
             }
         }
 
-        private void TryCloseTag(ITextChange textChange, IList<TextManipulation> manipulations)
-        {
-            var currentTag = _state.ParseCurrentTagName();
-            if (textChange.NewText == "/" && !string.IsNullOrEmpty(currentTag) && currentTag != "/")
-            {
-                if (IsTagAlreadyClosed())
-                {
-                    return;
-                }
-
-                manipulations.Add(TextManipulation.Insert(_position + 1, $">"));
-            }
-        }
-
-        private bool IsTagAlreadyClosed()
-        {
-            if (_text.Length > _position + 1)
-            {
-                var remainingSpan = _text.Span;
-                // at i == 0 we have "/"
-                for (int i = _position + 1; i < _text.Length; i++)
-                {
-                    var nextChar = remainingSpan[i];
-                    if (!char.IsWhiteSpace(nextChar))
-                    {
-                        if (nextChar == '>')
-                        {
-                            return true;
-                        }
-                        break;
-                    }
-                }
-            }
-
-            return false;
-        }
+        
     }
 }
