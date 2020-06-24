@@ -33,43 +33,9 @@ namespace Avalonia.Ide.CompletionEngine
         private Stack<int> _containingTagStart;
         private bool _isClosingTag;
 
-        public string TagName
-        {
-            get
-            {
-                if (State < ParserState.StartElement)
-                {
-                    return null;
-                }
-                var span = _data.Span;
-                if(_elementNameStart >= span.Length)
-                {
-                    return "";
-                }
-
-                if (_elementNameEnd == null)
-                {
-                    // Check where is element end
-                    _elementNameEnd = _elementNameStart;
-                    for (int i = _elementNameStart; i < span.Length; i++)
-                    {
-                        char c = span[i];
-                        bool isClosingTag = i == _elementNameStart && c == '/';
-                        if (!isClosingTag)
-                        {
-                            if (char.IsWhiteSpace(c) || c == '/' || c == '>')
-                            {
-                                _elementNameEnd = i;
-                                break;
-                            }
-                        }
-
-                        _elementNameEnd = i+1;
-                    }
-                }
-                return span.Slice(_elementNameStart, _elementNameEnd.Value - _elementNameStart).ToString();
-            }
-        }
+        public string TagName => State >= ParserState.StartElement
+            ? _data.Span.Slice(_elementNameStart, (_elementNameEnd ?? (_data.Length - 1)) - _elementNameStart + 1).ToString()
+            : null;
 
         public string AttributeName => State >= ParserState.StartAttribute
             ? _data.Span.Slice(_attributeNameStart, (_attributeNameEnd ?? (_data.Length - 1)) - _attributeNameStart + 1).ToString()
@@ -233,6 +199,41 @@ namespace Avalonia.Ide.CompletionEngine
             if (m.Success)
                 return m.Value.Substring(1);
             return null;
+
+        }
+
+        public string ParseCurrentTagName()
+        {
+            if (State < ParserState.StartElement)
+            {
+                return null;
+            }
+            var span = _data.Span;
+            if (_elementNameStart >= span.Length)
+            {
+                return "";
+            }
+
+            var endTag = _elementNameStart;
+            if (_elementNameEnd== null)
+            {
+                for (int i = _elementNameStart; i < span.Length; i++)
+                {
+                    char c = span[i];
+                    bool isClosingTag = i == _elementNameStart && c == '/';
+                    if (!isClosingTag)
+                    {
+                        if (char.IsWhiteSpace(c) || c == '/' || c == '>')
+                        {
+                            endTag = i;
+                            break;
+                        }
+                    }
+
+                    endTag = i + 1;
+                }
+            }
+            return span.Slice(_elementNameStart, endTag - _elementNameStart).ToString();
 
         }
 

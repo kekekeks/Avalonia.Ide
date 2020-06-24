@@ -76,7 +76,7 @@ namespace Avalonia.Ide.CompletionEngine
 
         private void SynchronizeStartAndEndTag(ITextChange textChange, List<TextManipulation> maniplations)
         {
-            string startTag = _state.TagName;
+            string startTag = _state.ParseCurrentTagName();
             int? maybeTagStart = _state.CurrentValueStart;
             if(maybeTagStart == null)
             {
@@ -96,7 +96,7 @@ namespace Avalonia.Ide.CompletionEngine
             XmlParser searchEndTag = _state.Clone();
             if (searchEndTag.SeekClosingTag())
             {
-                string endTag = searchEndTag.TagName;
+                string endTag = searchEndTag.ParseCurrentTagName();
                 if(endTag[0] != '/')
                 {
                     return;
@@ -123,7 +123,7 @@ namespace Avalonia.Ide.CompletionEngine
 
         private void TryCloseTag(ITextChange textChange, IList<TextManipulation> manipulations)
         {
-            if(textChange.NewText == "/" && !string.IsNullOrEmpty(_state.TagName))
+            if(textChange.NewText == "/" && !string.IsNullOrEmpty(_state.ParseCurrentTagName()))
             {
                 if (IsTagAlreadyClosed())
                 {
