@@ -7,9 +7,6 @@ namespace Avalonia.Ide.CompletionEngine
 {
     public class XmlParser
     {
-        private readonly ReadOnlyMemory<char> _data;
-        private int _parserPos;
-
         public enum ParserState
         {
             None,
@@ -25,6 +22,8 @@ namespace Avalonia.Ide.CompletionEngine
 
         public ParserState State { get; set; }
 
+        private readonly ReadOnlyMemory<char> _data;
+        private int _parserPos;
         private int _elementNameStart;
         private int _attributeNameStart;
         private int? _elementNameEnd;
@@ -308,7 +307,10 @@ namespace Avalonia.Ide.CompletionEngine
         /// <returns></returns>
         public XmlParser Clone()
         {
-            return (XmlParser)MemberwiseClone();
+            var newParser = (XmlParser)MemberwiseClone();
+            var clonedStack = = new Stack<int>(new Stack<int>(_containingTagStart));
+            newParser._containingTagStart = clonedStack;
+            return newParser;
         }
     }
 }
