@@ -308,7 +308,7 @@ namespace Avalonia.Ide.CompletionEngine
         public XmlParser Clone()
         {
             var newParser = (XmlParser)MemberwiseClone();
-            var clonedStack = = new Stack<int>(new Stack<int>(_containingTagStart));
+            var clonedStack = new Stack<int>(new Stack<int>(_containingTagStart));
             newParser._containingTagStart = clonedStack;
             return newParser;
         }
