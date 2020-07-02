@@ -31,17 +31,17 @@ namespace CompletionEngineTests
             };
         }
 
-        protected CompletionSet GetCompletionsFor(string xaml)
+        protected CompletionSet GetCompletionsFor(string xaml, string xamlAfterCursor ="")
         {
             xaml = Prologue + xaml;
             var engine = new CompletionEngine();
-            var set = engine.GetCompletions(Metadata, xaml, xaml.Length, Assembly.GetCallingAssembly().GetName().Name);
+            var set = engine.GetCompletions(Metadata, xaml + xamlAfterCursor, xaml.Length, Assembly.GetCallingAssembly().GetName().Name);
             return TransformCompletionSet(set);
         }
 
-        protected void AssertSingleCompletion(string xaml, string typed, string completion)
+        protected void AssertSingleCompletionInMiddleOfText(string xaml, string xamlAfterCursor, string typed, string completion)
         {
-            var comp = GetCompletionsFor(xaml + typed);
+            var comp = GetCompletionsFor(xaml + typed, xamlAfterCursor);
             if (comp == null)
                 throw new Exception("No completions found");
 
@@ -50,6 +50,12 @@ namespace CompletionEngineTests
             Assert.Contains(comp.Completions, c => c.InsertText == completion);
 
             Assert.Single(comp.Completions, c => c.InsertText == completion);
+
+        }
+
+        protected void AssertSingleCompletion(string xaml, string typed, string completion)
+        {
+            AssertSingleCompletionInMiddleOfText(xaml, "", typed, completion);
         }
     }
 }
