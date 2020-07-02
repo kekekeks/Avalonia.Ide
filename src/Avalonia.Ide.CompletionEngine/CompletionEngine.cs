@@ -67,14 +67,14 @@ namespace Avalonia.Ide.CompletionEngine
 
             }
 
-            public IEnumerable<KeyValuePair<string, MetadataType>> FilterTypes(string prefix, bool withAttachedPropertiesOnly = false, bool markupExtensionsOnly = false, bool staticGettersOnly = false, bool xamlDirectiveOnly = false)
+            public IEnumerable<KeyValuePair<string, MetadataType>> FilterTypes(string prefix, bool withAttachedPropertiesOrEventsOnly = false, bool markupExtensionsOnly = false, bool staticGettersOnly = false, bool xamlDirectiveOnly = false)
             {
                 prefix = prefix ?? "";
 
                 var e = _types
                     .Where(t => t.Value.IsXamlDirective == xamlDirectiveOnly && t.Key.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
-                if (withAttachedPropertiesOnly)
-                    e = e.Where(t => t.Value.HasAttachedProperties);
+                if (withAttachedPropertiesOrEventsOnly)
+                    e = e.Where(t => t.Value.HasAttachedProperties || t.Value.HasAttachedEvents);
                 if (markupExtensionsOnly)
                     e = e.Where(t => t.Value.IsMarkupExtension);
                 if (staticGettersOnly)
@@ -83,9 +83,9 @@ namespace Avalonia.Ide.CompletionEngine
                 return e;
             }
 
-            public IEnumerable<string> FilterTypeNames(string prefix, bool withAttachedPropertiesOnly = false, bool markupExtensionsOnly = false, bool staticGettersOnly = false, bool xamlDirectiveOnly = false)
+            public IEnumerable<string> FilterTypeNames(string prefix, bool withAttachedPropertiesOrEventsOnly = false, bool markupExtensionsOnly = false, bool staticGettersOnly = false, bool xamlDirectiveOnly = false)
             {
-                return FilterTypes(prefix, withAttachedPropertiesOnly, markupExtensionsOnly, staticGettersOnly, xamlDirectiveOnly).Select(s => s.Key);
+                return FilterTypes(prefix, withAttachedPropertiesOrEventsOnly, markupExtensionsOnly, staticGettersOnly, xamlDirectiveOnly).Select(s => s.Key);
             }
 
             public MetadataType LookupType(string name)
@@ -115,6 +115,17 @@ namespace Avalonia.Ide.CompletionEngine
                     e = e.Where(p => !p.IsStatic);
 
                 return e.Select(p => p.Name);
+            }
+
+            public IEnumerable<string> FilterEventNames(string typeName, string propName,
+                bool attached)
+            {
+                var t = LookupType(typeName);
+                propName = propName ?? "";
+                if (t == null)
+                    return new string[0];
+
+                return t.Events.Where(n => n.IsAttached == attached && n.Name.StartsWith(propName)).Select(n => n.Name);
             }
 
             public MetadataProperty LookupProperty(string typeName, string propName)
@@ -232,11 +243,18 @@ namespace Avalonia.Ide.CompletionEngine
                     var split = state.AttributeName.Split(new[] { '.' }, 2);
                     completions.AddRange(_helper.FilterPropertyNames(split[0], split[1], attached: true, hasSetter: true)
                         .Select(x => new Completion(x, x + attributeSuffix, x, CompletionKind.AttachedProperty, x.Length + attributeOffset)));
+
+                    completions.AddRange(_helper.FilterEventNames(split[0], split[1], attached: true)
+                        .Select(v => new Completion(v, v + attributeSuffix, v, CompletionKind.AttachedEvent, v.Length + attributeOffset)));
                 }
                 else
                 {
+
                     completions.AddRange(_helper.FilterPropertyNames(state.TagName, state.AttributeName, attached: false, hasSetter: true)
                         .Select(x => new Completion(x, x + attributeSuffix, x, CompletionKind.Property, x.Length + attributeOffset)));
+
+                    completions.AddRange(_helper.FilterEventNames(state.TagName, state.AttributeName, attached: false)
+                        .Select(v => new Completion(v, v + attributeSuffix, v, CompletionKind.Event, v.Length + attributeOffset)));
 
                     var targetType = _helper.LookupType(state.TagName);
                     completions.AddRange(
@@ -246,7 +264,7 @@ namespace Avalonia.Ide.CompletionEngine
 
                     if (targetType?.IsAvaloniaObjectType == true)
                         completions.AddRange(
-                            _helper.FilterTypeNames(state.AttributeName, withAttachedPropertiesOnly: true)
+                            _helper.FilterTypeNames(state.AttributeName, withAttachedPropertiesOrEventsOnly: true)
                                 .Select(v => new Completion(v, v + ".", v, CompletionKind.Class)));
                 }
             }

@@ -31,6 +31,9 @@ namespace Avalonia.Ide.CompletionEngine.AssemblyMetadata
         ITypeInformation GetBaseType();
         IEnumerable<IMethodInformation> Methods { get; }
         IEnumerable<IPropertyInformation> Properties { get; }
+        IEnumerable<IEventInformation> Events { get; }
+        IEnumerable<IFieldInformation> Fields { get; }
+
         bool IsEnum { get; }
         bool IsStatic { get; }
         bool IsInterface { get; }
@@ -49,6 +52,14 @@ namespace Avalonia.Ide.CompletionEngine.AssemblyMetadata
         string ReturnTypeFullName { get; }
     }
 
+    public interface IFieldInformation
+    {
+        bool IsStatic { get; }
+        bool IsPublic { get; }
+        string Name { get; }
+        string ReturnTypeFullName { get; }
+    }
+
     public interface IParameterInformation
     {
         string TypeFullName { get; }
@@ -61,5 +72,11 @@ namespace Avalonia.Ide.CompletionEngine.AssemblyMetadata
         bool HasPublicGetter { get; }
         string TypeFullName { get; }
         string Name { get; }
+    }
+
+    public interface IEventInformation
+    {
+        string Name { get; }
+        string TypeFullName { get; }
     }
 }

@@ -13,7 +13,9 @@ namespace Avalonia.Ide.CompletionEngine
         StaticProperty,
         Namespace,
         Enum,
-        MarkupExtension
+        MarkupExtension,
+        Event,
+        AttachedEvent
     }
 
     public class Completion

@@ -30,7 +30,9 @@ namespace Avalonia.Ide.CompletionEngine
         public string Name { get; set; }
         public string FullName { get; set; } = "";
         public List<MetadataProperty> Properties { get; set; } = new List<MetadataProperty>();
+        public List<MetadataEvent> Events { get; set; } = new List<MetadataEvent>();
         public bool HasAttachedProperties { get; set; }
+        public bool HasAttachedEvents { get; set; }
         public bool HasStaticGetProperties { get; set; }
         public bool HasSetProperties { get; set; }
         public bool IsAvaloniaObjectType { get; set; }
@@ -52,13 +54,13 @@ namespace Avalonia.Ide.CompletionEngine
     [DebuggerDisplay("{Name} from {DeclaringType}")]
     public class MetadataProperty
     {
-        public string Name { get; set; }
+        public string Name { get; }
         public MetadataType Type { get; set; }
-        public MetadataType DeclaringType { get; set; }
-        public bool IsAttached { get; set; }
-        public bool IsStatic { get; set; }
-        public bool HasGetter { get; set; }
-        public bool HasSetter { get; set; }
+        public MetadataType DeclaringType { get; }
+        public bool IsAttached { get; }
+        public bool IsStatic { get; }
+        public bool HasGetter { get; }
+        public bool HasSetter { get; }
 
         public MetadataProperty(string name, MetadataType type, MetadataType declaringType, bool isAttached, bool isStatic, bool hasGetter, bool hasSetter)
         {
@@ -71,4 +73,20 @@ namespace Avalonia.Ide.CompletionEngine
             HasSetter = hasSetter;
         }
     }
+
+    public class MetadataEvent
+    {
+        public MetadataEvent(string name, MetadataType type, MetadataType declaringType, bool isAttached)
+        {
+            Name = name;
+            Type = type;
+            DeclaringType = declaringType;
+            IsAttached = isAttached;
+        }
+        public string Name { get; }
+        public bool IsAttached { get; }
+        public MetadataType Type { get; }
+        public MetadataType DeclaringType { get; }
+    }
+
 }
