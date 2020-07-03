@@ -60,11 +60,8 @@ namespace Avalonia.Ide.CompletionEngine
             {
                 return null;
             }
-
-            // skip eventual whitespaces
-
-            char c = text[pos];
-            SkipWhitespace(ref pos, text, ref c);
+            
+            pos = SkipWhitespace(pos, text);
 
             // Check next text is </closingTag>
             if (text.Length < pos + currentTag.Length + 3
@@ -84,8 +81,7 @@ namespace Avalonia.Ide.CompletionEngine
                 pos++;
             }
 
-            // parse whitespace
-            SkipWhitespace(ref pos, text, ref c);
+            pos = SkipWhitespace(pos, text);
 
             if(text.Length <= pos || text[pos] != '>')
             {
@@ -95,12 +91,16 @@ namespace Avalonia.Ide.CompletionEngine
             return pos;
         }
 
-        private static void SkipWhitespace(ref int pos, ReadOnlySpan<char> text, ref char c)
+        private static int SkipWhitespace(int pos, ReadOnlySpan<char> text)
         {
-            for (; char.IsWhiteSpace(c) && text.Length > pos + 1; pos++)
+            for (; text.Length > pos; pos++)
             {
-                c = text[pos];
+                if (!char.IsWhiteSpace(text[pos]))
+                {
+                    return pos;
+                }
             }
+            return pos;
         }
     }
 }

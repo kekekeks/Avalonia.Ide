@@ -54,5 +54,10 @@ namespace CompletionEngineTests.Manipulator
             AssertInsertion("<Tag$", ">", "<Tag>");
         }
 
+        [Fact]
+        public void CloseTagWithTrailingWhitespace()
+        {
+            AssertInsertion("<MenuItem Header=\"Header\" $>\r\n      </MenuItem >", "/", @"<MenuItem Header=""Header"" />");
+        }
     }
 }
