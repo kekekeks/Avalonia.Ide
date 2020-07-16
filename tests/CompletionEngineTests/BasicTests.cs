@@ -12,6 +12,12 @@ namespace CompletionEngineTests
         }
 
         [Fact]
+        public void Property_Should_Be_Renamed()
+        {
+            AssertSingleCompletionInMiddleOfText("<UserControl ", "=\"Top\"","HorizontalAlign", "HorizontalAlignment");
+        }
+
+        [Fact]
         public void Property_Should_Be_Completed()
         {
             AssertSingleCompletion("<UserControl ", "HorizontalAlign", "HorizontalAlignment=\"\"");
@@ -54,6 +60,12 @@ namespace CompletionEngineTests
         public void AttachedProperty_Should_Be_Completed()
         {
             AssertSingleCompletion("<UserControl Grid.", "Ro", "Row=\"\"");
+        }
+
+        [Fact]
+        public void AttachedProperty_Should_Be_Renamed()
+        {
+            AssertSingleCompletionInMiddleOfText("<UserControl Grid.", "=\"2\"", "Ro", "Row");
         }
 
         [Fact]

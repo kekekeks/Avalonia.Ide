@@ -164,31 +164,31 @@ namespace Avalonia.Ide.CompletionEngine
             return rv;
         }
 
-        public CompletionSet GetCompletions(Metadata metadata, string text, int pos, string currentAssemblyName = null)
+        public CompletionSet GetCompletions(Metadata metadata, string fullText, int pos, string currentAssemblyName = null)
         {
-            _helper.SetMetadata(metadata, text, currentAssemblyName);
+            string textToCursor = fullText.Substring(0, pos);
+            _helper.SetMetadata(metadata, textToCursor, currentAssemblyName);
 
             if (_helper.Metadata == null)
                 return null;
 
-            if (text.Length == 0 || pos == 0)
+            if (fullText.Length == 0 || pos == 0)
                 return null;
-            text = text.Substring(0, pos);
-            var state = XmlParser.Parse(text);
+            var state = XmlParser.Parse(textToCursor);
 
             var completions = new List<Completion>();
 
 
-            var curStart = state.CurrentValueStart ?? 0;
+            int curStart = state.CurrentValueStart ?? 0;
 
             if (state.State == XmlParser.ParserState.StartElement)
             {
                 var tagName = state.TagName;
                 if (tagName.StartsWith("/"))
                 {
-                    if (text.Length < 2)
+                    if (textToCursor.Length < 2)
                         return null;
-                    var closingState = XmlParser.Parse(text.Substring(0, text.Length - 2));
+                    var closingState = XmlParser.Parse(textToCursor.Substring(0, textToCursor.Length - 2));
 
                     var name = closingState.GetParentTagName(0);
                     if (name == null)
@@ -216,24 +216,33 @@ namespace Avalonia.Ide.CompletionEngine
                 if (state.State == XmlParser.ParserState.InsideElement)
                     curStart = pos; //Force completion to be started from current cursor position
 
+                string attributeSuffix = "=\"\"";
+                int attributeOffset = 2;
+                if (fullText.Length > pos && fullText[pos] == '=')
+                {
+                    // attribute already has value, we are editing name only
+                    attributeSuffix = "";
+                    attributeOffset = 0;
+                }
+
                 if (state.AttributeName?.Contains(".") == true)
                 {
                     var dotPos = state.AttributeName.IndexOf('.');
                     curStart += dotPos + 1;
                     var split = state.AttributeName.Split(new[] { '.' }, 2);
                     completions.AddRange(_helper.FilterPropertyNames(split[0], split[1], attached: true, hasSetter: true)
-                        .Select(x => new Completion(x, x + "=\"\"", x, CompletionKind.AttachedProperty, x.Length + 2)));
+                        .Select(x => new Completion(x, x + attributeSuffix, x, CompletionKind.AttachedProperty, x.Length + attributeOffset)));
                 }
                 else
                 {
                     completions.AddRange(_helper.FilterPropertyNames(state.TagName, state.AttributeName, attached: false, hasSetter: true)
-                        .Select(x => new Completion(x, x + "=\"\"", x, CompletionKind.Property, x.Length + 2)));
+                        .Select(x => new Completion(x, x + attributeSuffix, x, CompletionKind.Property, x.Length + attributeOffset)));
 
                     var targetType = _helper.LookupType(state.TagName);
                     completions.AddRange(
                         _helper.FilterTypes(state.AttributeName, xamlDirectiveOnly: true)
                             .Where(t => t.Value.IsValidForXamlContextFunc?.Invoke(currentAssemblyName, targetType, null) ?? true)
-                            .Select(v => new Completion(v.Key, v.Key + "=\"\"", v.Key, CompletionKind.Class, v.Key.Length + 2)));
+                            .Select(v => new Completion(v.Key, v.Key + attributeSuffix, v.Key, CompletionKind.Class, v.Key.Length + attributeOffset)));
 
                     if (targetType?.IsAvaloniaObjectType == true)
                         completions.AddRange(
@@ -258,7 +267,7 @@ namespace Avalonia.Ide.CompletionEngine
                 {
                     curStart = state.CurrentValueStart.Value +
                                BuildCompletionsForMarkupExtension(prop, completions,
-                                   text.Substring(state.CurrentValueStart.Value), currentAssemblyName);
+                                   textToCursor.Substring(state.CurrentValueStart.Value), currentAssemblyName);
                 }
                 else
                 {
@@ -266,7 +275,7 @@ namespace Avalonia.Ide.CompletionEngine
 
                     if (prop?.Type?.HasHintValues == true)
                     {
-                        var search = text.Substring(state.CurrentValueStart.Value);
+                        var search = textToCursor.Substring(state.CurrentValueStart.Value);
                         if (prop.Type.IsCompositeValue)
                         {
                             var last = search.Split(' ', ',').LastOrDefault();
