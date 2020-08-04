@@ -152,11 +152,9 @@ namespace Avalonia.Ide.CompletionEngine
 
                         foreach (var fieldDef in typeDef.Fields)
                         {
-                            if (fieldDef.IsStatic && fieldDef.IsPublic
-                                && 
-                                (fieldDef.ReturnTypeFullName.StartsWith("RoutedEvent") || 
-                                fieldDef.Name.EndsWith("Event", StringComparison.OrdinalIgnoreCase))
-                                )
+                            if (fieldDef.IsStatic && fieldDef.IsPublic &&
+                                (fieldDef.IsRoutedEvent 
+                                || fieldDef.Name.EndsWith("Event", StringComparison.OrdinalIgnoreCase)))
                             {
                                 var name = fieldDef.Name;
                                 if(fieldDef.Name.EndsWith("Event", StringComparison.OrdinalIgnoreCase))

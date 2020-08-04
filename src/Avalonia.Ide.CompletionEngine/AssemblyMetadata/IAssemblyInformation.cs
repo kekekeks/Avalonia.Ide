@@ -58,6 +58,7 @@ namespace Avalonia.Ide.CompletionEngine.AssemblyMetadata
         bool IsPublic { get; }
         string Name { get; }
         string ReturnTypeFullName { get; }
+        bool IsRoutedEvent { get; }
     }
 
     public interface IParameterInformation

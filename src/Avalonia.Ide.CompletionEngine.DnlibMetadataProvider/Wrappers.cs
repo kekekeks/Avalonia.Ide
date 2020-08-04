@@ -149,7 +149,23 @@ namespace Avalonia.Ide.CompletionEngine.DnlibMetadataProvider
             IsPublic = f.IsPublic || f.IsAssembly;
             Name = f.Name;
             ReturnTypeFullName = f.FieldType.FullName;
+
+            bool isRoutedEvent = false;
+            ITypeDefOrRef t = f.FieldType.ToTypeDefOrRef();
+            while(t != null)
+            {
+                if(t.Name == "RoutedEvent" && t.Namespace == "Avalonia.Interactivity")
+                {
+                    isRoutedEvent = true;
+                    break;
+                }
+                t = t.GetBaseType();
+            }
+
+            IsRoutedEvent = isRoutedEvent;
         }
+
+        public bool IsRoutedEvent { get; }
 
         public bool IsStatic { get; }
 
