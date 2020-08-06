@@ -51,7 +51,12 @@ namespace Avalonia.Ide.CompletionEngine.DnlibMetadataProvider
         public string Namespace => _type.Namespace;
         public ITypeInformation GetBaseType() => FromDef(_type.GetBaseType().ResolveTypeDef());
 
+
+        public IEnumerable<IEventInformation> Events => _type.Events.Select(e => new EventWrapper(e));
+
         public IEnumerable<IMethodInformation> Methods => _type.Methods.Select(m => new MethodWrapper(m));
+
+        public IEnumerable<IFieldInformation> Fields => _type.Fields.Select(f => new FieldWrapper(f));
 
         public IEnumerable<IPropertyInformation> Properties => _type.Properties
             //Filter indexer properties
@@ -134,6 +139,54 @@ namespace Avalonia.Ide.CompletionEngine.DnlibMetadataProvider
         public string TypeFullName { get; }
         public string Name { get; }
         public override string ToString() => Name;
+    }
+
+    class FieldWrapper : IFieldInformation
+    {
+        public FieldWrapper(FieldDef f)
+        {
+            IsStatic = f.IsStatic;
+            IsPublic = f.IsPublic || f.IsAssembly;
+            Name = f.Name;
+            ReturnTypeFullName = f.FieldType.FullName;
+
+            bool isRoutedEvent = false;
+            ITypeDefOrRef t = f.FieldType.ToTypeDefOrRef();
+            while(t != null)
+            {
+                if(t.Name == "RoutedEvent" && t.Namespace == "Avalonia.Interactivity")
+                {
+                    isRoutedEvent = true;
+                    break;
+                }
+                t = t.GetBaseType();
+            }
+
+            IsRoutedEvent = isRoutedEvent;
+        }
+
+        public bool IsRoutedEvent { get; }
+
+        public bool IsStatic { get; }
+
+        public bool IsPublic { get; }
+
+        public string Name { get; }
+
+        public string ReturnTypeFullName { get; }
+    }
+
+    class EventWrapper : IEventInformation
+    {
+        public EventWrapper(EventDef @event)
+        {
+            Name = @event.Name;
+            TypeFullName = @event.EventType.FullName;
+        }
+
+        public string Name { get; }
+
+        public string TypeFullName { get; }
     }
 
     class MethodWrapper : IMethodInformation

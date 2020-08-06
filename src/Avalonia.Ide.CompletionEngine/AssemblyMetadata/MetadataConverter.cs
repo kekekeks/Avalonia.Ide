@@ -126,12 +126,20 @@ namespace Avalonia.Ide.CompletionEngine
                         type.Properties.Add(p);
                     }
 
+                    foreach (var eventDef in typeDef.Events)
+                    {
+                        var e = new MetadataEvent(eventDef.Name, types.GetValueOrDefault(eventDef.TypeFullName),
+                            types.GetValueOrDefault(typeDef.FullName), false);
+
+                        type.Events.Add(e);
+                    }
+
                     //check for attached properties only on top level
                     if (level == 0)
                     {
                         foreach (var methodDef in typeDef.Methods)
                         {
-                            if (methodDef.Name.StartsWith("Set") && methodDef.IsStatic && methodDef.IsPublic
+                            if (methodDef.Name.StartsWith("Set", StringComparison.OrdinalIgnoreCase) && methodDef.IsStatic && methodDef.IsPublic
                                 && methodDef.Parameters.Count == 2)
                             {
                                 var name = methodDef.Name.Substring(3);
@@ -139,6 +147,25 @@ namespace Avalonia.Ide.CompletionEngine
                                     types.GetValueOrDefault(methodDef.Parameters[1].TypeFullName),
                                     types.GetValueOrDefault(typeDef.FullName),
                                     true, false, true, true));
+                            }
+                        }
+
+                        foreach (var fieldDef in typeDef.Fields)
+                        {
+                            if (fieldDef.IsStatic && fieldDef.IsPublic &&
+                                (fieldDef.IsRoutedEvent 
+                                || fieldDef.Name.EndsWith("Event", StringComparison.OrdinalIgnoreCase)))
+                            {
+                                var name = fieldDef.Name;
+                                if(fieldDef.Name.EndsWith("Event", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    name = name.Substring(0, name.Length - "Event".Length);
+                                }
+
+                                type.Events.Add(new MetadataEvent(name,
+                                    types.GetValueOrDefault(fieldDef.ReturnTypeFullName),
+                                    types.GetValueOrDefault(typeDef.FullName),
+                                    true));
                             }
                         }
                     }
@@ -153,6 +180,7 @@ namespace Avalonia.Ide.CompletionEngine
                 }
 
                 type.HasAttachedProperties = type.Properties.Any(p => p.IsAttached);
+                type.HasAttachedEvents = type.Events.Any(e => e.IsAttached);
                 type.HasStaticGetProperties = type.Properties.Any(p => p.IsStatic && p.HasGetter);
                 type.HasSetProperties = type.Properties.Any(p => !p.IsStatic && p.HasSetter);
 
