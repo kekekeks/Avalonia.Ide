@@ -365,6 +365,7 @@ namespace Avalonia.Ide.CompletionEngine
                 new MetadataType(){ Name = typeof(System.Type).FullName },
                 new MetadataType(){ Name = "Avalonia.Media.IBrush" },
                 new MetadataType(){ Name = "Avalonia.Media.Imaging.IBitmap" },
+                new MetadataType(){ Name = "Avalonia.Media.IImage" },
             };
 
             foreach (var t in toAdd)
@@ -501,6 +502,20 @@ namespace Avalonia.Ide.CompletionEngine
                 avProperty.HintValues = allProps.Keys.ToArray();
             }
 
+            if (!types.TryGetValue("Avalonia.Markup.Xaml.MarkupExtensions.BindingExtension", out MetadataType bindingExtType))
+            {
+                if (types.TryGetValue("Avalonia.Data.Binding", out MetadataType origBindingType))
+                {
+                    //avalonia 0.10 has implicit binding extension
+                    bindingExtType = origBindingType.CloneAs("BindingExtension",
+                        "Avalonia.Markup.Xaml.MarkupExtensions.BindingExtension");
+                    bindingExtType.IsMarkupExtension = true;
+
+                    types.Add(bindingExtType.FullName, bindingExtType);
+                    metadata.AddType(Utils.AvaloniaNamespace, bindingExtType);
+                }
+            }
+
             //bindings related hints
             if (types.TryGetValue("Avalonia.Markup.Xaml.MarkupExtensions.BindingExtension", out MetadataType bindingType))
             {
@@ -596,6 +611,13 @@ namespace Avalonia.Ide.CompletionEngine
                 ibitmapType.HasHintValues = true;
                 ibitmapType.HintValues = allresourceUrls.Where(r => isbitmaptype(r)).ToArray();
                 ibitmapType.XamlContextHintValuesFunc = (a, t, p) => filterLocalRes(ibitmapType, a);
+            }
+
+            if (types.TryGetValue("Avalonia.Media.IImage", out MetadataType iImageType))
+            {
+                iImageType.HasHintValues = true;
+                iImageType.HintValues = allresourceUrls.Where(r => isbitmaptype(r)).ToArray();
+                iImageType.XamlContextHintValuesFunc = (a, t, p) => filterLocalRes(ibitmapType, a);
             }
 
             if (types.TryGetValue("Avalonia.Controls.WindowIcon", out MetadataType winIcon))
