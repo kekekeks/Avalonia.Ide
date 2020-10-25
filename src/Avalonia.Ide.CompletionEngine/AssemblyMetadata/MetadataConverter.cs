@@ -353,16 +353,17 @@ namespace Avalonia.Ide.CompletionEngine
 
         private static void PreProcessTypes(Dictionary<string, MetadataType> types, Metadata metadata)
         {
+            MetadataType xDataType, xCompiledBindings, boolType, typeType;
             var toAdd = new List<MetadataType>
             {
-                new MetadataType()
+                (boolType = new MetadataType()
                 {
                     Name = typeof(bool).FullName,
                     HasHintValues = true,
                     HintValues = new[] { "True", "False" }
-                },
+                }),
                 new MetadataType(){ Name = typeof(System.Uri).FullName },
-                new MetadataType(){ Name = typeof(System.Type).FullName },
+                (typeType = new MetadataType(){ Name = typeof(System.Type).FullName }),
                 new MetadataType(){ Name = "Avalonia.Media.IBrush" },
                 new MetadataType(){ Name = "Avalonia.Media.Imaging.IBitmap" },
                 new MetadataType(){ Name = "Avalonia.Media.IImage" },
@@ -408,6 +409,18 @@ namespace Avalonia.Ide.CompletionEngine
                     Name = "Key",
                     IsXamlDirective = true
                 },
+                xDataType = new MetadataType()
+                {
+                    Name = "DataType",
+                    IsXamlDirective = true,
+                    Properties = { new MetadataProperty("", typeType,null, false, false, false, true)},
+                },
+                xCompiledBindings = new MetadataType()
+                {
+                    Name = "CompileBindings",
+                    IsXamlDirective = true,
+                    Properties = { new MetadataProperty("", boolType,null, false, false, false, true)},
+                },
             };
 
             //as in avalonia 0.9 Portablexaml is missing we need to hardcode some extensions
@@ -415,6 +428,9 @@ namespace Avalonia.Ide.CompletionEngine
             {
                 metadata.AddType(Utils.Xaml2006Namespace, t);
             }
+
+            types.Add(xDataType.Name, xDataType);
+            types.Add(xCompiledBindings.Name, xCompiledBindings);
 
             metadata.AddType("", new MetadataType() { Name = "xmlns", IsXamlDirective = true });
         }

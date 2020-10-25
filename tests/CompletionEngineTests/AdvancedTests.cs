@@ -57,6 +57,12 @@ namespace CompletionEngineTests
         {
             AssertSingleCompletion("<DataTemplate DataType=\"{x:Type ", "But", "Button");
         }
+        
+        [Fact]
+        public void Extension_DataType_Types_Should_Be_Completed()
+        {
+            AssertSingleCompletion("<UserControl x:DataType=\"", "But", "Button");
+        }
 
         [Fact]
         public void Property_Of_Type_Type_Type_Should_Be_Completed()
