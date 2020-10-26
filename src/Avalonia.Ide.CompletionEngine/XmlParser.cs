@@ -200,6 +200,28 @@ namespace Avalonia.Ide.CompletionEngine
             return null;
 
         }
+        
+        public string FindParentAttributeValue(string attributeExpr, int startLevel = 0)
+        {
+            if (NestingLevel - startLevel - 1 < 0)
+                return null;
+            var attribRegExpr = new Regex($"\\s(?:{attributeExpr})=\"(?<AttribValue>[\\w\\:]*)\"");
+            foreach(var start in _containingTagStart.Skip(startLevel))
+            {
+                var m = Regex.Match(_data.Span.Slice(start).ToString(), @"^<[^>]+");
+                if (m.Success)
+                {
+                    var tagNameWithAttributes = m.Value.Substring(1);
+                    var attribMatch = attribRegExpr.Match(tagNameWithAttributes);
+                    if (attribMatch.Success)
+                    {
+                        return attribMatch.Groups["AttribValue"].Value;
+                    }
+                }
+            }
+
+            return null;
+        }
 
         public string ParseCurrentTagName()
         {

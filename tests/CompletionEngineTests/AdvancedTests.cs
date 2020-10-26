@@ -51,6 +51,48 @@ namespace CompletionEngineTests
         {
             AssertSingleCompletion("<UserControl Background=\"{Binding RelativeSource={RelativeSource ", "Se", "Self");
         }
+        
+        [Fact]
+        public void Binding_Path_Should_Be_Completed_From_xDataType()
+        {
+            AssertSingleCompletion("<UserControl x:DataType=\"Button\"><TextBlock Tag=\"{Binding Path=", "Conte", "Content");
+        }
+        
+        [Fact]
+        public void Binding_Path_Should_Be_Completed_From_xDataType2()
+        {
+            AssertSingleCompletion("<UserControl x:DataType=\"Button\"><TextBlock Tag=\"{Binding ", "Conte", "Content");
+        }
+        
+        [Fact]
+        public void Binding_Path_Should_Be_Completed_From_sParent()
+        {
+            AssertSingleCompletion("<UserControl Background=\"{Binding ", "$pa", "$parent[");
+        }
+        
+        [Fact]
+        public void Binding_Path_Should_Be_Completed_From_sParentType()
+        {
+            AssertSingleCompletion("<UserControl Background=\"{Binding ", "$parent[But", "$parent[Button].");
+        }
+        
+        [Fact]
+        public void Binding_Path_Should_Be_Completed_From_sParentType_Property()
+        {
+            AssertSingleCompletion("<UserControl Background=\"{Binding ", "$parent[Button].Ta", "$parent[Button].Tag");
+        }
+        
+        [Fact]
+        public void Binding_Path_Should_Be_Completed_From_sParent_Property()
+        {
+            AssertSingleCompletion("<UserControl Background=\"{Binding ", "$parent.Ta", "$parent.Tag");
+        }
+
+        [Fact]
+        public void Binding_Path_Should_Be_Completed_From_sParent_Property_Nested()
+        {
+            AssertSingleCompletion("<UserControl Background=\"{Binding ", "$parent.Bounds.Wi", "$parent.Bounds.Width");
+        }
 
         [Fact]
         public void Extension_With_CtorArgument_Type_Should_Be_Completed()

@@ -52,6 +52,7 @@ namespace Avalonia.Ide.CompletionEngine
             public string ReturnTypeFullName;
             public string LocalUrl;
             public string GlobalUrl;
+
             public override string ToString() => GlobalUrl;
         }
 
@@ -114,13 +115,14 @@ namespace Avalonia.Ide.CompletionEngine
                 int level = 0;
                 while (typeDef != null)
                 {
+                    var currentType = types.GetValueOrDefault(typeDef.FullName);
                     foreach (var prop in typeDef.Properties)
                     {
                         if (!prop.HasPublicGetter && !prop.HasPublicSetter)
                             continue;
 
                         var p = new MetadataProperty(prop.Name, types.GetValueOrDefault(prop.TypeFullName),
-                            types.GetValueOrDefault(typeDef.FullName), false, prop.IsStatic, prop.HasPublicGetter,
+                            currentType, false, prop.IsStatic, prop.HasPublicGetter,
                             prop.HasPublicSetter);
 
                         type.Properties.Add(p);
@@ -153,11 +155,11 @@ namespace Avalonia.Ide.CompletionEngine
                         foreach (var fieldDef in typeDef.Fields)
                         {
                             if (fieldDef.IsStatic && fieldDef.IsPublic &&
-                                (fieldDef.IsRoutedEvent 
+                                (fieldDef.IsRoutedEvent
                                 || fieldDef.Name.EndsWith("Event", StringComparison.OrdinalIgnoreCase)))
                             {
                                 var name = fieldDef.Name;
-                                if(fieldDef.Name.EndsWith("Event", StringComparison.OrdinalIgnoreCase))
+                                if (fieldDef.Name.EndsWith("Event", StringComparison.OrdinalIgnoreCase))
                                 {
                                     name = name.Substring(0, name.Length - "Event".Length);
                                 }
@@ -532,10 +534,25 @@ namespace Avalonia.Ide.CompletionEngine
                 }
             }
 
+            types.TryGetValue("Avalonia.Controls.Control", out MetadataType controlType);
+            types.TryGetValue(typeof(Type).FullName, out MetadataType typeType);
+
+            var dataContextType = new MetadataType()
+            {
+                Name = "{BindingPath}",
+                FullName = "{BindingPath}",
+                HasHintValues = true,
+                HintValues = new[] { "$parent", "$parent[", "$self" },
+            };
+
             //bindings related hints
             if (types.TryGetValue("Avalonia.Markup.Xaml.MarkupExtensions.BindingExtension", out MetadataType bindingType))
             {
                 bindingType.SupportCtorArgument = MetadataTypeCtorArgument.None;
+                var pathProp = bindingType.Properties.FirstOrDefault(p => p.Name == "Path");
+                if (pathProp != null) pathProp.Type = dataContextType;
+
+                bindingType.Properties.Add(new MetadataProperty("", dataContextType, bindingType, false, false, true, true));
             }
 
             if (types.TryGetValue("Avalonia.Data.TemplateBinding", out MetadataType templBinding))
@@ -666,7 +683,7 @@ namespace Avalonia.Ide.CompletionEngine
                 uriType.XamlContextHintValuesFunc = (a, t, p) => filterLocalRes(uriType, a);
             }
 
-            if (types.TryGetValue(typeof(Type).FullName, out MetadataType typeType))
+            if (typeType != null)
             {
                 var typeArguments = new MetadataType()
                 {
