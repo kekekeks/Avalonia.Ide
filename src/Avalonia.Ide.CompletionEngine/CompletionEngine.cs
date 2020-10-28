@@ -8,13 +8,13 @@ namespace Avalonia.Ide.CompletionEngine
 {
     public class CompletionEngine
     {
-        class MetadataHelper
+        private class MetadataHelper
         {
             private Metadata _metadata;
             public Metadata Metadata => _metadata;
             public Dictionary<string, string> Aliases { get; private set; }
 
-            Dictionary<string, MetadataType> _types;
+            private Dictionary<string, MetadataType> _types;
             private string _currentAssemblyName;
 
             public void SetMetadata(Metadata metadata, string xml, string currentAssemblyName = null)
@@ -64,7 +64,6 @@ namespace Avalonia.Ide.CompletionEngine
                 }
 
                 _types = types;
-
             }
 
             public IEnumerable<KeyValuePair<string, MetadataType>> FilterTypes(string prefix, bool withAttachedPropertiesOrEventsOnly = false, bool markupExtensionsOnly = false, bool staticGettersOnly = false, bool xamlDirectiveOnly = false)
@@ -337,12 +336,68 @@ namespace Avalonia.Ide.CompletionEngine
                                     .Select(v => new Completion(v, CompletionKind.Class)));
                         }
                     }
+                    else if (state.TagName == "Setter" && (state.AttributeName == "Value" || state.AttributeName == "Property"))
+                    {
+                        ProcessStyleSetter(state.AttributeName, state, completions, currentAssemblyName);
+                    }
                 }
             }
 
             if (completions.Count != 0)
                 return new CompletionSet() { Completions = completions, StartPosition = curStart };
             return null;
+        }
+
+        private void ProcessStyleSetter(string setterPropertyName, XmlParser state, List<Completion> completions, string currentAssemblyName)
+        {
+            var selector = state.FindParentAttributeValue("Selector", 1, maxLevels: 0);
+            var selectorTypeName = selector?.Split(' ', '.', ':').FirstOrDefault()?.Replace('|', ':');
+
+            if (string.IsNullOrEmpty(selectorTypeName)) return;
+
+            if (setterPropertyName == "Property")
+            {
+                string value = state.AttributeValue ?? "";
+
+                if (value.Contains("."))
+                {
+                    int curStart = state.CurrentValueStart ?? 0;
+                    var dotPos = value.IndexOf(".");
+                    var typeName = value.Substring(0, dotPos);
+                    var compName = value.Substring(dotPos + 1);
+                    curStart = curStart + dotPos + 1;
+
+                    var sameType = state.GetParentTagName(1) == typeName;
+
+                    completions.AddRange(_helper.FilterPropertyNames(typeName, compName, attached: true, hasSetter: true)
+                        .Select(p => new Completion(p, $"{typeName}.{p}", p, CompletionKind.AttachedProperty)));
+                }
+                else
+                {
+                    completions.AddRange(_helper.FilterPropertyNames(selectorTypeName, value, attached: false, hasSetter: true)
+                            .Select(x => new Completion(x, CompletionKind.Property)));
+
+                    completions.AddRange(_helper.FilterTypeNames(value, withAttachedPropertiesOrEventsOnly: true).Select(x => new Completion(x, CompletionKind.Class)));
+                }
+
+            }
+            else if (setterPropertyName == "Value")
+            {
+                var setterProperty = state.FindParentAttributeValue("Property", maxLevels: 0);
+
+                if (setterProperty.Contains("."))
+                {
+                    var vals = setterProperty.Split('.');
+                    selectorTypeName = vals[0];
+                    setterProperty = vals[1];
+                }
+
+                var setterProp = _helper.LookupProperty(selectorTypeName, setterProperty);
+                if (setterProp?.Type?.HasHintValues == true)
+                {
+                    completions.AddRange(GetHintCompletions(setterProp.Type, state.AttributeValue, currentAssemblyName));
+                }
+            }
         }
 
         public IEnumerable<string> FilterHintValues(MetadataType type, string entered, string currentAssemblyName, XmlParser state)

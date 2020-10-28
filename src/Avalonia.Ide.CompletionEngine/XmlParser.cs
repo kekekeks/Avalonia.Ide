@@ -50,7 +50,7 @@ namespace Avalonia.Ide.CompletionEngine
                     ? _attributeNameStart
                     : State == ParserState.AttributeValue
                         ? _attributeValueStart
-                        : (int?) null;
+                        : (int?)null;
 
         public int? ElementNameEnd => State >= ParserState.StartElement ? _elementNameEnd : null;
 
@@ -74,7 +74,7 @@ namespace Avalonia.Ide.CompletionEngine
 
         private const string CdataStart = "![CDATA[";
         private const string CdataEnd = "]]>";
-        
+
         bool CheckPrev(int caret, string checkFor)
         {
             var startAt = caret - checkFor.Length + 1;
@@ -91,7 +91,7 @@ namespace Avalonia.Ide.CompletionEngine
 
         private bool ParseChar()
         {
-            if(_parserPos >= _data.Length)
+            if (_parserPos >= _data.Length)
             {
                 return false;
             }
@@ -200,13 +200,13 @@ namespace Avalonia.Ide.CompletionEngine
             return null;
 
         }
-        
-        public string FindParentAttributeValue(string attributeExpr, int startLevel = 0)
+
+        public string FindParentAttributeValue(string attributeExpr, int startLevel = 0, int maxLevels = int.MaxValue)
         {
             if (NestingLevel - startLevel - 1 < 0)
                 return null;
-            var attribRegExpr = new Regex($"\\s(?:{attributeExpr})=\"(?<AttribValue>[\\w\\:]*)\"");
-            foreach(var start in _containingTagStart.Skip(startLevel))
+            var attribRegExpr = new Regex($"\\s(?:{attributeExpr})=\"(?<AttribValue>[\\w\\:\\s\\|\\.]+)\"");
+            foreach (var start in _containingTagStart.Skip(startLevel))
             {
                 var m = Regex.Match(_data.Span.Slice(start).ToString(), @"^<[^>]+");
                 if (m.Success)
@@ -218,6 +218,7 @@ namespace Avalonia.Ide.CompletionEngine
                         return attribMatch.Groups["AttribValue"].Value;
                     }
                 }
+                if (--maxLevels < 0) break;
             }
 
             return null;

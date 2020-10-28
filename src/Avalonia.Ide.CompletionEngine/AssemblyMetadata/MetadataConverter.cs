@@ -502,23 +502,17 @@ namespace Avalonia.Ide.CompletionEngine
 
             types.Add(xamlResType.Name, xamlResType);
 
-            MetadataType avProperty;
+            var allProps = new Dictionary<string, MetadataProperty>();
 
-            if (types.TryGetValue("Avalonia.AvaloniaProperty", out avProperty))
+            foreach (var type in types.Where(t => t.Value.IsAvaloniaObjectType))
             {
-                var allProps = new Dictionary<string, MetadataProperty>();
-
-                foreach (var type in types.Where(t => t.Value.IsAvaloniaObjectType))
+                foreach (var v in type.Value.Properties.Where(p => p.HasSetter && p.HasGetter))
                 {
-                    foreach (var v in type.Value.Properties.Where(p => p.HasSetter && p.HasGetter))
-                    {
-                        allProps[v.Name] = v;
-                    }
+                    allProps[v.Name] = v;
                 }
-
-                avProperty.HasHintValues = true;
-                avProperty.HintValues = allProps.Keys.ToArray();
             }
+
+            string[] allAvaloniaProps = allProps.Keys.ToArray();
 
             if (!types.TryGetValue("Avalonia.Markup.Xaml.MarkupExtensions.BindingExtension", out MetadataType bindingExtType))
             {
@@ -563,8 +557,8 @@ namespace Avalonia.Ide.CompletionEngine
                     IsMarkupExtension = true,
                     Properties = templBinding.Properties,
                     SupportCtorArgument = MetadataTypeCtorArgument.HintValues,
-                    HasHintValues = avProperty?.HasHintValues ?? false,
-                    HintValues = avProperty?.HintValues
+                    HasHintValues = allAvaloniaProps?.Any() ?? false,
+                    HintValues = allAvaloniaProps
                 };
 
                 types["TemplateBindingExtension"] = tbext;

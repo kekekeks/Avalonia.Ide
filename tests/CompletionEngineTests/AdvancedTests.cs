@@ -146,6 +146,36 @@ namespace CompletionEngineTests
         }
 
         [Fact]
+        public void Style_Property_Name_Should_Be_Completed()
+        {
+            AssertSingleCompletion("<Style Selector=\"Button\"><Setter Property=\"", "HorizontalAli", "HorizontalAlignment");
+        }
+
+        [Fact]
+        public void Style_Attached_Property_Class_Name_Should_Be_Completed()
+        {
+            AssertSingleCompletion("<Style Selector=\"Button\"><Setter Property=\"", "TextBl", "TextBlock");
+        }
+
+        [Fact]
+        public void Style_Attached_Property_Name_Should_Be_Completed()
+        {
+            AssertSingleCompletion("<Style Selector=\"Button\"><Setter Property=\"", "TextBlock.FontWe", "TextBlock.FontWeight");
+        }
+
+        [Fact]
+        public void Style_Attached_Property_Value_Should_Be_Completed()
+        {
+            AssertSingleCompletion("<Style Selector=\"Button\"><Setter Property=\"TextBlock.FontWeight\" Value=\"", "Bo", "Bold");
+        }
+
+        [Fact]
+        public void Style_Property_Value_Should_Be_Completed()
+        {
+            AssertSingleCompletion("<Style Selector=\"Button.my\"><Setter Property=\"HorizontalAlignment\" Value=\"", "Le", "Left");
+        }
+
+        [Fact]
         public void Image_Source_resm_Uris_Should_Be_Completed()
         {
             AssertSingleCompletion("<Image Source=\"", "resm:", "resm:CompletionEngineTests.Test.bmp?assembly=CompletionEngineTests");
