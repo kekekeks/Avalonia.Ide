@@ -100,6 +100,15 @@ namespace Avalonia.Ide.CompletionEngine
                 bool staticGetter = false)
             {
                 var t = LookupType(typeName);
+                return FilterPropertyNames(t, propName, attached, hasSetter, staticGetter);
+            }
+
+            public IEnumerable<string> FilterPropertyNames(MetadataType t, string propName,
+                bool? attached,
+                bool hasSetter,
+                bool staticGetter = false)
+            {
+
                 propName = propName ?? "";
                 if (t == null)
                     return new string[0];
@@ -423,9 +432,9 @@ namespace Avalonia.Ide.CompletionEngine
 
         private IEnumerable<Completion> FilterHintValuesForBindingPath(MetadataType bindingPathType, string entered, string currentAssemblyName, XmlParser state)
         {
-            IEnumerable<Completion> forProperties(string filterType, string filter, Func<string, string> fmtInsertText = null)
+            IEnumerable<Completion> forPropertiesFromType(MetadataType filterType, string filter, Func<string, string> fmtInsertText = null)
             {
-                if (!string.IsNullOrEmpty(filterType))
+                if (filterType != null)
                 {
                     foreach (var propertyName in _helper.FilterPropertyNames(filterType, filter, false, false))
                     {
@@ -433,6 +442,9 @@ namespace Avalonia.Ide.CompletionEngine
                     }
                 }
             }
+
+            IEnumerable<Completion> forProperties(string filterType, string filter, Func<string, string> fmtInsertText = null)
+                    => forPropertiesFromType(_helper.LookupType(filterType ?? ""), filter, fmtInsertText);
 
             if (string.IsNullOrEmpty(entered))
                 return forProperties(state.FindParentAttributeValue("(x\\:)?DataType"), entered);
@@ -457,21 +469,36 @@ namespace Avalonia.Ide.CompletionEngine
 
             string type = values[0];
 
-            if (values[0] == "$self") //current control type
-                type = state.GetParentTagName(0);
-            else if (values[0] == "$parent") //parent control in the xaml
-                type = state.GetParentTagName(1) ?? "Control";
-            else if (values[0].StartsWith("$parent[")) //extract parent type
-                type = values[0].Substring("$parent[".Length, values[0].Length - "$parent[".Length - 1);
-            else if (values[0].StartsWith("#")) //todo: find the control type etc ???
-                type = "Control";
+            int i;
 
-            var mdType = _helper.LookupType(type);
-            int i = 1;
+            if (values[0].StartsWith("$"))
+            {
+                i = 1;
+                type = "Control";
+                if (values[0] == "$self") //current control type
+                    type = state.GetParentTagName(0);
+                else if (values[0] == "$parent") //parent control in the xaml
+                    type = state.GetParentTagName(1) ?? "Control";
+                else if (values[0].StartsWith("$parent[")) //extract parent type
+                    type = values[0].Substring("$parent[".Length, values[0].Length - "$parent[".Length - 1);
+            }
+            else if (values[0].StartsWith("#"))
+            {
+                i = 1;
+                //todo: find the control type etc ???
+                type = "Control";
+            }
+            else
+            {
+                i = 0;
+                type = state.FindParentAttributeValue("(x\\:)?DataType");
+            }
+
+            var mdType = _helper.LookupType(type ?? "");
 
             while (mdType != null && i < values.Length - 1 && !string.IsNullOrEmpty(values[i]))
             {
-                if (i == 1 && values[i] == "DataContext")
+                if (i <= 1 && values[i] == "DataContext")
                 {
                     //assume parent.datacontext is x:datatype so we have some intelisence
                     type = state.FindParentAttributeValue("(x\\:)?DataType");
@@ -480,12 +507,12 @@ namespace Avalonia.Ide.CompletionEngine
                 else
                 {
                     mdType = mdType.Properties.FirstOrDefault(p => p.Name == values[i])?.Type;
-                    type = mdType?.Name;
+                    type = mdType?.FullName;
                 }
                 i++;
             }
 
-            return forProperties(type, values[i], p => $"{string.Join(".", values.Take(i).ToArray())}.{p}");
+            return forPropertiesFromType(mdType, values[i], p => $"{string.Join(".", values.Take(i).ToArray())}.{p}");
         }
 
         private List<Completion> GetHintCompletions(MetadataType type, string entered, string currentAssemblyName = null, XmlParser state = null)
