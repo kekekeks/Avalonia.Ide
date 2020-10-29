@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Xml;
 
 namespace Avalonia.Ide.CompletionEngine
@@ -290,7 +291,7 @@ namespace Avalonia.Ide.CompletionEngine
                 if (state.AttributeValue.StartsWith("{"))
                 {
                     curStart = state.CurrentValueStart.Value +
-                               BuildCompletionsForMarkupExtension(prop, completions, state,
+                               BuildCompletionsForMarkupExtension(prop, completions, fullText, state,
                                    textToCursor.Substring(state.CurrentValueStart.Value), currentAssemblyName);
                 }
                 else
@@ -430,7 +431,7 @@ namespace Avalonia.Ide.CompletionEngine
             }
         }
 
-        private IEnumerable<Completion> FilterHintValuesForBindingPath(MetadataType bindingPathType, string entered, string currentAssemblyName, XmlParser state)
+        private IEnumerable<Completion> FilterHintValuesForBindingPath(MetadataType bindingPathType, string entered, string currentAssemblyName, string fullText, XmlParser state)
         {
             IEnumerable<Completion> forPropertiesFromType(MetadataType filterType, string filter, Func<string, string> fmtInsertText = null)
             {
@@ -460,7 +461,22 @@ namespace Avalonia.Ide.CompletionEngine
                 }
                 else if (values[0].StartsWith("#"))
                 {
-                    //todo: return names in xaml
+                    var nameMatch = Regex.Matches(fullText, $"\\s(?:(x\\:)?Name)=\"(?<AttribValue>[\\w\\:\\s\\|\\.]+)\"");
+
+                    if (nameMatch.Count > 0)
+                    {
+                        var result = new List<Completion>();
+                        foreach (Match m in nameMatch)
+                        {
+                            if (m.Success)
+                            {
+                                var name = m.Groups["AttribValue"].Value;
+                                result.Add(new Completion(name, $"#{name}", name, CompletionKind.Class));
+                            }
+                        }
+                        return result;
+                    }
+
                     return Array.Empty<Completion>();
                 }
 
@@ -515,7 +531,7 @@ namespace Avalonia.Ide.CompletionEngine
             return forPropertiesFromType(mdType, values[i], p => $"{string.Join(".", values.Take(i).ToArray())}.{p}");
         }
 
-        private List<Completion> GetHintCompletions(MetadataType type, string entered, string currentAssemblyName = null, XmlParser state = null)
+        private List<Completion> GetHintCompletions(MetadataType type, string entered, string currentAssemblyName = null, string fullText = null, XmlParser state = null)
         {
             var kind = GetCompletionKindForHintValues(type);
 
@@ -524,12 +540,12 @@ namespace Avalonia.Ide.CompletionEngine
 
             if (type.FullName == "{BindingPath}" && state != null)
             {
-                completions.AddRange(FilterHintValuesForBindingPath(type, entered, currentAssemblyName, state));
+                completions.AddRange(FilterHintValuesForBindingPath(type, entered, currentAssemblyName, fullText, state));
             }
             return completions;
         }
 
-        private int BuildCompletionsForMarkupExtension(MetadataProperty property, List<Completion> completions, XmlParser state, string data, string currentAssemblyName)
+        private int BuildCompletionsForMarkupExtension(MetadataProperty property, List<Completion> completions, string fullText, XmlParser state, string data, string currentAssemblyName)
         {
             int? forcedStart = null;
             var ext = MarkupExtensionParser.Parse(data);
@@ -602,7 +618,7 @@ namespace Avalonia.Ide.CompletionEngine
                     var defaultProp = t?.Properties.FirstOrDefault(p => p.Name == "");
                     if (defaultProp?.Type?.HasHintValues ?? false)
                     {
-                        completions.AddRange(GetHintCompletions(defaultProp.Type, ext.AttributeName ?? "", currentAssemblyName, state));
+                        completions.AddRange(GetHintCompletions(defaultProp.Type, ext.AttributeName ?? "", currentAssemblyName, fullText, state));
                     }
                 }
             }
@@ -613,7 +629,7 @@ namespace Avalonia.Ide.CompletionEngine
                 if (prop?.Type?.HasHintValues == true)
                 {
                     var start = data.Substring(ext.CurrentValueStart);
-                    completions.AddRange(GetHintCompletions(prop.Type, start, currentAssemblyName, state));
+                    completions.AddRange(GetHintCompletions(prop.Type, start, currentAssemblyName, fullText, state));
                 }
             }
 
@@ -623,7 +639,7 @@ namespace Avalonia.Ide.CompletionEngine
         public static bool ShouldTriggerCompletionListOn(char typedChar)
         {
             return char.IsLetterOrDigit(typedChar) || typedChar == '/' || typedChar == '<'
-                || typedChar == ' ' || typedChar == '.' || typedChar == ':';
+                || typedChar == ' ' || typedChar == '.' || typedChar == ':' || typedChar == '$' || typedChar == '#';
         }
 
         public static CompletionKind GetCompletionKindForHintValues(MetadataType type)

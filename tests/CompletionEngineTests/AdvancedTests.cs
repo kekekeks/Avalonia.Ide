@@ -75,7 +75,13 @@ namespace CompletionEngineTests
         {
             AssertSingleCompletion("<UserControl Background=\"{Binding ", "$parent[But", "$parent[Button].");
         }
-        
+
+        [Fact]
+        public void Binding_Path_Should_Be_Completed_From_xName()
+        {
+            AssertSingleCompletion("<UserControl x:Name=\"foo\" Tag=\"{Binding ", "#f", "#foo");
+        }
+
         [Fact]
         public void Binding_Path_Should_Be_Completed_From_sParentType_Property()
         {
