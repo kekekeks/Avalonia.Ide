@@ -51,11 +51,65 @@ namespace CompletionEngineTests
         {
             AssertSingleCompletion("<UserControl Background=\"{Binding RelativeSource={RelativeSource ", "Se", "Self");
         }
+        
+        [Fact]
+        public void Binding_Path_Should_Be_Completed_From_xDataType()
+        {
+            AssertSingleCompletion("<UserControl x:DataType=\"Button\"><TextBlock Tag=\"{Binding Path=", "Conte", "Content");
+        }
+        
+        [Fact]
+        public void Binding_Path_Should_Be_Completed_From_xDataType2()
+        {
+            AssertSingleCompletion("<UserControl x:DataType=\"Button\"><TextBlock Tag=\"{Binding ", "Conte", "Content");
+        }
+        
+        [Fact]
+        public void Binding_Path_Should_Be_Completed_From_sParent()
+        {
+            AssertSingleCompletion("<UserControl Background=\"{Binding ", "$pa", "$parent[");
+        }
+        
+        [Fact]
+        public void Binding_Path_Should_Be_Completed_From_sParentType()
+        {
+            AssertSingleCompletion("<UserControl Background=\"{Binding ", "$parent[But", "$parent[Button].");
+        }
+
+        [Fact]
+        public void Binding_Path_Should_Be_Completed_From_xName()
+        {
+            AssertSingleCompletion("<UserControl x:Name=\"foo\" Tag=\"{Binding ", "#f", "#foo");
+        }
+
+        [Fact]
+        public void Binding_Path_Should_Be_Completed_From_sParentType_Property()
+        {
+            AssertSingleCompletion("<UserControl Background=\"{Binding ", "$parent[Button].Ta", "$parent[Button].Tag");
+        }
+        
+        [Fact]
+        public void Binding_Path_Should_Be_Completed_From_sParent_Property()
+        {
+            AssertSingleCompletion("<UserControl Background=\"{Binding ", "$parent.Ta", "$parent.Tag");
+        }
+
+        [Fact]
+        public void Binding_Path_Should_Be_Completed_From_sParent_Property_Nested()
+        {
+            AssertSingleCompletion("<UserControl Background=\"{Binding ", "$parent.Bounds.Wi", "$parent.Bounds.Width");
+        }
 
         [Fact]
         public void Extension_With_CtorArgument_Type_Should_Be_Completed()
         {
             AssertSingleCompletion("<DataTemplate DataType=\"{x:Type ", "But", "Button");
+        }
+        
+        [Fact]
+        public void Extension_DataType_Types_Should_Be_Completed()
+        {
+            AssertSingleCompletion("<UserControl x:DataType=\"", "But", "Button");
         }
 
         [Fact]
@@ -95,6 +149,36 @@ namespace CompletionEngineTests
             Assert.Contains(compl, v => v.InsertText == ":pointerover");
             Assert.Contains(compl, v => v.InsertText == ":disabled");
             Assert.Contains(compl, v => v.InsertText == ":focus");
+        }
+
+        [Fact]
+        public void Style_Property_Name_Should_Be_Completed()
+        {
+            AssertSingleCompletion("<Style Selector=\"Button\"><Setter Property=\"", "HorizontalAli", "HorizontalAlignment");
+        }
+
+        [Fact]
+        public void Style_Attached_Property_Class_Name_Should_Be_Completed()
+        {
+            AssertSingleCompletion("<Style Selector=\"Button\"><Setter Property=\"", "TextBl", "TextBlock");
+        }
+
+        [Fact]
+        public void Style_Attached_Property_Name_Should_Be_Completed()
+        {
+            AssertSingleCompletion("<Style Selector=\"Button\"><Setter Property=\"", "TextBlock.FontWe", "TextBlock.FontWeight");
+        }
+
+        [Fact]
+        public void Style_Attached_Property_Value_Should_Be_Completed()
+        {
+            AssertSingleCompletion("<Style Selector=\"Button\"><Setter Property=\"TextBlock.FontWeight\" Value=\"", "Bo", "Bold");
+        }
+
+        [Fact]
+        public void Style_Property_Value_Should_Be_Completed()
+        {
+            AssertSingleCompletion("<Style Selector=\"Button.my\"><Setter Property=\"HorizontalAlignment\" Value=\"", "Le", "Left");
         }
 
         [Fact]

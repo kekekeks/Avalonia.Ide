@@ -117,5 +117,11 @@ namespace CompletionEngineTests
         {
             AssertSingleCompletion("<UserControl Content=\"{Binding Mode=", "One", "OneWay");
         }
+        
+        [Fact]
+        public void Extension_DataType_Should_Be_Completed()
+        {
+            AssertSingleCompletion("<UserControl ", "x:Data", "x:DataType=\"\"");
+        }
     }
 }

@@ -52,6 +52,7 @@ namespace Avalonia.Ide.CompletionEngine
             public string ReturnTypeFullName;
             public string LocalUrl;
             public string GlobalUrl;
+
             public override string ToString() => GlobalUrl;
         }
 
@@ -114,13 +115,14 @@ namespace Avalonia.Ide.CompletionEngine
                 int level = 0;
                 while (typeDef != null)
                 {
+                    var currentType = types.GetValueOrDefault(typeDef.FullName);
                     foreach (var prop in typeDef.Properties)
                     {
                         if (!prop.HasPublicGetter && !prop.HasPublicSetter)
                             continue;
 
                         var p = new MetadataProperty(prop.Name, types.GetValueOrDefault(prop.TypeFullName),
-                            types.GetValueOrDefault(typeDef.FullName), false, prop.IsStatic, prop.HasPublicGetter,
+                            currentType, false, prop.IsStatic, prop.HasPublicGetter,
                             prop.HasPublicSetter);
 
                         type.Properties.Add(p);
@@ -153,11 +155,11 @@ namespace Avalonia.Ide.CompletionEngine
                         foreach (var fieldDef in typeDef.Fields)
                         {
                             if (fieldDef.IsStatic && fieldDef.IsPublic &&
-                                (fieldDef.IsRoutedEvent 
+                                (fieldDef.IsRoutedEvent
                                 || fieldDef.Name.EndsWith("Event", StringComparison.OrdinalIgnoreCase)))
                             {
                                 var name = fieldDef.Name;
-                                if(fieldDef.Name.EndsWith("Event", StringComparison.OrdinalIgnoreCase))
+                                if (fieldDef.Name.EndsWith("Event", StringComparison.OrdinalIgnoreCase))
                                 {
                                     name = name.Substring(0, name.Length - "Event".Length);
                                 }
@@ -353,18 +355,20 @@ namespace Avalonia.Ide.CompletionEngine
 
         private static void PreProcessTypes(Dictionary<string, MetadataType> types, Metadata metadata)
         {
+            MetadataType xDataType, xCompiledBindings, boolType, typeType;
             var toAdd = new List<MetadataType>
             {
-                new MetadataType()
+                (boolType = new MetadataType()
                 {
                     Name = typeof(bool).FullName,
                     HasHintValues = true,
                     HintValues = new[] { "True", "False" }
-                },
+                }),
                 new MetadataType(){ Name = typeof(System.Uri).FullName },
-                new MetadataType(){ Name = typeof(System.Type).FullName },
+                (typeType = new MetadataType(){ Name = typeof(System.Type).FullName }),
                 new MetadataType(){ Name = "Avalonia.Media.IBrush" },
                 new MetadataType(){ Name = "Avalonia.Media.Imaging.IBitmap" },
+                new MetadataType(){ Name = "Avalonia.Media.IImage" },
             };
 
             foreach (var t in toAdd)
@@ -407,6 +411,18 @@ namespace Avalonia.Ide.CompletionEngine
                     Name = "Key",
                     IsXamlDirective = true
                 },
+                xDataType = new MetadataType()
+                {
+                    Name = "DataType",
+                    IsXamlDirective = true,
+                    Properties = { new MetadataProperty("", typeType,null, false, false, false, true)},
+                },
+                xCompiledBindings = new MetadataType()
+                {
+                    Name = "CompileBindings",
+                    IsXamlDirective = true,
+                    Properties = { new MetadataProperty("", boolType,null, false, false, false, true)},
+                },
             };
 
             //as in avalonia 0.9 Portablexaml is missing we need to hardcode some extensions
@@ -414,6 +430,9 @@ namespace Avalonia.Ide.CompletionEngine
             {
                 metadata.AddType(Utils.Xaml2006Namespace, t);
             }
+
+            types.Add(xDataType.Name, xDataType);
+            types.Add(xCompiledBindings.Name, xCompiledBindings);
 
             metadata.AddType("", new MetadataType() { Name = "xmlns", IsXamlDirective = true });
         }
@@ -483,28 +502,51 @@ namespace Avalonia.Ide.CompletionEngine
 
             types.Add(xamlResType.Name, xamlResType);
 
-            MetadataType avProperty;
+            var allProps = new Dictionary<string, MetadataProperty>();
 
-            if (types.TryGetValue("Avalonia.AvaloniaProperty", out avProperty))
+            foreach (var type in types.Where(t => t.Value.IsAvaloniaObjectType))
             {
-                var allProps = new Dictionary<string, MetadataProperty>();
-
-                foreach (var type in types.Where(t => t.Value.IsAvaloniaObjectType))
+                foreach (var v in type.Value.Properties.Where(p => p.HasSetter && p.HasGetter))
                 {
-                    foreach (var v in type.Value.Properties.Where(p => p.HasSetter && p.HasGetter))
-                    {
-                        allProps[v.Name] = v;
-                    }
+                    allProps[v.Name] = v;
                 }
-
-                avProperty.HasHintValues = true;
-                avProperty.HintValues = allProps.Keys.ToArray();
             }
+
+            string[] allAvaloniaProps = allProps.Keys.ToArray();
+
+            if (!types.TryGetValue("Avalonia.Markup.Xaml.MarkupExtensions.BindingExtension", out MetadataType bindingExtType))
+            {
+                if (types.TryGetValue("Avalonia.Data.Binding", out MetadataType origBindingType))
+                {
+                    //avalonia 0.10 has implicit binding extension
+                    bindingExtType = origBindingType.CloneAs("BindingExtension",
+                        "Avalonia.Markup.Xaml.MarkupExtensions.BindingExtension");
+                    bindingExtType.IsMarkupExtension = true;
+
+                    types.Add(bindingExtType.FullName, bindingExtType);
+                    metadata.AddType(Utils.AvaloniaNamespace, bindingExtType);
+                }
+            }
+
+            types.TryGetValue("Avalonia.Controls.Control", out MetadataType controlType);
+            types.TryGetValue(typeof(Type).FullName, out MetadataType typeType);
+
+            var dataContextType = new MetadataType()
+            {
+                Name = "{BindingPath}",
+                FullName = "{BindingPath}",
+                HasHintValues = true,
+                HintValues = new[] { "$parent", "$parent[", "$self" },
+            };
 
             //bindings related hints
             if (types.TryGetValue("Avalonia.Markup.Xaml.MarkupExtensions.BindingExtension", out MetadataType bindingType))
             {
                 bindingType.SupportCtorArgument = MetadataTypeCtorArgument.None;
+                var pathProp = bindingType.Properties.FirstOrDefault(p => p.Name == "Path");
+                if (pathProp != null) pathProp.Type = dataContextType;
+
+                bindingType.Properties.Add(new MetadataProperty("", dataContextType, bindingType, false, false, true, true));
             }
 
             if (types.TryGetValue("Avalonia.Data.TemplateBinding", out MetadataType templBinding))
@@ -515,8 +557,8 @@ namespace Avalonia.Ide.CompletionEngine
                     IsMarkupExtension = true,
                     Properties = templBinding.Properties,
                     SupportCtorArgument = MetadataTypeCtorArgument.HintValues,
-                    HasHintValues = avProperty?.HasHintValues ?? false,
-                    HintValues = avProperty?.HintValues
+                    HasHintValues = allAvaloniaProps?.Any() ?? false,
+                    HintValues = allAvaloniaProps
                 };
 
                 types["TemplateBindingExtension"] = tbext;
@@ -598,6 +640,13 @@ namespace Avalonia.Ide.CompletionEngine
                 ibitmapType.XamlContextHintValuesFunc = (a, t, p) => filterLocalRes(ibitmapType, a);
             }
 
+            if (types.TryGetValue("Avalonia.Media.IImage", out MetadataType iImageType))
+            {
+                iImageType.HasHintValues = true;
+                iImageType.HintValues = allresourceUrls.Where(r => isbitmaptype(r)).ToArray();
+                iImageType.XamlContextHintValuesFunc = (a, t, p) => filterLocalRes(ibitmapType, a);
+            }
+
             if (types.TryGetValue("Avalonia.Controls.WindowIcon", out MetadataType winIcon))
             {
                 winIcon.HasHintValues = true;
@@ -628,7 +677,7 @@ namespace Avalonia.Ide.CompletionEngine
                 uriType.XamlContextHintValuesFunc = (a, t, p) => filterLocalRes(uriType, a);
             }
 
-            if (types.TryGetValue(typeof(Type).FullName, out MetadataType typeType))
+            if (typeType != null)
             {
                 var typeArguments = new MetadataType()
                 {

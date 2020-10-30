@@ -40,6 +40,14 @@ namespace Avalonia.Ide.CompletionEngine
         public bool IsCompositeValue { get; set; }
         public bool IsGeneric { get; set; }
         public bool IsXamlDirective { get; set; }
+
+        public MetadataType CloneAs(string name, string fullName)
+        {
+            var result = (MetadataType)MemberwiseClone();
+            result.Name = name;
+            result.FullName = fullName;
+            return result;
+        }
     }
 
     public enum MetadataTypeCtorArgument
