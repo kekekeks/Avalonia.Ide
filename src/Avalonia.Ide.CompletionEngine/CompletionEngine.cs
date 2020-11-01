@@ -322,8 +322,12 @@ namespace Avalonia.Ide.CompletionEngine
                                     .Select(v => new Completion(v.Substring("clr-namespace:".Length), v, v, CompletionKind.Namespace)));
                         else
                         {
+                            if ("using:".StartsWith(state.AttributeValue))
+                                completions.Add(new Completion("using:", CompletionKind.Namespace));
+
                             if ("clr-namespace:".StartsWith(state.AttributeValue))
                                 completions.Add(new Completion("clr-namespace:", CompletionKind.Namespace));
+
                             completions.AddRange(
                                 metadata.Namespaces.Keys.Where(
                                     v =>

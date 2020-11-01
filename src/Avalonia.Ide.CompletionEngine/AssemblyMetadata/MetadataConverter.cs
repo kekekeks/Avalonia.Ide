@@ -85,8 +85,18 @@ namespace Avalonia.Ide.CompletionEngine
                     typeDefs[mt] = type;
                     metadata.AddType("clr-namespace:" + type.Namespace + ";assembly=" + asm.Name, mt);
                     string[] nsAliases = null;
-                    if (aliases.TryGetValue(type.Namespace, out nsAliases))
-                        foreach (var alias in nsAliases) metadata.AddType(alias, mt);
+                    string usingNamespace = $"using:{type.Namespace}";
+                    if (!aliases.TryGetValue(type.Namespace, out nsAliases))
+                    {
+                        nsAliases = new string[] { usingNamespace };
+                        aliases[type.Namespace] = nsAliases;
+                    }
+                    else if (!nsAliases.Contains(usingNamespace))
+                    {
+                        aliases[type.Namespace] = nsAliases.Union(new string[] { usingNamespace }).ToArray();
+                    }
+
+                    foreach (var alias in nsAliases) metadata.AddType(alias, mt);
                 }
 
                 ProcessAvaloniaResources(asm, asmTypes, avaresValues);
