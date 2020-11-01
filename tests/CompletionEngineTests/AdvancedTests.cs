@@ -41,6 +41,12 @@ namespace CompletionEngineTests
         }
 
         [Fact]
+        public void Extension_With_CtorArgument_Static_Field_Values_Should_Be_Completed()
+        {
+            AssertSingleCompletion("<UserControl IsEnabled=\"{Binding Converter={x:Static ", "ObjectConverters.IsN", "ObjectConverters.IsNull");
+        }
+
+        [Fact]
         public void Extension_Property_With_WellKnown_Value_Should_Be_Completed()
         {
             AssertSingleCompletion("<UserControl Background=\"{Binding RelativeSource=", "Se", "Self");

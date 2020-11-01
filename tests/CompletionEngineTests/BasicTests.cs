@@ -101,6 +101,16 @@ namespace CompletionEngineTests
         }
 
         [Fact]
+        public void Using_NameSpaces_Should_Be_Completed()
+        {
+            var compl = GetCompletionsFor("<UserControl xmlns:t=\"using:Ava");
+
+            Assert.NotEmpty(compl.Completions);
+            Assert.Contains(compl.Completions, v => v.InsertText == "using:Avalonia.Data");
+            Assert.Contains(compl.Completions, v => v.InsertText == "using:Avalonia.Controls");
+        }
+
+        [Fact]
         public void Extension_Should_Be_Completed()
         {
             AssertSingleCompletion("<UserControl Content=\"{", "Bind", "Binding");

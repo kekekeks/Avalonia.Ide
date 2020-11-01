@@ -85,8 +85,18 @@ namespace Avalonia.Ide.CompletionEngine
                     typeDefs[mt] = type;
                     metadata.AddType("clr-namespace:" + type.Namespace + ";assembly=" + asm.Name, mt);
                     string[] nsAliases = null;
-                    if (aliases.TryGetValue(type.Namespace, out nsAliases))
-                        foreach (var alias in nsAliases) metadata.AddType(alias, mt);
+                    string usingNamespace = $"using:{type.Namespace}";
+                    if (!aliases.TryGetValue(type.Namespace, out nsAliases))
+                    {
+                        nsAliases = new string[] { usingNamespace };
+                        aliases[type.Namespace] = nsAliases;
+                    }
+                    else if (!nsAliases.Contains(usingNamespace))
+                    {
+                        aliases[type.Namespace] = nsAliases.Union(new string[] { usingNamespace }).ToArray();
+                    }
+
+                    foreach (var alias in nsAliases) metadata.AddType(alias, mt);
                 }
 
                 ProcessAvaloniaResources(asm, asmTypes, avaresValues);
@@ -154,20 +164,25 @@ namespace Avalonia.Ide.CompletionEngine
 
                         foreach (var fieldDef in typeDef.Fields)
                         {
-                            if (fieldDef.IsStatic && fieldDef.IsPublic &&
-                                (fieldDef.IsRoutedEvent
-                                || fieldDef.Name.EndsWith("Event", StringComparison.OrdinalIgnoreCase)))
+                            if (fieldDef.IsStatic && fieldDef.IsPublic)
                             {
-                                var name = fieldDef.Name;
-                                if (fieldDef.Name.EndsWith("Event", StringComparison.OrdinalIgnoreCase))
+                                if ((fieldDef.IsRoutedEvent || fieldDef.Name.EndsWith("Event", StringComparison.OrdinalIgnoreCase)))
                                 {
-                                    name = name.Substring(0, name.Length - "Event".Length);
-                                }
+                                    var name = fieldDef.Name;
+                                    if (fieldDef.Name.EndsWith("Event", StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        name = name.Substring(0, name.Length - "Event".Length);
+                                    }
 
-                                type.Events.Add(new MetadataEvent(name,
-                                    types.GetValueOrDefault(fieldDef.ReturnTypeFullName),
-                                    types.GetValueOrDefault(typeDef.FullName),
-                                    true));
+                                    type.Events.Add(new MetadataEvent(name,
+                                        types.GetValueOrDefault(fieldDef.ReturnTypeFullName),
+                                        types.GetValueOrDefault(typeDef.FullName),
+                                        true));
+                                }
+                                else if(type.IsStatic)
+                                {
+                                    type.Properties.Add(new MetadataProperty(fieldDef.Name, null, type, false, true, true, false));
+                                }
                             }
                         }
                     }
