@@ -364,8 +364,12 @@ namespace Avalonia.Ide.CompletionEngine
 
         private void ProcessStyleSetter(string setterPropertyName, XmlParser state, List<Completion> completions, string currentAssemblyName)
         {
+            const string selectorTypes = @"(?<type>([\w|])+)|([:\.#/]\w+)";
+
             var selector = state.FindParentAttributeValue("Selector", 1, maxLevels: 0);
-            var selectorTypeName = selector?.Split(' ', '.', ':').FirstOrDefault()?.Replace('|', ':');
+            var matches = Regex.Matches(selector ?? "", selectorTypes);
+            var types = matches.OfType<Match>().Select(m => m.Groups["type"].Value).Where(v => !string.IsNullOrEmpty(v));
+            var selectorTypeName = types.LastOrDefault()?.Replace('|', ':') ?? "Control";
 
             if (string.IsNullOrEmpty(selectorTypeName)) return;
 
@@ -384,7 +388,7 @@ namespace Avalonia.Ide.CompletionEngine
                     var sameType = state.GetParentTagName(1) == typeName;
 
                     completions.AddRange(_helper.FilterPropertyNames(typeName, compName, attached: true, hasSetter: true)
-                        .Select(p => new Completion(p, $"{typeName}.{p}", p, CompletionKind.AttachedProperty)));
+                                    .Select(p => new Completion(p, $"{typeName}.{p}", p, CompletionKind.AttachedProperty)));
                 }
                 else
                 {
