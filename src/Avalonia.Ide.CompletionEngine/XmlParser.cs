@@ -205,10 +205,10 @@ namespace Avalonia.Ide.CompletionEngine
         {
             if (NestingLevel - startLevel - 1 < 0)
                 return null;
-            var attribRegExpr = new Regex($"\\s(?:{attributeExpr})=\"(?<AttribValue>[\\w\\:\\s\\|\\.]+)\"");
+            var attribRegExpr = new Regex($"\\s(?:{attributeExpr})=\"(?<AttribValue>.*?)\"");
             foreach (var start in _containingTagStart.Skip(startLevel))
             {
-                var m = Regex.Match(_data.Span.Slice(start).ToString(), @"^<[^>]+");
+                var m = Regex.Match(_data.Span.Slice(start).ToString(), @"^<[^<]+");
                 if (m.Success)
                 {
                     var tagNameWithAttributes = m.Value.Substring(1);

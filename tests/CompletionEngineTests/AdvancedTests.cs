@@ -164,6 +164,12 @@ namespace CompletionEngineTests
         }
 
         [Fact]
+        public void Style_Property_Name_Should_Be_Completed_From_Last_Selector_Type()
+        {
+            AssertSingleCompletion("<Style Selector=\"Button.classname:pseudoclass /template/ > Grid#name\"><Setter Property=\"", "ColumnDef", "ColumnDefinitions");
+        }
+
+        [Fact]
         public void Style_Attached_Property_Class_Name_Should_Be_Completed()
         {
             AssertSingleCompletion("<Style Selector=\"Button\"><Setter Property=\"", "TextBl", "TextBlock");
