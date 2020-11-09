@@ -316,9 +316,18 @@ namespace Avalonia.Ide.CompletionEngine
                     }
                     else if (state.AttributeName == "xmlns" || state.AttributeName.Contains("xmlns:"))
                     {
+                        IEnumerable<string> filterNamespaces(Func<string, bool> predicate)
+                        {
+                            var result = metadata.Namespaces.Keys.Where(predicate).ToList();
+
+                            result.Sort((x, y) => x.CompareTo(y));
+
+                            return result;
+                        }
+
                         if (state.AttributeValue.StartsWith("clr-namespace:"))
                             completions.AddRange(
-                                metadata.Namespaces.Keys.Where(v => v.StartsWith(state.AttributeValue))
+                                    filterNamespaces(v => v.StartsWith(state.AttributeValue))
                                     .Select(v => new Completion(v.Substring("clr-namespace:".Length), v, v, CompletionKind.Namespace)));
                         else
                         {
@@ -329,7 +338,7 @@ namespace Avalonia.Ide.CompletionEngine
                                 completions.Add(new Completion("clr-namespace:", CompletionKind.Namespace));
 
                             completions.AddRange(
-                                metadata.Namespaces.Keys.Where(
+                                filterNamespaces(
                                     v =>
                                         v.StartsWith(state.AttributeValue) &&
                                         !v.StartsWith("clr-namespace"))
