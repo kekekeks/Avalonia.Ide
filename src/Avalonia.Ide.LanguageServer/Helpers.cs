@@ -36,22 +36,24 @@ namespace Avalonia.Ide.LanguageServer
             var tcs = new TaskCompletionSource<TcpClient>();
             l.AcceptTcpClientAsync().ContinueWith(t =>
             {
-                if (t.IsCompletedSuccessfully)
+                if (t.IsFaulted || t.IsCanceled)
                 {
-                    lock (tcs)
-                    {
-                        if (timedOut.IsCancellationRequested)
-                            t.Result.Close();
-                        else
-                            tcs.SetResult(t.Result);
-                    }
+                    return;
+                }
+
+                lock (tcs)
+                {
+                    if (timedOut.IsCancellationRequested)
+                        t.Result.Close();
+                    else
+                        tcs.SetResult(t.Result);
                 }
             });
             if (!tcs.Task.Wait(timeout.Value))
             {
                 lock (tcs)
                 {
-                    if (!tcs.Task.IsCompletedSuccessfully)
+                    if (tcs.Task.IsFaulted || tcs.Task.IsCanceled)
                     {
                         timedOut.Cancel();
                         throw new TimeoutException();

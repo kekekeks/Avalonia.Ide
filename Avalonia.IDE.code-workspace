@@ -1,0 +1,20 @@
+{
+	"folders": [
+		{
+			"path": "./vscode-extension"
+		}
+	],
+	"settings": {},
+	"launch": {
+		"configurations": [],
+		"compounds": [
+			{
+				"name": "Launch Server & Extension",
+				"configurations": [
+					"LanguageServer",
+					"Extension"
+				]
+			}
+		]
+	}
+}

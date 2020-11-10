@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>netcoreapp2.1</TargetFramework>
+        <LangVersion>latest</LangVersion>
+        <TieredCompilation>true</TieredCompilation>
+    </PropertyGroup>
+    <ItemGroup>
+        <!-- TODO:  To be replaced with nuget dependency -->
+        <!-- <PackageReference Include="Avalonia.Ide.LanguageServer" Version="1.2.3" /> -->
+        <ProjectReference Include="../../src/Avalonia.Ide.LanguageServer/Avalonia.Ide.LanguageServer.csproj" />
+    </ItemGroup>
+</Project>

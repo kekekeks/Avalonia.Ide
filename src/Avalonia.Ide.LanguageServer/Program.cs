@@ -13,9 +13,9 @@ using Microsoft.Extensions.Logging;
 
 namespace Avalonia.Ide.LanguageServer
 {
-    partial class Program
+    public partial class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             if (args.FirstOrDefault() == "--web")
             {
