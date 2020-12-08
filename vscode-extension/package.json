@@ -28,7 +28,8 @@
             {
                 "id": "xaml",
                 "extensions": [
-                    ".xaml"
+                    ".xaml",
+                    ".axaml"
                 ],
                 "aliases": [
                     "XAML"
