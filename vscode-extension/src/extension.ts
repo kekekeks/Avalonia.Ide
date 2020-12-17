@@ -1,10 +1,11 @@
 import * as vscode from 'vscode';
-import { startLspClient } from './lsp/lspProcess'
+import { XamlEditorProvider } from './editor/xamlEditorProvider';
+import { startLspClient } from './lsp/lspProcess';
 
 export function activate(context: vscode.ExtensionContext) 
 {
-    const lspSubscription = startLspClient();
-    context.subscriptions.push(lspSubscription);
+    //context.subscriptions.push(startLspClient());
+    context.subscriptions.push(XamlEditorProvider.register(context));
 }
 
 export function deactivate() {
