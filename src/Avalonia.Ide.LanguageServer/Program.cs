@@ -42,6 +42,26 @@ namespace Avalonia.Ide.LanguageServer
                     WebBaseUri = "Lal"
                 });
             }));
+            server.AddHandler(new AvaloniaXamlInfoRequestHandler(request =>
+            {
+                var xamlFile = request.XamlFile;
+
+                // TODO: get data from language client
+                string previewerPath = Environment.GetEnvironmentVariable("AvaloniaPreviewerDevPath");
+                string assemblyPath = Environment.GetEnvironmentVariable("AvaloniaPreviewerAppPath");
+
+                if (string.IsNullOrEmpty(previewerPath) || string.IsNullOrEmpty(assemblyPath))
+                {
+                    throw new InvalidOperationException("Define AvaloniaPreviewerDevPath and AvaloniaPreviewerAppPath");
+                }
+
+                server.SendNotification("avalonia/xamlInfo", new AvaloniaXamlInfoNotification
+                {
+                    XamlFile = xamlFile,
+                    AssemblyPath = assemblyPath,
+                    PreviewerPath = previewerPath
+                });
+            }));
 
             await server.Initialize();
             

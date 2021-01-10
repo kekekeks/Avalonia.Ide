@@ -9,9 +9,8 @@ import { Disposable, Trace } from 'vscode-jsonrpc';
 interface IAvaloniaServerInfo {
     webBaseUri: string;
 }
-
 const avaloniaServerInfoNotification: NotificationType<IAvaloniaServerInfo, any> = new NotificationType('avalonia/serverInfo');
-const avaloniaServerInfoRequest: RequestType<any, any, any, any> = new RequestType('avalonia/getServerInfo');
+const avaloniaServerInfoRequest: RequestType<any, any, any, any> = new RequestType('avalonia/getServerInfoRequest');
 
 export let serverInfo: Promise<IAvaloniaServerInfo>;
 
@@ -33,7 +32,7 @@ function connectToTcp(): ServerOptions {
                 resolve(nfo);
             });
         });
-    }
+    };
     return serverOptions;
 }
 
@@ -58,10 +57,11 @@ function startServer(): Disposable {
 }
 
 
-export function startLspClient(): Disposable {
+export function startLspClient(): [Promise<LanguageClient>, Disposable] {
 
     let clientProcess: Disposable;
     const serverProcess = startServer();
+    let languageClient: Promise<LanguageClient>; 
     try {
 
         let clientOptions: LanguageClientOptions = {
@@ -75,32 +75,39 @@ export function startLspClient(): Disposable {
                 configurationSection: 'avaloniaXaml',
                 fileEvents: vscode.workspace.createFileSystemWatcher('**/*.xaml')
             },
-        }
+        };
 
         let opts = connectToTcp();
 
-        const client = new LanguageClient('avaloniaXaml', 'Avalonia', opts, clientOptions);
+        languageClient = new Promise((resolveClient, rejectClient) => {
 
-        client.trace = Trace.Verbose;
-        clientProcess = client.start();
-        serverInfo = new Promise((resolve, _) => {
-            client.onReady().then(() => {
-                client.onNotification(avaloniaServerInfoNotification, info => {
-                    console.log("Obtained avalonia server info - " + info.webBaseUri);
-                    resolve(info);
+            try {
+                const client = new LanguageClient('avaloniaXaml', 'Avalonia', opts, clientOptions);
+                client.trace = Trace.Verbose;
+                clientProcess = client.start();
+                serverInfo = new Promise((resolve, _) => {
+                    client.onReady().then(() => {
+                        client.onNotification(avaloniaServerInfoNotification, info => {
+                            console.log("Obtained avalonia server info - " + info.webBaseUri);
+                            resolve(info);
+                        });
+                        client.sendRequest(avaloniaServerInfoRequest, {});
+                        resolveClient(client);
+                    });
                 });
-                client.sendRequest(avaloniaServerInfoRequest, {});
-            });
+            }
+            catch (error) {
+                rejectClient(error);
+            }
         });
-
     }
     catch (e) {
         serverProcess.dispose();
         throw e;
     }
 
-    return Disposable.create(() => {
+    return [languageClient, Disposable.create(() => {
         serverProcess.dispose();
         clientProcess.dispose();
-    });
+    })];
 }
