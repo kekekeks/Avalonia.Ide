@@ -9,10 +9,10 @@
     <ProjectReference Include="..\Avalonia.Ide.CompletionEngine.DnlibMetadataProvider\Avalonia.Ide.CompletionEngine.DnlibMetadataProvider.csproj" />
     <ProjectReference Include="..\Avalonia.Ide.CompletionEngine\Avalonia.Ide.CompletionEngine.csproj" />
     <ProjectReference Include="..\Avalonia.Ide.LanguageServer.MSBuild\Avalonia.Ide.LanguageServer.MSBuild.csproj" />
-    <ProjectReference Include="..\external\lsp\lsp.csproj" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="2.0.0" />
     <PackageReference Include="Avalonia.Remote.Protocol" Version="0.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.0" />
+    <PackageReference Include="OmniSharp.Extensions.LanguageServer" Version="0.19.0-beta0004" />
     <ProjectReference Include="..\external\pngcs\pngcs.csproj" />
   </ItemGroup>
   <ItemGroup>
