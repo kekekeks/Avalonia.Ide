@@ -2,6 +2,8 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.1</TargetFramework>
+    <nullable>enable</nullable>
+    <LangVersion>8</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Avalonia.Ide.CompletionEngine.DnlibMetadataProvider\Avalonia.Ide.CompletionEngine.DnlibMetadataProvider.csproj" />
