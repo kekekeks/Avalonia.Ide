@@ -1,19 +1,23 @@
 ﻿using System;
 using System.IO;
+using System.IO.Pipelines;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
-using Avalonia.Ide.LanguageServer;
+using Avalonia.Ide.LanguageServer.AssemblyMetadata;
+using Avalonia.Ide.LanguageServer.Document;
 using Avalonia.Ide.LanguageServer.Editor;
+using Avalonia.Ide.LanguageServer.Handlers;
 using Avalonia.Ide.LanguageServer.ProjectModel;
 using Avalonia.Ide.LanguageServer.Web;
-using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection;
+using PimpMyAvalonia.LanguageServer;
 
 namespace Avalonia.Ide.LanguageServer
 {
-    partial class Program
+    public class Program
     {
         static void Main(string[] args)
         {
@@ -28,43 +32,28 @@ namespace Avalonia.Ide.LanguageServer
         
         static async Task RunLsp(Stream sin, Stream sout)
         {
-            var server = new OmniSharp.Extensions.LanguageServer.LanguageServer(sin, sout, new LoggerFactory());
-            server.OnInitialize(args =>
+            var server = await OmniSharp.Extensions.LanguageServer.Server.LanguageServer.From(opts =>
             {
-                Console.WriteLine(args.RootPath);
-                return Task.CompletedTask;
+                opts.Input = PipeReader.Create(sin);
+                opts.Output = PipeWriter.Create(sout);
+                opts.AddHandler(new AvaloniaServerInfoHandler());
+                opts.AddHandler(new AvaloniaXamlInfoHandler());
+                opts.WithHandler<TextDocumentHandler>();
+                opts.WithHandler<FileChangedHandler>();
+                opts.WithHandler<CompletionHandler>();
+
+                opts.Services.AddSingleton<CompletionHandler>();
+                opts.Services.AddSingleton<FileChangedHandler>();
+                opts.Services.AddSingleton<TextDocumentToProjectMapper>();
+                opts.Services.AddSingleton<DocumentMetadataProvider>();
+                opts.Services.AddSingleton<TextDocumentHandler>();
+                opts.Services.AddSingleton<TextDocumentBuffer>();
+                opts.Services.AddSingleton<AvaloniaMetadataLoader>();
+                opts.Services.AddSingleton<AvaloniaMetadataShepard>();
+                opts.Services.AddSingleton<ProjectShepard>();
             });
-            server.AddHandler(new XamlDocumentHandler(server));
-            server.AddHandler(new AvaloniaServerInfoRequestHandler(() =>
-            {
-                server.SendNotification("avalonia/serverInfo", new AvaloniaServerInfo
-                {
-                    WebBaseUri = "Lal"
-                });
-            }));
-            server.AddHandler(new AvaloniaXamlInfoRequestHandler(request =>
-            {
-                var xamlFile = request.XamlFile;
 
-                // TODO: get data from language client
-                string previewerPath = Environment.GetEnvironmentVariable("AvaloniaPreviewerDevPath");
-                string assemblyPath = Environment.GetEnvironmentVariable("AvaloniaPreviewerAppPath");
-
-                if (string.IsNullOrEmpty(previewerPath) || string.IsNullOrEmpty(assemblyPath))
-                {
-                    throw new InvalidOperationException("Define AvaloniaPreviewerDevPath and AvaloniaPreviewerAppPath");
-                }
-
-                server.SendNotification("avalonia/xamlInfo", new AvaloniaXamlInfoNotification
-                {
-                    XamlFile = xamlFile,
-                    AssemblyPath = assemblyPath,
-                    PreviewerPath = previewerPath
-                });
-            }));
-
-            await server.Initialize();
-            
+            await server.Initialize(CancellationToken.None);
             await server.WasShutDown;
         }
 
@@ -92,7 +81,7 @@ namespace Avalonia.Ide.LanguageServer
                     var cl = await tcpServer.AcceptTcpClientAsync();
                     //var s = new ConsoleLogStream(cl.GetStream(), Console.OpenStandardError());
                     var s = cl.GetStream();
-                    RunLsp(s, s).ContinueWith(t =>
+                    _ = RunLsp(s, s).ContinueWith(t =>
                     {
                         if(t.IsFaulted)
                             Console.WriteLine(t.Exception);

@@ -10,7 +10,7 @@ interface IAvaloniaServerInfo {
     webBaseUri: string;
 }
 const avaloniaServerInfoNotification: NotificationType<IAvaloniaServerInfo, any> = new NotificationType('avalonia/serverInfo');
-const avaloniaServerInfoRequest: RequestType<any, any, any, any> = new RequestType('avalonia/getServerInfoRequest');
+const avaloniaServerInfoRequest: RequestType<any, IAvaloniaServerInfo, any, any> = new RequestType('avalonia/getServerInfoRequest');
 
 export let serverInfo: Promise<IAvaloniaServerInfo>;
 
@@ -85,13 +85,12 @@ export function startLspClient(): [Promise<LanguageClient>, Disposable] {
                 const client = new LanguageClient('avaloniaXaml', 'Avalonia', opts, clientOptions);
                 client.trace = Trace.Verbose;
                 clientProcess = client.start();
-                serverInfo = new Promise((resolve, _) => {
+                serverInfo = new Promise((resolve, reject) => {
                     client.onReady().then(() => {
-                        client.onNotification(avaloniaServerInfoNotification, info => {
-                            console.log("Obtained avalonia server info - " + info.webBaseUri);
-                            resolve(info);
-                        });
-                        client.sendRequest(avaloniaServerInfoRequest, {});
+                        client.sendRequest(avaloniaServerInfoRequest, {}).then(response =>{
+                            console.log("Obtained avalonia server info - " + response.webBaseUri);
+                            resolve(response);
+                        }, reject);
                         resolveClient(client);
                     });
                 });
