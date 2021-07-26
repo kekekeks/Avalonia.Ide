@@ -14,12 +14,12 @@ namespace Avalonia.Ide.LanguageServer.ProjectModel
             _path = Path.GetFullPath(path);
         }
         
-        public List<WorkspaceProject> Projects { get; set; }
+        public List<WorkspaceProject2> Projects { get; set; }
 
         public void Reload()
         {
             var projects = SolutionLoader.LoadProjects(_path);
-            var solution = new List<WorkspaceProject>();
+            var solution = new List<WorkspaceProject2>();
             foreach (var p in projects)
             {
                 var loaded = LoadProject(p);
@@ -28,7 +28,7 @@ namespace Avalonia.Ide.LanguageServer.ProjectModel
             Projects = solution;
         }
 
-        WorkspaceProject LoadProject(SolutionProject p)
+        WorkspaceProject2 LoadProject(SolutionProject p)
         {
             var resp = Globals.MsBuildHost.SendRequest(new ProjectInfoRequest
             {
@@ -46,7 +46,7 @@ namespace Avalonia.Ide.LanguageServer.ProjectModel
                         xaml.Add(fullXamlPath);
                 }
 
-            return new WorkspaceProject
+            return new WorkspaceProject2
             {
                 Name = p.Name,
                 TargetPath = resp.TargetPath,
@@ -54,11 +54,11 @@ namespace Avalonia.Ide.LanguageServer.ProjectModel
             };
         }
 
-        public WorkspaceProject FindProjectWithXamlFile(string path) 
+        public WorkspaceProject2 FindProjectWithXamlFile(string path) 
             => Projects.FirstOrDefault(p => p.XamlFiles.Contains(path));
     }   
     
-    public class WorkspaceProject
+    public class WorkspaceProject2
     {
         public string Name { get; set; }
         public HashSet<string> XamlFiles { get; set; }

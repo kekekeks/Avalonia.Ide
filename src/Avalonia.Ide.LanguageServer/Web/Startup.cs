@@ -27,7 +27,7 @@ namespace Avalonia.Ide.LanguageServer.Web
             services.AddMvc();
         }
 
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app)
         {
             app.UseDeveloperExceptionPage();
             app.UseWebSockets();

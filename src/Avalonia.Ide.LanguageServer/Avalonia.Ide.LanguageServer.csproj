@@ -1,19 +1,17 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
+    <nullable>enable</nullable>
+    <LangVersion>9</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Avalonia.Ide.CompletionEngine.DnlibMetadataProvider\Avalonia.Ide.CompletionEngine.DnlibMetadataProvider.csproj" />
     <ProjectReference Include="..\Avalonia.Ide.CompletionEngine\Avalonia.Ide.CompletionEngine.csproj" />
     <ProjectReference Include="..\Avalonia.Ide.LanguageServer.MSBuild\Avalonia.Ide.LanguageServer.MSBuild.csproj" />
-    <ProjectReference Include="..\external\lsp\lsp.csproj" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="2.0.0" />
     <PackageReference Include="Avalonia.Remote.Protocol" Version="0.0.1" />
-    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.0" />
+    <PackageReference Include="OmniSharp.Extensions.LanguageServer" Version="0.19.0" />
     <ProjectReference Include="..\external\pngcs\pngcs.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Views" />
   </ItemGroup>
 </Project>
