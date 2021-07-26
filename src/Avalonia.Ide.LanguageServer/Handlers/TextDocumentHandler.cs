@@ -13,6 +13,7 @@ using OmniSharp.Extensions.LanguageServer.Protocol.Server;
 using OmniSharp.Extensions.LanguageServer.Protocol.Server.Capabilities;
 using OmniSharp.Extensions.LanguageServer.Protocol.Workspace;
 using PimpMyAvalonia.LanguageServer;
+using Range = OmniSharp.Extensions.LanguageServer.Protocol.Models.Range;
 
 namespace Avalonia.Ide.LanguageServer.Handlers
 {
@@ -31,11 +32,8 @@ namespace Avalonia.Ide.LanguageServer.Handlers
             }
         );
 
-        private readonly ILanguageServer _router;
-
-        public TextDocumentHandler(ILanguageServer router, TextDocumentBuffer bufferManager)
+        public TextDocumentHandler(TextDocumentBuffer bufferManager)
         {
-            _router = router;
             _bufferManager = bufferManager;
         }
 
@@ -139,19 +137,19 @@ namespace Avalonia.Ide.LanguageServer.Handlers
                         throw new NotSupportedException();
                 }
             }).ToList();
-            if (edits.Count > 0)
-                await _router.ApplyWorkspaceEdit(new ApplyWorkspaceEditParams
-                {
-                    Edit = new WorkspaceEdit
-                    {
-                        DocumentChanges = new Container<WorkspaceEditDocumentChange>(new WorkspaceEditDocumentChange(
-                            new TextDocumentEdit
-                            {
-                                TextDocument = request.TextDocument,
-                                Edits = new TextEditContainer(edits)
-                            }))
-                    }
-                });
+            // if (edits.Count > 0)
+            //     await _router.ApplyWorkspaceEdit(new ApplyWorkspaceEditParams
+            //     {
+            //         Edit = new WorkspaceEdit
+            //         {
+            //             DocumentChanges = new Container<WorkspaceEditDocumentChange>(new WorkspaceEditDocumentChange(
+            //                 new TextDocumentEdit
+            //                 {
+            //                     TextDocument = request.TextDocument,
+            //                     Edits = new TextEditContainer(edits)
+            //                 }))
+            //         }
+            //     });
         }
 
         protected override TextDocumentSyncRegistrationOptions CreateRegistrationOptions(

@@ -12,11 +12,11 @@ namespace PimpMyAvalonia.LanguageServer
 {
     public class AvaloniaMetadataLoader
     {
-        private readonly ILanguageServer _languageServer;
+        private readonly IServerWorkDoneManager _workDoneManager;
 
-        public AvaloniaMetadataLoader(ILanguageServer languageServer)
+        public AvaloniaMetadataLoader(IServerWorkDoneManager workDoneManager)
         {
-            _languageServer = languageServer;
+            _workDoneManager = workDoneManager;
         }
 
         private async Task<Metadata?> CreateMetadataForAssembly(string assemblyPath)
@@ -42,7 +42,7 @@ namespace PimpMyAvalonia.LanguageServer
                 Message = "Loading metadata for " + projectName,
                 Percentage = 0
             };
-            using IWorkDoneObserver manager = await _languageServer.WorkDoneManager.Create(begin);
+            using IWorkDoneObserver manager = await _workDoneManager.Create(begin);
             string? outputDllPath = project.OutputFile;
             if (outputDllPath == null)
             {

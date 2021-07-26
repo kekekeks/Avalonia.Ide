@@ -41,8 +41,7 @@ function startServer(): Disposable {
     let dotnetArgs;
     if (runFromSource) {
         // for dev purposes, later it can be removed
-        let serverBin = normalize(join(__dirname, "..", "..", "..", "src/Avalonia.Ide.LanguageServer/bin/Debug/netcoreapp2.1/Avalonia.Ide.LanguageServer.dll"));
-        dotnetArgs = ["exec", serverBin];
+        return Disposable.create(() => {;});
     }
     else {
         // NOTE: binary must be in extensions folder "vscode-extension" , which will be compressed by 'vsce package'
