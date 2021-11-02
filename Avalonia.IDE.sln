@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27130.0
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31729.503
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{042CECB7-80C5-4A1C-AF22-A5AF4115ED88}"
 EndProject
@@ -13,27 +13,29 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Editor.Avalonia", "samples\
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "external", "external", "{B44ED41E-2FA1-469C-87F0-90172FAA6146}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "lsp", "src\external\lsp\lsp.csproj", "{06B3AFF1-DAA1-4897-ADEE-B2CC4F6F8FFC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "lsp", "src\external\lsp\lsp.csproj", "{06B3AFF1-DAA1-4897-ADEE-B2CC4F6F8FFC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Avalonia.Ide.LanguageServer", "src\Avalonia.Ide.LanguageServer\Avalonia.Ide.LanguageServer.csproj", "{1E65ECBB-2A24-4858-BD54-5B16156C590D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Avalonia.Ide.LanguageServer", "src\Avalonia.Ide.LanguageServer\Avalonia.Ide.LanguageServer.csproj", "{1E65ECBB-2A24-4858-BD54-5B16156C590D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Avalonia.Ide.LanguageServer.MSBuild", "src\Avalonia.Ide.LanguageServer.MSBuild\Avalonia.Ide.LanguageServer.MSBuild.csproj", "{6DAD5C3D-483E-4FCA-962B-FE678C412860}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Avalonia.Ide.LanguageServer.MSBuild", "src\Avalonia.Ide.LanguageServer.MSBuild\Avalonia.Ide.LanguageServer.MSBuild.csproj", "{6DAD5C3D-483E-4FCA-962B-FE678C412860}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "pngcs", "src\external\pngcs\pngcs.csproj", "{B2621E3F-82E1-404C-838D-EFDCB8680779}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "pngcs", "src\external\pngcs\pngcs.csproj", "{B2621E3F-82E1-404C-838D-EFDCB8680779}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Avalonia.Ide.WpfDesigner", "src\Avalonia.Ide.WpfDesigner\Avalonia.Ide.WpfDesigner.csproj", "{EC42600F-049B-43FF-AED1-8314D61B2749}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AvaloniaEdit", "src\external\AvaloniaEdit\src\AvaloniaEdit\AvaloniaEdit.csproj", "{871CDA16-4E17-49FA-A8FC-841A3227B5E0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AvaloniaEdit", "src\external\AvaloniaEdit\src\AvaloniaEdit\AvaloniaEdit.csproj", "{871CDA16-4E17-49FA-A8FC-841A3227B5E0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CompletionEngineTests", "tests\CompletionEngineTests\CompletionEngineTests.csproj", "{803938C3-FBFE-4AB4-93E4-04BF626F73C1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CompletionEngineTests", "tests\CompletionEngineTests\CompletionEngineTests.csproj", "{803938C3-FBFE-4AB4-93E4-04BF626F73C1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Avalonia.Ide.CompletionEngine.DnlibMetadataProvider", "src\Avalonia.Ide.CompletionEngine.DnlibMetadataProvider\Avalonia.Ide.CompletionEngine.DnlibMetadataProvider.csproj", "{247A85F0-C8B6-43EE-8644-C543D009D8AD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Avalonia.Ide.CompletionEngine.DnlibMetadataProvider", "src\Avalonia.Ide.CompletionEngine.DnlibMetadataProvider\Avalonia.Ide.CompletionEngine.DnlibMetadataProvider.csproj", "{247A85F0-C8B6-43EE-8644-C543D009D8AD}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{1B1E12FA-741D-4D3C-B901-63AA47F46DEC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ass1", "tests\Ass1\Ass1.csproj", "{54D80639-5092-41DE-9AA7-2EC0D6FF1C4B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ass2", "tests\Ass2\Ass2.csproj", "{1F8B262F-3204-4830-B883-31DEB6F26E35}"
 EndProject
 Global
-	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		samples\Editor.Shared\Editor.Shared.projitems*{1aef8360-f2ea-4275-be31-e09db5aa9c58}*SharedItemsImports = 4
-		samples\Editor.Shared\Editor.Shared.projitems*{411fbe58-fa4a-4918-bfb2-707d7558d297}*SharedItemsImports = 13
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Debug|x64 = Debug|x64
@@ -163,6 +165,30 @@ Global
 		{247A85F0-C8B6-43EE-8644-C543D009D8AD}.Release|x64.Build.0 = Release|Any CPU
 		{247A85F0-C8B6-43EE-8644-C543D009D8AD}.Release|x86.ActiveCfg = Release|Any CPU
 		{247A85F0-C8B6-43EE-8644-C543D009D8AD}.Release|x86.Build.0 = Release|Any CPU
+		{54D80639-5092-41DE-9AA7-2EC0D6FF1C4B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{54D80639-5092-41DE-9AA7-2EC0D6FF1C4B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{54D80639-5092-41DE-9AA7-2EC0D6FF1C4B}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{54D80639-5092-41DE-9AA7-2EC0D6FF1C4B}.Debug|x64.Build.0 = Debug|Any CPU
+		{54D80639-5092-41DE-9AA7-2EC0D6FF1C4B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{54D80639-5092-41DE-9AA7-2EC0D6FF1C4B}.Debug|x86.Build.0 = Debug|Any CPU
+		{54D80639-5092-41DE-9AA7-2EC0D6FF1C4B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{54D80639-5092-41DE-9AA7-2EC0D6FF1C4B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{54D80639-5092-41DE-9AA7-2EC0D6FF1C4B}.Release|x64.ActiveCfg = Release|Any CPU
+		{54D80639-5092-41DE-9AA7-2EC0D6FF1C4B}.Release|x64.Build.0 = Release|Any CPU
+		{54D80639-5092-41DE-9AA7-2EC0D6FF1C4B}.Release|x86.ActiveCfg = Release|Any CPU
+		{54D80639-5092-41DE-9AA7-2EC0D6FF1C4B}.Release|x86.Build.0 = Release|Any CPU
+		{1F8B262F-3204-4830-B883-31DEB6F26E35}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1F8B262F-3204-4830-B883-31DEB6F26E35}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1F8B262F-3204-4830-B883-31DEB6F26E35}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{1F8B262F-3204-4830-B883-31DEB6F26E35}.Debug|x64.Build.0 = Debug|Any CPU
+		{1F8B262F-3204-4830-B883-31DEB6F26E35}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{1F8B262F-3204-4830-B883-31DEB6F26E35}.Debug|x86.Build.0 = Debug|Any CPU
+		{1F8B262F-3204-4830-B883-31DEB6F26E35}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1F8B262F-3204-4830-B883-31DEB6F26E35}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1F8B262F-3204-4830-B883-31DEB6F26E35}.Release|x64.ActiveCfg = Release|Any CPU
+		{1F8B262F-3204-4830-B883-31DEB6F26E35}.Release|x64.Build.0 = Release|Any CPU
+		{1F8B262F-3204-4830-B883-31DEB6F26E35}.Release|x86.ActiveCfg = Release|Any CPU
+		{1F8B262F-3204-4830-B883-31DEB6F26E35}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -177,7 +203,10 @@ Global
 		{B2621E3F-82E1-404C-838D-EFDCB8680779} = {B44ED41E-2FA1-469C-87F0-90172FAA6146}
 		{EC42600F-049B-43FF-AED1-8314D61B2749} = {042CECB7-80C5-4A1C-AF22-A5AF4115ED88}
 		{871CDA16-4E17-49FA-A8FC-841A3227B5E0} = {B44ED41E-2FA1-469C-87F0-90172FAA6146}
+		{803938C3-FBFE-4AB4-93E4-04BF626F73C1} = {1B1E12FA-741D-4D3C-B901-63AA47F46DEC}
 		{247A85F0-C8B6-43EE-8644-C543D009D8AD} = {042CECB7-80C5-4A1C-AF22-A5AF4115ED88}
+		{54D80639-5092-41DE-9AA7-2EC0D6FF1C4B} = {1B1E12FA-741D-4D3C-B901-63AA47F46DEC}
+		{1F8B262F-3204-4830-B883-31DEB6F26E35} = {1B1E12FA-741D-4D3C-B901-63AA47F46DEC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {95BF2E74-047C-4986-940E-12884B41C4CC}

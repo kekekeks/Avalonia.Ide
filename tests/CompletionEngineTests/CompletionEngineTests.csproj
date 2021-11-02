@@ -23,6 +23,8 @@
     <ItemGroup>
       <ProjectReference Include="..\..\src\Avalonia.Ide.CompletionEngine.DnlibMetadataProvider\Avalonia.Ide.CompletionEngine.DnlibMetadataProvider.csproj" />
       <ProjectReference Include="..\..\src\Avalonia.Ide.CompletionEngine\Avalonia.Ide.CompletionEngine.csproj" />
+      <ProjectReference Include="..\Ass1\Ass1.csproj" Aliases="A1" />
+      <ProjectReference Include="..\Ass2\Ass2.csproj" Aliases="A2" />
     </ItemGroup>
 
 </Project>
