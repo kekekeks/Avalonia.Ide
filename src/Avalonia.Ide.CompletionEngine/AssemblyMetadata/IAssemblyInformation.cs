@@ -10,6 +10,8 @@ namespace Avalonia.Ide.CompletionEngine.AssemblyMetadata
         IEnumerable<ICustomAttributeInformation> CustomAttributes { get; }
         IEnumerable<string> ManifestResourceNames { get; }
         Stream GetManifestResourceStream(string name);
+        IEnumerable<string> InternalsVisibleTo { get; }
+        string AssemblyName { get; }
     }
 
     public interface ICustomAttributeInformation
@@ -28,6 +30,8 @@ namespace Avalonia.Ide.CompletionEngine.AssemblyMetadata
         string FullName { get; }
         string Name { get; }
         string Namespace { get; }
+        string AssemblyQualifiedName { get; }
+
         ITypeInformation GetBaseType();
         IEnumerable<IMethodInformation> Methods { get; }
         IEnumerable<IPropertyInformation> Properties { get; }
@@ -39,6 +43,8 @@ namespace Avalonia.Ide.CompletionEngine.AssemblyMetadata
         bool IsInterface { get; }
         bool IsPublic { get; }
         bool IsGeneric { get; }
+        bool IsAbstract { get; }
+        bool IsInternal { get; }
         IEnumerable<string> EnumValues { get; }
         IEnumerable<ITypeInformation> NestedTypes { get; }
     }
@@ -50,6 +56,7 @@ namespace Avalonia.Ide.CompletionEngine.AssemblyMetadata
         string Name { get; }
         IList<IParameterInformation> Parameters { get;}
         string ReturnTypeFullName { get; }
+        string QualifiedReturnTypeFullName { get; }
     }
 
     public interface IFieldInformation
@@ -58,12 +65,14 @@ namespace Avalonia.Ide.CompletionEngine.AssemblyMetadata
         bool IsPublic { get; }
         string Name { get; }
         string ReturnTypeFullName { get; }
+        string QualifiedTypeFullName { get; }
         bool IsRoutedEvent { get; }
     }
 
     public interface IParameterInformation
     {
         string TypeFullName { get; }
+        string QualifiedTypeFullName { get; }
     }
 
     public interface IPropertyInformation
@@ -72,6 +81,7 @@ namespace Avalonia.Ide.CompletionEngine.AssemblyMetadata
         bool HasPublicSetter { get; }
         bool HasPublicGetter { get; }
         string TypeFullName { get; }
+        string QualifiedTypeFullName { get; }
         string Name { get; }
     }
 
@@ -79,5 +89,6 @@ namespace Avalonia.Ide.CompletionEngine.AssemblyMetadata
     {
         string Name { get; }
         string TypeFullName { get; }
+        string QualifiedTypeFullName { get; }
     }
 }

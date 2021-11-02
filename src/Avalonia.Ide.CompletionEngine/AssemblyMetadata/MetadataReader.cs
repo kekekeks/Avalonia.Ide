@@ -16,8 +16,6 @@ namespace Avalonia.Ide.CompletionEngine.AssemblyMetadata
             _provider = provider;
         }
 
-
-
         IEnumerable<string> GetAssemblies(string path)
         {
             var depsPath = Path.Combine(Path.GetDirectoryName(path),
