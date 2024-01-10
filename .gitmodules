@@ -3,7 +3,7 @@
 	url = https://github.com/kekekeks/csharp-language-server-protocol.git
 [submodule "src/external/pngcs/pngcs"]
 	path = src/external/pngcs/pngcs
-	url = https://github.com/AvaloniaUI/pngcs.git
+	url = https://github.com/leonbloy/pngcs.git
 [submodule "src/external/AvaloniaEdit"]
 	path = src/external/AvaloniaEdit
 	url = https://github.com/AvaloniaUI/AvaloniaEdit.git
