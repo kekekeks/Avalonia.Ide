@@ -1,16 +1,14 @@
 {
     "name": "avalonia",
-    "displayName": "avalonia",
+    "displayName": "Avalonia SDK",
     "description": "",
     "version": "0.0.1",
     "publisher": "kekekeks",
+    "preview": true,
     "engines": {
-        "vscode": "^1.30.1",
+        "vscode": "^1.30.0",
         "node": "^8.9.3"
     },
-    "categories": [
-        "Other"
-    ],
     "repository": {
         "type": "git",
         "url": "https://github.com/kekekeks/Avalonia.Ide.git"
@@ -18,6 +16,9 @@
     "bugs": {
         "url": "https://github.com/kekekeks/Avalonia.Ide/issues"
     },
+    "categories": [
+        "Other"
+    ],
     "activationEvents": [
         "onLanguage:xml",
         "onLanguage:xaml"
@@ -41,24 +42,26 @@
         "compile": "tsc -p ./src",
         "tslint": "tslint ./src/**/*.ts",
         "watch": "tsc -w -p ./src",
-        "test": "mocha -u tdd ./out/tests/; node_modules/.bin/mocha --require jsdoctest out/extension.js",
+        "test": "mocha -u tdd ./out/tests/; node_modules/.bin/mocha --require jsdoctest out/bashRuntime.js out/handlePath.js",
         "postinstall": "node ./node_modules/vscode/bin/install",
-        "package": "vsce package",
+        "prepack": "node ./out/preparescript.js",
+        "pack": "vsce package",
         "publish": "vsce publish",
         "release": "standard-version"
     },
+    "dependencies": {
+        "vscode-languageclient": "3.1.0",
+        "standard-version": "^4.4.0",
+        "child-process": "^1.0.2"
+    },
     "devDependencies": {
-        "typescript": "^3.2.2",
-        "vscode": "^1.1.26",
-        "tslint": "^5.12.0",
         "@types/node": "^10.12.18",
         "@types/mocha": "^5.2.5",
-        "standard-version": "4.4.0",
+        "typescript": "^3.2.2",
+        "vscode": "^1.1.26",
         "vsce": "1.54.0",
-        "jsdoctest": "1.7.1"
-    },
-    "dependencies": {
-        "vscode-languageclient": "5.2.1",
-        "child-process": "1.0.2"
+        "tslint": "5.12.0",
+        "jsdoctest": "1.7.1",
+        "mocha": "5.2.0"
     }
 }

@@ -1,93 +1,115 @@
-import * as vscode from 'vscode';
 import * as net from 'net';
-import {normalize, join} from 'path';
-import { LanguageClient, LanguageClientOptions, ServerOptions, StreamInfo,
-     NotificationType, RequestType } from 'vscode-languageclient';
+import * as path from 'path';
+import * as vscode from 'vscode';
+import { LanguageClient, LanguageClientOptions, ServerOptions } from 'vscode-languageclient';
 import { Trace } from 'vscode-jsonrpc';
 import { ChildProcess, spawn } from 'child_process';
 
-interface IAvaloniaServerInfo
-{
-    webBaseUri : string;
-}
+import { IAvaloniaServerInfo, avaloniaServerInfoNotification, avaloniaServerInfoRequest } from './types';
 
-const avaloniaServerInfoNotification: NotificationType<IAvaloniaServerInfo, any> = new NotificationType('avalonia/serverInfo');
-const avaloniaServerInfoRequest: RequestType<any, any, any, any> = new RequestType('avalonia/getServerInfo');
+export const languageId: string = 'xml';
+export const serverPort: number = 26001;
+const dotnetExe = "dotnet";
+const serverPublishPath = path.normalize(path.join(__dirname, "..", "languageserver/bin/Release/netcoreapp2.1/publish"));
+const serverProjectPath = path.normalize(path.join(__dirname, "..", "languageserver"));
 
-export let serverInfo : Promise<IAvaloniaServerInfo>;
+export let serverInfo: IAvaloniaServerInfo;
+export let spawnedProcess: ChildProcess;
 
-let serverProcess: ChildProcess;
 
-function connectToTcp() :  ServerOptions
-{
-    const serverOptions: ServerOptions = function() {
-        console.log("Connection initiated");
-		return new Promise((resolve, _reject) => {
-            console.log("Connecting");
-			var client = new net.Socket();
-			client.connect(26001, "127.0.0.1", function() {
-                console.log("Connected");
-                let nfo : StreamInfo =                  
+export async function activate(context: vscode.ExtensionContext) {
+    try {
+        const clientOptions: LanguageClientOptions = {
+            documentSelector: [
                 {
-                    reader: client,
-                    writer: client
-                };
-				resolve(nfo);
-			});
-		});
-    }
-    return serverOptions;
-}
+                    language: 'xml',
+                    pattern: '*.xaml'
+                }
+            ],
+            synchronize: {
+                configurationSection: 'avaloniaXaml',
+                fileEvents: vscode.workspace.createFileSystemWatcher('**/*.xaml')
+            },
+        };
 
-function startServer() : void
-{
-    // NOTE: binary must be in extensions folder "vscode-extension" , which will be compressed by 'vsce package'
-    let serverBin = normalize(join(__dirname, "..","bin/vscode-lsp-proxy.dll"));
-
-    //if (process.platform === "win32")
-    // NOTE: dotnetcore (target version of dll) required, running dll via "dotnet" will work on all platforms
-    serverProcess = spawn("dotnet", [serverBin], { stdio: ["pipe", "pipe", "pipe"], shell: false});
-}
-
-export function activate(context: vscode.ExtensionContext) 
-{
-    startServer();
-
-    let clientOptions: LanguageClientOptions = {
-        documentSelector: [
-            {
-                language: 'xaml'
-            }
-        ],
-        synchronize: {
-            // Synchronize the setting section 'languageServerExample' to the server
-            configurationSection: 'avaloniaXaml',
-            fileEvents: vscode.workspace.createFileSystemWatcher('**/*.xaml')
-        },
-    }
-
-    let opts = connectToTcp();
-    
-    const client = new LanguageClient('avaloniaXaml', 'Avalonia', opts, clientOptions);
-
-    client.trace = Trace.Verbose;
-    let disposable = client.start();
-    serverInfo = new Promise((resolve, _) => {
-        client.onReady().then(() => {
-            client.onNotification(avaloniaServerInfoNotification, info => {
-                console.log("Obtained avalonia server info - " + info.webBaseUri);
-                resolve(info);
+        const serverOptions: ServerOptions = () => {
+            return new Promise((resolve, reject) => {
+                logWriter("Connecting");
+                let client = new net.Socket();
+                client.connect(serverPort, "127.0.0.1", () => resolve({ reader: client, writer: client }));
+                client.on("error", (err) => {
+                    logWriter(err);
+                    reject(err);
+                });
             });
-            client.sendRequest(avaloniaServerInfoRequest, {});
-        });
-    });
-    
-    context.subscriptions.push(disposable);
-}
+        };
 
-export function deactivate() {
-    if (serverProcess !== undefined) {
-        // NOTE: need to close gracefully: - send message, wait, optionally kill
-        serverProcess.kill();
+        // TODO: handle server folder corruption or dotnet update 
+        var fs = require('fs');
+        if (!fs.existsSync(serverPublishPath)) {
+            console.log(`Building language server`);
+            await buildServer();
+        }
+        
+        console.log(`Starting language server`);
+        await startServer();
+
+        const client = new LanguageClient('avaloniaXaml', 'Avalonia', serverOptions, clientOptions);
+
+        client.trace = Trace.Verbose;
+
+        // NOTE: https://microsoft.github.io/language-server-protocol/specification
+        let disposable = client.start();
+        console.log(`Checking server availability`);
+        await client.onReady();
+        client.onNotification(avaloniaServerInfoNotification, info => {
+            console.log("Obtained avalonia server info - " + info.webBaseUri);
+            serverInfo = info;
+        });
+        client.sendRequest(avaloniaServerInfoRequest, {});
+
+        context.subscriptions.push(disposable);
+    }
+    catch (err) {
+        vscode.window.showErrorMessage(err);
     }
 }
+
+export async function deactivate() {
+    // TODO
+    spawnedProcess.kill();
+}
+
+const logWriter = t => console.log(`${t}`);
+
+const buildServer: Function = async () => {
+    await new Promise<boolean>((resolve, reject) => {
+        let publishProcess = spawn(dotnetExe, ["publish", "-c", "Release"],
+            {
+                cwd: serverProjectPath,
+                stdio: ["pipe", "pipe", "pipe"],
+                shell: true
+            });
+        publishProcess.on("error", (err) => reject(err));
+        publishProcess.on("exit", (code) => resolve(code === 0));
+        publishProcess.stdout.on("data", logWriter);
+        publishProcess.stderr.on("data", logWriter);
+    });
+};
+
+const startServer: Function = async () => {
+    await new Promise((resolve) => {
+        spawnedProcess = spawn(dotnetExe, ["languageserver.dll"],
+            {
+                cwd: serverPublishPath,
+                stdio: ["pipe", "pipe", "pipe"],
+                shell: true
+            });
+        spawnedProcess.on("error", logWriter);
+        spawnedProcess.on("exit", logWriter);
+        spawnedProcess.stdout.on("data", logWriter);
+        spawnedProcess.stderr.on("data", logWriter);
+
+        setTimeout(()=> resolve(), 500);
+    });
+};
