@@ -25,7 +25,7 @@ namespace Avalonia.Ide.LanguageServer.Editor
                 _previewer.UpdateXaml(xaml, _previewerAssemblyPath);
         }
 
-        public (PreviewerSession session, string error) GetPreviewerSession()
+        public (PreviewerSession? session, string error) GetPreviewerSession()
         {
             if (_previewer != null && _previewer.IsAlive)
                 return (_previewer, null);
